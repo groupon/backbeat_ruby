@@ -40,6 +40,17 @@ describe Backbeat::Api do
 
         expect { api.create_workflow(workflow_data) }.to raise_error Backbeat::Api::ValidationError
       end
+
+      it "raises an authentication error if the request is not authenticated" do
+        expect(client).to receive(:post).with("/v2/workflows", MultiJson.dump({}), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 401 })
+
+        expect { api.create_workflow({}) }.to raise_error Backbeat::Api::AuthenticationError
+      end
     end
 
     context "find_workflow_by_id" do

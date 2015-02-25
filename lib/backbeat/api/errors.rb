@@ -8,5 +8,8 @@ module Backbeat
 
     class ApiError < StandardError
     end
+
+    class AuthenticationError < StandardError
+    end
   end
 end

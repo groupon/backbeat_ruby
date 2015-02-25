@@ -1,3 +1,6 @@
+require "backbeat/api"
+require "backbeat/http_client"
+
 module Backbeat
   module Context
     class Remote

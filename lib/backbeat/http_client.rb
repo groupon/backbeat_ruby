@@ -8,12 +8,46 @@ module Backbeat
     end
 
     def get(path, options = {})
+      response = HTTParty.get(url(path), build_options(options))
+      response_to_hash(response)
     end
 
     def post(path, data, options = {})
+      response = HTTParty.post(url(path), build_options(options, data))
+      response_to_hash(response)
     end
 
     def put(path, data, options = {})
+      response = HTTParty.put(url(path), build_options(options, data))
+      response_to_hash(response)
+    end
+
+    private
+
+    attr_reader :host, :client_id
+
+    def response_to_hash(response)
+      {
+        status: response.code,
+        body: response.body,
+        headers: response.headers
+      }
+    end
+
+    def build_options(raw_options, data = nil)
+      options = {}
+      options = options.merge(headers: raw_options.fetch(:headers, {}).merge(authorization_header))
+      options = options.merge(query: raw_options[:query]) if raw_options[:query]
+      options = options.merge(body: data) if data
+      options
+    end
+
+    def authorization_header
+      { "Authorization" => "Backbeat #{client_id}" }
+    end
+
+    def url(path)
+      host + path
     end
   end
 end

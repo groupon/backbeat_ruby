@@ -53,6 +53,8 @@ module Backbeat
             parse_body(response)
           when 201
             parse_body(response)
+          when 401
+            raise AuthenticationError
           when 404
             raise NotFoundError
           when 422
