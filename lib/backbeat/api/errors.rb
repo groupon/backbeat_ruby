@@ -5,5 +5,8 @@ module Backbeat
 
     class NotFoundError < StandardError
     end
+
+    class ApiError < StandardError
+    end
   end
 end

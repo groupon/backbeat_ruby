@@ -44,10 +44,11 @@ module Backbeat
       end
 
       def handle_response(response, handlers)
-        if handler = handlers[response[:status]]
+        status = response[:status]
+        if handler = handlers[status]
           handler.call(response)
         else
-          case response[:status]
+          case status
           when 200
             parse_body(response)
           when 201
@@ -56,6 +57,8 @@ module Backbeat
             raise NotFoundError
           when 422
             raise ValidationError
+          else
+            raise ApiError
           end
         end
       end

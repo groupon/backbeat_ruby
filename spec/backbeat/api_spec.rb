@@ -222,4 +222,70 @@ describe Backbeat::Api do
       end
     end
   end
+
+  context "events" do
+    let(:event_data) {{
+      id: 5,
+      workflow_id: 5,
+      parent_id: nil,
+      mode: "blocking",
+      client_data: {},
+      metadata: {},
+      name: "My Workflow",
+      subject: "Subject",
+      decider: "Decider",
+      user_id: "123"
+    }}
+
+    context "find_event_by_id" do
+      it "finds an event by id" do
+        expect(client).to receive(:get).with("/v2/events/25", {
+          headers: { "Accept" => "application/json"}
+        }).and_return({ status: 200, body: MultiJson.dump(event_data) })
+
+        event = api.find_event_by_id(25)
+
+        expect(event).to eq(event_data)
+      end
+    end
+
+    context "update_event_status" do
+      it "sends a request to update the event status" do
+        expect(client).to receive(:put).with("/v2/events/25/status/errored", MultiJson.dump({}), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 200 })
+
+        api.update_event_status(25, :errored)
+      end
+    end
+
+    context "restart_event" do
+      it "sends a request to restart the event" do
+        expect(client).to receive(:put).with("/v2/events/25/restart", MultiJson.dump({}), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 200 })
+
+        api.restart_event(25)
+      end
+    end
+
+    context "add_child_events" do
+      it "creates new child events on the event" do
+        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump([event_data]), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 201 })
+
+        api.add_child_events(12, [event_data])
+      end
+    end
+  end
 end

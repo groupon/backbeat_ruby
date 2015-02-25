@@ -8,20 +8,24 @@ module Backbeat
       end
 
       def find_event_by_id(id)
-        # get events/:id
+        http_client.get("/v2/events/#{id}")
       end
 
       def update_event_status(id, status)
-        # put events/:id/status/:new_status
+        http_client.put("/v2/events/#{id}/status/#{status}", {})
       end
 
       def restart_event(id)
-        # put :id/restart
+        http_client.put("/v2/events/#{id}/restart", {})
       end
 
-      def add_children(id, data)
-        # post :id/decisions
+      def add_child_events(id, data)
+        http_client.post("/v2/events/#{id}/decisions", data)
       end
+
+      private
+
+      attr_reader :http_client
     end
   end
 end
