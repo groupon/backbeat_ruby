@@ -1,6 +1,8 @@
+require "backbeat/action"
+
 module Backbeat
-  module Action
-    module Command
+  module Actors
+    class Command
       def self.build(name, klass, *args)
         new(name: name, class: klass, args: args)
       end
@@ -13,26 +15,8 @@ module Backbeat
         @args[:name]
       end
 
-      def klass
-        @args[:class]
-      end
-
-      def method
-        :call
-      end
-
-      def args
-        @args[:args]
-      end
-
-      def contextible
-        klass.new
-      end
-
       def run(context)
-        contextible.with_context(context) do |contextible|
-          contexible.send(method, *args)
-        end
+        Action.new(contextible, method, args).run(context)
       end
 
       def to_hash
@@ -43,6 +27,24 @@ module Backbeat
           method: method,
           args: args
         }
+      end
+
+      private
+
+      def contextible
+        klass.new
+      end
+
+      def klass
+        @args[:class]
+      end
+
+      def method
+        :call
+      end
+
+      def args
+        @args[:args]
       end
     end
   end

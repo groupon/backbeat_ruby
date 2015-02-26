@@ -16,7 +16,7 @@ describe Backbeat::Context::Remote::Registry do
     )
   }
 
-  let(:action) { Backbeat::Action::Activity.new(name: "Fake Action") }
+  let(:action) { Backbeat::Actors::Activity.new(name: "Fake Action") }
 
   let(:now) { Time.now }
 

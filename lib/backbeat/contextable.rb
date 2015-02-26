@@ -1,7 +1,6 @@
 module Backbeat
   module Contextable
-    class NoContextError < StandardError
-    end
+    class NoContextError < StandardError; end
 
     def context
       if @context
@@ -14,8 +13,6 @@ module Backbeat
     def with_context(context)
       @context = context
       yield self
-    ensure
-      @context = nil
     end
   end
 end

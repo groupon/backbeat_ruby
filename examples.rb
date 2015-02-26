@@ -62,15 +62,6 @@ class MyCommand
   include Backbeat::Contextable
 
   def perform(a, b, c)
-    context.fire_and_forget.run(Activity.build(MyActivity, :foo, payment_term, 1))
-  end
-end
-
-class MyCommand
-  include Backbeat::Contextable
-  action_type Backbeat::Action::Activity # => Initialize the activity with some arguments, then set context and call method
-
-  def perform(a, b, c)
-    context.fire_and_forget.run(MyActivity.action(:foo, payment_term, 1))
+    context.fire_and_forget(Time.now + 5.days).run(Activity.build(MyActivity, :foo, payment_term, 1))
   end
 end

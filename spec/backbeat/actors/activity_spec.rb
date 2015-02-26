@@ -1,14 +1,14 @@
 require "spec_helper"
 require "backbeat/contextable"
 require "backbeat/context/local"
-require "backbeat/action/activity"
+require "backbeat/actors/activity"
 
-describe Backbeat::Action::Activity do
+describe Backbeat::Actors::Activity do
 
   class MyActivity
     extend Backbeat::Contextable
 
-    def boom
+    def self.boom
       raise
     end
 
@@ -21,24 +21,6 @@ describe Backbeat::Action::Activity do
     action = described_class.new(name: "New Activity")
 
     expect(action.name).to eq("New Activity")
-  end
-
-  it "has a class" do
-    action = described_class.new(class: MyActivity)
-
-    expect(action.klass).to eq(MyActivity)
-  end
-
-  it "has a method" do
-    action = described_class.new(method: :perform)
-
-    expect(action.method).to eq(:perform)
-  end
-
-  it "has arguments" do
-    action = described_class.new(args: [1, 2, 3])
-
-    expect(action.args).to eq([1, 2, 3])
   end
 
   it "returns a hash representation of itself" do
