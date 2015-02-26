@@ -1,27 +1,30 @@
+require "backbeat"
 require "backbeat/api"
-require "backbeat/http_client"
+require "backbeat/api/http_client"
+require "backbeat/context/remote/registry"
 
 module Backbeat
   module Context
     class Remote
-      def self.build(data)
-        new(data, api)
-      end
-
-      def self.api
-        @api ||= Api.new(HttpClient.new(
-          Backbeat.config.host,
-          Backbeat.config.client_id
-        ))
-      end
-
-      def initialize(data, api)
+      def initialize(data, api = nil)
         @data = data
-        @api = api
+        @api = api || backbeat_api
       end
 
-      def deciding
-        api.update_event_status(event_id, :deciding)
+      def blocking(fires_at = nil)
+        Registry.new(:blocking, fires_at, data, api)
+      end
+
+      def non_blocking(fires_at = nil)
+        Registry.new(:non_blocking, fires_at, data, api)
+      end
+
+      def fire_and_forget(fires_at = nil)
+        Registry.new(:fire_and_forget, fires_at, data, api)
+      end
+
+      def processing
+        api.update_event_status(event_id, :processing)
       end
 
       def complete
@@ -32,25 +35,31 @@ module Backbeat
         api.update_event_status(event_id, :errored)
       end
 
-      def deactivate
-        api.update_event_status(event_id, :deactivated)
-      end
-
-      def signal(signal_data)
-        workflow_id = api.find_workflow_by_subject(signal_data)[:id]
-        api.signal_workflow(workflow_id, signal_data)
-      end
-
-      def add_activity(activity_data)
-        api.add_children_to_node(event_id, [activity_data])
-      end
-
       def event_history
-        api.find_all_workflow_events(workflow_id)
+        api.find_all_workflow_events(data[:workflow_id])
       end
 
       def complete_workflow!
-        api.complete_workflow(dataworkflow_id)
+        api.complete_workflow(workflow_id)
+      end
+
+      private
+
+      attr_reader :api, :data
+
+      def event_id
+        data[:event_id]
+      end
+
+      def workflow_id
+        data[:workflow_id]
+      end
+
+      def backbeat_api
+        Api.new(Api::HttpClient.new(
+          Backbeat.config.host,
+          Backbeat.config.client_id
+        ))
       end
     end
   end

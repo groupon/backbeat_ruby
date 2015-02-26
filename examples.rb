@@ -16,51 +16,94 @@ Backbeat.signal(
   decider: FirstDecision
 )
 
+# Assume signal if no current context?
+#
+Backbeat::Context.perform(action)
+
 # Parse response
 
 decision_data = {
-  id: 1,
-  name: "name",
-  workflow_id: 2,
-  client_data: {
-    argumentss: [1, 2, 3]
+  "id" => 1,
+  "name" => "name",
+  "workflow_id" => 2,
+  "client_data" => {
+    action: {
+    "class" => "FirstDecision"
+    "method" => "decision_1"
+    }
+    args: []
   },
-  subject: {
-    class: "Subject",
-    id: 123
+  "subject" => {
+    "class" => "Subject",
+    "id" => 123
   },
-  decider: "Decider"
+  "decider" => "Decider"
 }
 
-performer = Backbeat.build_performer(decision_data)
-subject = Backbeat.build_subject(decision_data)
-context = Backbeat.build_context(decision_data)
+context, current_node = Backbeat::Packer.unpack(decision_data)
+# build subject object
+# build client_data object
+# build client_data arguments
+# get client_data method
+# get decider class
+
+Backbeat::Context.perform(context, current_node)
 
 # Perform
+#
+# Case client_data
+# When nothing
+#   Decider.new(context).call(subject)
+# When just class
+#   Class.new(context).call(subject)
+# When class and arguments
+#   Class.new(context).call(*arguments)
+# When class and method
+#   Class.new(context).method(subject)
+# When class, method, arguments
+#   Class.new(context).method(*arguments)
+# *ActiveRecord Packer*
+# When class, id, method, arguments
+#   Class.find(id).method(arguments)
 
-performer.call(subject, context)
+# Testing
 
-class FirstDecision
-  def self.call(subject, context)
-    context.deciding
-    context.add_activity(
-      name: MyActivity,
-      arguments: [1, 2, 3],
-      mode: :nonblocking,
-      fires_at: Time.now + 5.days
-    )
-    context.add_activity(
-      name: MyActivity2,
-      arguments: { key: :value },
-      mode: :blocking
-    )
-    context.complete
-  end
+context = Backbeat::Context::Remote.new(
+  workflow_id: 1
+)
+
+context = Backbeat::Context::Remote.new(
+  workflow_name: "A",
+  subject: "B",
+  decider: "C"
+)
+
+MyCommand.with_context(context) do |command|
+  command.perform(payment_term)
 end
 
-class MyActivity
-  def self.call(subject, context)
-    subject.update_attributes(context.arguments)
-    context.complete
+MyCommand.new(context).perform(payment_term)
+
+# Worker
+
+context = Backbeat::Context::Remote.new(
+  workflow_id: 1,
+  event_id: 2
+)
+
+action = Backbeat::Action.new(
+  name: "My action",
+  class: MyCommand,
+  method: :perform,
+  args: [1, 2, 3]
+)
+
+action.run(context)
+
+class MyCommand
+  include Contextable
+
+  def perform(a, b, c)
+    context.fire_and_forget.run(Activity.build(MyActivity, :foo, payment_term, 1))
   end
 end

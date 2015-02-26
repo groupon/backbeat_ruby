@@ -1,36 +1,68 @@
 module Backbeat
   module Context
     class Local
+      attr_reader :state
+
       def initialize(data, state = {})
         @data = data
         @state = state
       end
 
-      def deciding(event_id)
+      def blocking(fires_at = nil)
+        Registry.new(data, state)
       end
 
-      def complete(event_id)
+      def non_blocking(fires_at = nil)
+        Registry.new(data, state)
       end
 
-      def errored(event_id)
+      def fire_and_forget(fires_at = nil)
+        Registry.new(data, state)
       end
 
-      def deactivate(event_id)
+      def processing
+        state[:events] ||= {}
+        state[:events][event_id] ||= { statuses: [] }
+        state[:events][event_id][:statuses] << :processing
       end
 
-      def signal(data)
+      def complete
+        state[:events] ||= {}
+        state[:events][event_id] ||= { statuses: [] }
+        state[:events][event_id][:statuses] << :complete
       end
 
-      def add_children(event_id, data)
+      def errored
+        state[:events] ||= {}
+        state[:events][event_id] ||= { statuses: [] }
+        state[:events][event_id][:statuses] << :errored
       end
 
-      def add_activity(event_id, data)
+      def event_history
+        state[:event_history]
       end
 
-      def event_history(workflow_id)
+      def complete_workflow!
+        state[:workflow_complete] = true
       end
 
-      def complete_workflow!(workflow_id)
+      class Registry
+        def initialize(data, state)
+          @data = data
+          @state = state
+        end
+
+        def run(activity)
+          activity.run(Context.new(@data, @state))
+        end
+      end
+
+      private
+
+      attr_reader :data
+
+      def event_id
+        data[:event_id]
       end
     end
   end

@@ -1,7 +1,7 @@
 require "spec_helper"
 require "backbeat/api"
 require "backbeat/api/errors"
-require "backbeat/mock_http_client"
+require "support/mock_http_client"
 
 describe Backbeat::Api do
   let(:client) { MockHttpClient.new }
