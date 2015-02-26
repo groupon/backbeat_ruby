@@ -6,9 +6,6 @@ module Backbeat
     def self.unpack_action(data)
     end
 
-    def self.pack_context(context)
-    end
-
     def self.pack_action(action, mode, fires_at = nil)
       {
         name: action.name,

@@ -11,6 +11,14 @@ class MemoryApi
     seeds[:workflows]
   end
 
+  def create_workflow(data)
+    last_id = workflows.keys.sort.last || 0
+    id = last_id + 1
+    workflow = { signals: {}, subject: data[:subject] }
+    workflows[id] = workflow
+    workflow.merge(id: id)
+  end
+
   def find_workflow_by_id(id)
     workflows[id]
   end
@@ -19,7 +27,7 @@ class MemoryApi
     workflow = workflows.find do |id, workflow|
       data[:subject] == workflow[:subject]
     end
-    workflow.last.merge(id: workflow.first)
+    workflow.last.merge(id: workflow.first) if workflow
   end
 
   def find_event_by_id(id)

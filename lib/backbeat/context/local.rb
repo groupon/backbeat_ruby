@@ -9,33 +9,31 @@ module Backbeat
       end
 
       def blocking(fires_at = nil)
-        Registry.new(data, state)
+        now
       end
 
       def non_blocking(fires_at = nil)
-        Registry.new(data, state)
+        now
       end
 
       def fire_and_forget(fires_at = nil)
+        now
+      end
+
+      def now
         Registry.new(data, state)
       end
 
       def processing
-        state[:events] ||= {}
-        state[:events][event_id] ||= { statuses: [] }
-        state[:events][event_id][:statuses] << :processing
+        add_event_status(:processing)
       end
 
       def complete
-        state[:events] ||= {}
-        state[:events][event_id] ||= { statuses: [] }
-        state[:events][event_id][:statuses] << :complete
+        add_event_status(:complete)
       end
 
       def errored
-        state[:events] ||= {}
-        state[:events][event_id] ||= { statuses: [] }
-        state[:events][event_id][:statuses] << :errored
+        add_event_status(:errored)
       end
 
       def event_history
@@ -52,8 +50,11 @@ module Backbeat
           @state = state
         end
 
-        def run(activity)
-          activity.run(Context.new(@data, @state))
+        def run(action)
+          @state[:event_history] ||= []
+          @state[:event_history] << action.name
+          new_data = @data.merge(event_name: action.name)
+          action.run(Local.new(new_data, @state))
         end
       end
 
@@ -61,8 +62,14 @@ module Backbeat
 
       attr_reader :data
 
-      def event_id
-        data[:event_id]
+      def event_name
+        data[:event_name]
+      end
+
+      def add_event_status(status)
+        state[:events] ||= {}
+        state[:events][event_name] ||= { statuses: [] }
+        state[:events][event_name][:statuses] << status
       end
     end
   end

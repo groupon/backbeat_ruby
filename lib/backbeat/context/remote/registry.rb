@@ -26,11 +26,12 @@ module Backbeat
         attr_reader :workflow_data, :api
 
         def workflow_id
-          @workflow_id ||= workflow_data[:workflow_id] || get_workflow_id
+          @workflow_id ||= workflow_data[:workflow_id] || get_workflow[:id]
         end
 
-        def get_workflow_id
-          api.find_workflow_by_subject(workflow_data)[:id]
+        def get_workflow
+          api.find_workflow_by_subject(workflow_data) ||
+            api.create_workflow(workflow_data)
         end
 
         def event_id

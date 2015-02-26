@@ -56,7 +56,7 @@ describe Backbeat::Action::Activity do
   context "run" do
     let(:action) { described_class.build("Blue", MyActivity, :perform, 1, 2, 3) }
 
-    let(:context) { Backbeat::Context::Local.new({ event_id: 10 }) }
+    let(:context) { Backbeat::Context::Local.new({ event_name: "Blue" }) }
 
     it "calls the method on the class with the arguments" do
       expect(action.run(context)).to eq(6)
@@ -65,13 +65,13 @@ describe Backbeat::Action::Activity do
     it "sends a processing message to the context" do
       action.run(context)
 
-      expect(context.state[:events][10][:statuses].first).to eq(:processing)
+      expect(context.state[:events]["Blue"][:statuses].first).to eq(:processing)
     end
 
     it "sends a complete message to the context" do
       action.run(context)
 
-      expect(context.state[:events][10][:statuses].last).to eq(:complete)
+      expect(context.state[:events]["Blue"][:statuses].last).to eq(:complete)
     end
 
     it "sends an error message to the context on error" do
@@ -79,7 +79,7 @@ describe Backbeat::Action::Activity do
 
       action.run(context)
 
-      expect(context.state[:events][10][:statuses].last).to eq(:errored)
+      expect(context.state[:events]["Blue"][:statuses].last).to eq(:errored)
     end
   end
 end

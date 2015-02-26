@@ -16,17 +16,7 @@ describe Backbeat::Context::Remote::Registry do
     )
   }
 
-  class MockAction
-    def name
-      "Fake Action"
-    end
-
-    def to_hash
-      { name: name }
-    end
-  end
-
-  let(:action) { MockAction.new }
+  let(:action) { Backbeat::Action::Activity.new(name: "Fake Action") }
 
   let(:now) { Time.now }
 
@@ -43,14 +33,18 @@ describe Backbeat::Context::Remote::Registry do
       registry.run(action)
 
       expect(api.find_workflow_by_id(5)[:signals]["Fake Action"]).to eq(
-        action.to_hash.merge(
-          name: action.name,
-          mode: :blocking,
-          fires_at: now,
-          client_data: {
-            action: action.to_hash
-          }
-        )
+        Backbeat::Packer.pack_action(action, :blocking, now)
+      )
+    end
+
+    it "creates a new workflow if one is not found" do
+      new_data = workflow_data.merge(subject: "New Subject")
+      registry = described_class.new(:blocking, now, new_data, api)
+
+      registry.run(action)
+
+      expect(api.find_workflow_by_id(6)[:signals]["Fake Action"]).to eq(
+        Backbeat::Packer.pack_action(action, :blocking, now)
       )
     end
 
@@ -60,14 +54,7 @@ describe Backbeat::Context::Remote::Registry do
       registry.run(action)
 
       expect(api.find_event_by_id(10)[:child_events].first).to eq(
-        action.to_hash.merge(
-          name: action.name,
-          mode: :non_blocking,
-          fires_at: now,
-          client_data: {
-            action: action.to_hash
-          }
-        )
+        Backbeat::Packer.pack_action(action, :non_blocking, now)
       )
     end
   end
