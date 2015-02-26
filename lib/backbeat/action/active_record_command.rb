@@ -1,6 +1,6 @@
 module Backbeat
   module Action
-    module Command
+    module ActiveRecordCommand
       def self.build(name, resource, method, *args)
         new(name: name, class: resource.class, id: resource.id, method: method, args: args)
       end
@@ -41,9 +41,10 @@ module Backbeat
 
       def to_hash
         {
-          type: "Method"
+          type: "ActiveRecordCommand"
           name: name,
           class: klass,
+          id: id,
           method: method,
           args: args
         }

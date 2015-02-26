@@ -298,5 +298,18 @@ describe Backbeat::Api do
         api.add_child_events(12, [event_data])
       end
     end
+
+    context "add_child_event" do
+      it "creates a new child event on the event" do
+        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump([event_data]), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 201 })
+
+        api.add_child_event(12, event_data)
+      end
+    end
   end
 end

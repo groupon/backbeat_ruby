@@ -55,6 +55,10 @@ module Backbeat
       events_api.restart_event(id)
     end
 
+    def add_child_event(id, data)
+      add_child_events(id, [data])
+    end
+
     def add_child_events(id, data)
       events_api.add_child_events(id, data)
     end

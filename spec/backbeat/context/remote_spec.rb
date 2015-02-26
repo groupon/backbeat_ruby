@@ -20,21 +20,21 @@ describe Backbeat::Context::Remote do
     context = described_class.new({ event_id: 5 }, api)
     context.processing
 
-    expect(api.events[5][:status]).to eq(:processing)
+    expect(api.find_event_by_id(5)[:status]).to eq(:processing)
   end
 
   it "marks an event as complete" do
     context = described_class.new({ event_id: 6 }, api)
     context.complete
 
-    expect(api.events[6][:status]).to eq(:complete)
+    expect(api.find_event_by_id(6)[:status]).to eq(:complete)
   end
 
   it "marks an event as errored" do
     context = described_class.new({ event_id: 6 }, api)
     context.errored
 
-    expect(api.events[6][:status]).to eq(:errored)
+    expect(api.find_event_by_id(6)[:status]).to eq(:errored)
   end
 
   it "returns the workflow event history" do
@@ -48,7 +48,7 @@ describe Backbeat::Context::Remote do
     context = described_class.new({ event_id: 6, workflow_id: 2 }, api)
     context.complete_workflow!
 
-    expect(api.workflows[2][:complete]).to eq(true)
+    expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
   end
 
   context "registering actions" do

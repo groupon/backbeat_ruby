@@ -1,7 +1,5 @@
 class MemoryApi
-  attr_reader :seeds
-
-  def initialize(seeds)
+  def initialize(seeds = {})
     @seeds = seeds
   end
 
@@ -11,6 +9,21 @@ class MemoryApi
 
   def workflows
     seeds[:workflows]
+  end
+
+  def find_workflow_by_id(id)
+    workflows[id]
+  end
+
+  def find_workflow_by_subject(data)
+    workflow = workflows.find do |id, workflow|
+      data[:subject] == workflow[:subject]
+    end
+    workflow.last.merge(id: workflow.first)
+  end
+
+  def find_event_by_id(id)
+    events[id]
   end
 
   def update_event_status(event_id, status)
@@ -31,6 +44,10 @@ class MemoryApi
   end
 
   def signal_workflow(id, name, data)
-    seeds[:workflows][workflow_id][:signals][name] = data
+    seeds[:workflows][id][:signals][name] = data
   end
+
+  private
+
+  attr_reader :seeds
 end
