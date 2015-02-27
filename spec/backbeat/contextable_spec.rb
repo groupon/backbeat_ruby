@@ -16,7 +16,7 @@ describe Backbeat::Contextable do
     extend Backbeat::Contextable
 
     def self.decision_one(a, b, c)
-      DoActivity.in_context_blocking(context).do_something(1, 2)
+      DoActivity.in_context(context, :blocking).do_something(1, 2)
     end
   end
 
@@ -25,19 +25,17 @@ describe Backbeat::Contextable do
   let(:now) { Time.now }
 
   it "runs an activity in the set context" do
-    Decider.in_context(
-      remote_context, { mode: :blocking, name: "Deciding", fires_at: now }
-    ).decision_one(:one, :two, :three)
+    Decider.in_context(remote_context, :blocking, now).decision_one(:one, :two, :three)
 
     expect(api.find_event_by_id(1)[:child_events].first).to eq(
       {
-        name: "Deciding",
+        name: "Decider.decision_one",
         mode: :blocking,
         fires_at: now,
         client_data: {
           action: {
             type: "Activity",
-            name: "Deciding",
+            name: "Decider.decision_one",
             class: Decider,
             method: :decision_one,
             args: [:one, :two, :three]
@@ -54,28 +52,28 @@ describe Backbeat::Contextable do
   end
 
   it "sets the mode to blocking" do
-    Decider.in_context_blocking(remote_context).decision_one(:one, :two, :three)
+    Decider.in_context(remote_context).decision_one(:one, :two, :three)
     event = api.find_event_by_id(1)[:child_events].first
 
     expect(event[:mode]).to eq(:blocking)
   end
 
   it "sets the mode to non_blocking" do
-    Decider.in_context_non_blocking(remote_context).decision_one(:one, :two, :three)
+    Decider.in_context(remote_context, :non_blocking).decision_one(:one, :two, :three)
     event = api.find_event_by_id(1)[:child_events].first
 
     expect(event[:mode]).to eq(:non_blocking)
   end
 
   it "sets the mode to fire_and_forget" do
-    Decider.in_context_fire_forget(remote_context).decision_one(:one, :two, :three)
+    Decider.in_context(remote_context, :fire_and_forget).decision_one(:one, :two, :three)
     event = api.find_event_by_id(1)[:child_events].first
 
     expect(event[:mode]).to eq(:fire_and_forget)
   end
 
   it "signals the workflow with an action" do
-    Decider.in_context_signal(remote_context, now).decision_one(:one, :two, :three)
+    Decider.in_context(remote_context, :signal).decision_one(:one, :two, :three)
     signal = api.find_workflow_by_id(1)[:signals]["Decider.decision_one"]
 
     expect(signal[:name]).to eq("Decider.decision_one")

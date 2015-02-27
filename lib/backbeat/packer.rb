@@ -7,7 +7,7 @@ module Backbeat
     def self.unpack_context(data, api = nil)
       Backbeat.context.new({
         workflow_id: data[:workflow_id],
-        event_id: data[:event_id],
+        event_id: data[:id],
         subject: data[:subject],
         decider: data[:decider]
       }, api)
