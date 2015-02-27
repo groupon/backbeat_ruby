@@ -28,4 +28,8 @@ module Backbeat
       raise ContextNotConfiguredError
     end
   end
+
+  def self.local
+    yield Context::Local.new({})
+  end
 end

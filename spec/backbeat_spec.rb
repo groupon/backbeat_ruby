@@ -40,5 +40,13 @@ describe Backbeat do
 
     expect { Backbeat.context }.to_not raise_error
   end
+
+  it "yields a local context to use" do
+    Backbeat.local do |context|
+      context.complete_workflow!
+
+      expect(context.state[:workflow_complete]).to eq(true)
+    end
+  end
 end
 

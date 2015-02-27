@@ -42,19 +42,20 @@ puts "\nResult:"
 puts result
 puts
 
-context = Backbeat::Context::Local.new({})
-result = AddSomething.in_context(context).add_3(1, 2, 3, 50)
-puts "\nResult:"
-puts result
-puts "\nEvent History:"
-p context.event_history
-puts
+## Or use a default local context
+Backbeat.local do |context|
+  result = AddSomething.in_context(context).add_3(1, 2, 3, 50)
+  puts "\nResult:"
+  puts result
+  puts "\nEvent History:"
+  p context.event_history
+  puts
+end
 
 puts "Remote Context"
 Backbeat.configure do |config|
   config.context = Backbeat::Context::Remote
 end
-
 
 require_relative "../spec/support/memory_api"
 api = Backbeat::MemoryApi.new({ workflows: { 2 => { signals: {} }}})
