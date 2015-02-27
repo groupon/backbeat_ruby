@@ -1,4 +1,4 @@
-require "backbeat/actors/activity"
+require "backbeat/action/activity"
 require "backbeat/context/local"
 
 module Backbeat
@@ -40,7 +40,7 @@ module Backbeat
       end
 
       def method_missing(method, *args)
-        activity = Actors::Activity.build(
+        activity = Action::Activity.build(
           name || build_name(method),
           contextible,
           method,

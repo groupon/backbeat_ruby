@@ -1,10 +1,10 @@
 require "backbeat/action"
 
 module Backbeat
-  module Actors
-    class Activity
-      def self.build(name, klass, method, args)
-        new(name: name, class: klass, method: method, args: args)
+  class Action
+    class ActiveRecordActivity
+      def self.build(name, object, method, *args)
+        new(name: name, class: object.class, id: object.id, method: method, args: args)
       end
 
       def initialize(args)
@@ -21,9 +21,10 @@ module Backbeat
 
       def to_hash
         {
-          type: "Activity",
+          type: "ActiveRecordActivity",
           name: name,
           class: klass,
+          id: id,
           method: method,
           args: args
         }
@@ -32,11 +33,15 @@ module Backbeat
       private
 
       def contextible
-        klass
+        klass.find(id)
       end
 
       def klass
         @args[:class]
+      end
+
+      def id
+        @args[:id]
       end
 
       def method

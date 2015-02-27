@@ -1,4 +1,6 @@
 require "spec_helper"
+require "backbeat/action/activity"
+require "backbeat/context/local"
 
 describe Backbeat::Context::Local do
 
@@ -51,7 +53,7 @@ describe Backbeat::Context::Local do
     let(:now) { Time.now }
 
     it "Runs a workflow locally" do
-      action = Backbeat::Actors::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
+      action = Backbeat::Action::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
       value, new_context = context.run_activity(action, :blocking)
 

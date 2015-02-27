@@ -1,7 +1,7 @@
 require "backbeat/contextable"
 require "backbeat/context/local"
 require "backbeat/context/remote"
-require "backbeat/actors/activity"
+require "backbeat/action/activity"
 require "backbeat/packer"
 
 module Backbeat

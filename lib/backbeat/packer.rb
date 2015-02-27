@@ -1,6 +1,6 @@
 require "backbeat"
-require "backbeat/actors/activity"
-require "backbeat/actors/active_record_activity"
+require "backbeat/action/activity"
+require "backbeat/action/active_record_activity"
 
 module Backbeat
   class Packer
@@ -15,7 +15,7 @@ module Backbeat
 
     def self.unpack_action(data)
       actor_type = data[:client_data][:action][:type]
-      actor_klass = Actors.const_get(actor_type)
+      actor_klass = Action.const_get(actor_type)
       actor_data = data[:client_data][:action]
       actor_data.delete(:type)
       actor_klass.new(actor_data)

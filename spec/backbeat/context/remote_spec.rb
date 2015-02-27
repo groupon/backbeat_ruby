@@ -1,5 +1,6 @@
 require "spec_helper"
 require "support/memory_api"
+require "backbeat/action/activity"
 require "backbeat/packer"
 require "backbeat/context/remote"
 
@@ -71,7 +72,7 @@ describe Backbeat::Context::Remote do
       name: "Workflow"
     }}
 
-    let(:action) { Backbeat::Actors::Activity.new(name: "Fake Action") }
+    let(:action) { Backbeat::Action::Activity.new(name: "Fake Action") }
     let(:now) { Time.now }
 
     it "signals the workflow if there is no event id in the workflow data" do

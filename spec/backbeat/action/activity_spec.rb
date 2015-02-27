@@ -1,9 +1,9 @@
 require "spec_helper"
 require "backbeat/contextable"
 require "backbeat/context/local"
-require "backbeat/actors/activity"
+require "backbeat/action/activity"
 
-describe Backbeat::Actors::Activity do
+describe Backbeat::Action::Activity do
 
   class MyActivity
     extend Backbeat::Contextable
