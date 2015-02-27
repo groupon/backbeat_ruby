@@ -22,7 +22,7 @@ describe Backbeat::Packer do
   end
 
   context "unpack_action" do
-    it "returns the actor object specified in the action type with the action data" do
+    it "returns the action object specified in the action type with the action data" do
       action = Backbeat::Action::Activity.build("Action", "Klass", :method, args: [])
       action_data = Backbeat::Packer.pack_action(action, :fire_and_forget, now)
       unpacked_action = Backbeat::Packer.unpack_action(action_data)

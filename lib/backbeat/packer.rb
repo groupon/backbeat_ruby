@@ -14,11 +14,11 @@ module Backbeat
     end
 
     def self.unpack_action(data)
-      actor_type = data[:client_data][:action][:type]
-      actor_klass = Action.const_get(actor_type)
-      actor_data = data[:client_data][:action]
-      actor_data.delete(:type)
-      actor_klass.new(actor_data)
+      action_type = data[:client_data][:action][:type]
+      action_klass = Action.const_get(action_type)
+      action_data = data[:client_data][:action]
+      action_data.delete(:type)
+      action_klass.new(action_data)
     end
 
     def self.pack_action(action, mode, fires_at = nil)
