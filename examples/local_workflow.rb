@@ -48,7 +48,9 @@ puts "\nResult:"
 puts result
 puts "\nEvent History:"
 p context.event_history
+puts
 
+puts "Remote Context"
 Backbeat.configure do |config|
   config.context = Backbeat::Context::Remote
 end
@@ -65,16 +67,15 @@ decision_data = {
       args: [1, 2, 3, 50]
     }
   },
-  subject: "not important",
-  decider: "not important in local context"
+  subject: "Subject",
+  decider: "Decider"
 }
 
-context = Backbeat::Packer.unpack_context(decision_data)
+require_relative "../spec/support/memory_api"
+api = MemoryApi.new
+context = Backbeat::Packer.unpack_context(decision_data, api)
 action = Backbeat::Packer.unpack_action(decision_data)
 
-result = action.run(context)
+action.run(context)
 
-puts "\nResult:"
-puts result
-puts
-
+p api.find_workflow_by_id(2)

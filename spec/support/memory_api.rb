@@ -55,6 +55,7 @@ class MemoryApi
   end
 
   def signal_workflow(id, name, data)
+    workflows[id] ||= { signals: {} }
     workflows[id][:signals][name] = data
   end
 

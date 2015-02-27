@@ -4,13 +4,13 @@ require "backbeat/actors/active_record_activity"
 
 module Backbeat
   class Packer
-    def self.unpack_context(data)
+    def self.unpack_context(data, api = nil)
       Backbeat.context.new({
         workflow_id: data[:workflow_id],
         event_id: data[:event_id],
         subject: data[:subject],
         decider: data[:decider]
-      })
+      }, api)
     end
 
     def self.unpack_action(data)
