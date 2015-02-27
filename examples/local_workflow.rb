@@ -55,27 +55,25 @@ Backbeat.configure do |config|
   config.context = Backbeat::Context::Remote
 end
 
-decision_data = {
-  id: 1,
-  name: "Adding things",
-  workflow_id: 2,
-  client_data: {
-    action: {
-      type: "Activity",
-      class: AddSomething,
-      method: :add_3,
-      args: [1, 2, 3, 50]
-    }
-  },
-  subject: "Subject",
-  decider: "Decider"
-}
 
 require_relative "../spec/support/memory_api"
-api = Backbeat::MemoryApi.new
+api = Backbeat::MemoryApi.new({ workflows: { 2 => { signals: {} }}})
+
+# Send a signal
+
+starting_context = Backbeat::Packer.unpack_context({ workflow_id: 2 }, api)
+
+AddSomething.in_context_signal(starting_context).add_3(1, 2, 3, 50)
+
+# Receive the decision data
+
+decision_data = api.find_workflow_by_id(2)[:signals]["AddSomething.add_3"]
+
+# Build the decision
 context = Backbeat::Packer.unpack_context(decision_data, api)
 action = Backbeat::Packer.unpack_action(decision_data)
 
+# Run the activity
 action.run(context)
 
 p api.find_workflow_by_id(2)
