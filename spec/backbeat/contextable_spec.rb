@@ -9,6 +9,7 @@ describe Backbeat::Contextable do
     extend Backbeat::Contextable
 
     def self.do_something(x, y)
+      x + y
     end
   end
 
@@ -46,8 +47,9 @@ describe Backbeat::Contextable do
   end
 
   it "defaults to a local context if the context is not already set" do
-    Decider.decision_one(1, 2, 3)
+    result = Decider.decision_one(1, 2, 3)
 
+    expect(result).to eq(3)
     expect(Decider.context.event_history).to eq(["DoActivity.do_something"])
   end
 
@@ -78,5 +80,70 @@ describe Backbeat::Contextable do
 
     expect(signal[:name]).to eq("Decider.decision_one")
     expect(signal[:mode]).to eq(:blocking)
+  end
+
+  context "contextible model" do
+
+    class MyModel
+      include Backbeat::ContextableModel
+
+      attr_reader :id, :name
+
+      def initialize(attrs)
+        @id = attrs[:id]
+        @name = attrs[:name]
+      end
+
+      def self.find(id)
+        new(id: id, name: "A findable object")
+      end
+
+      def update_attributes(attrs)
+        MyModel.new({ id: id }.merge(attrs))
+      end
+    end
+
+    let(:object) { MyModel.new(id: 10, name: "Lime") }
+
+    it "runs activities on an findable instance of a class" do
+      object.in_context(remote_context).update_attributes({ name: "Lemon" })
+
+      expect(api.find_event_by_id(1)[:child_events].first).to eq(
+        {
+          name: "MyModel#update_attributes",
+          mode: :blocking,
+          fires_at: nil,
+          client_data: {
+            action: {
+              type: "FindableActivity",
+              name: "MyModel#update_attributes",
+              class: MyModel,
+              id: 10,
+              method: :update_attributes,
+              args: [{ name: "Lemon" }]
+            }
+          }
+        }
+      )
+    end
+
+    it "can run in a local context" do
+      Backbeat.local do |context|
+        result = object.in_context(context).update_attributes({ name: "Orange" })
+
+        expect(result.name).to eq("Orange")
+        expect(context.event_history).to eq(["MyModel#update_attributes"])
+      end
+    end
+
+    it "extends contextable to the model class" do
+      Backbeat.local do |context|
+        result = MyModel.in_context(context).find(100)
+
+        expect(result.name).to eq("A findable object")
+        expect(result.id).to eq(100)
+        expect(context.event_history).to eq(["MyModel.find"])
+      end
+    end
   end
 end

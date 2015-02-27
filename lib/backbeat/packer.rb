@@ -1,6 +1,6 @@
 require "backbeat"
 require "backbeat/action/activity"
-require "backbeat/action/active_record_activity"
+require "backbeat/action/findable_activity"
 
 module Backbeat
   class Packer

@@ -1,4 +1,5 @@
 require "backbeat/action/activity"
+require "backbeat/action/findable_activity"
 require "backbeat/context/local"
 
 module Backbeat
@@ -16,6 +17,10 @@ module Backbeat
       ContextProxy.new(self, new_context, { mode: mode, fires_at: fires_at })
     end
 
+    def action
+      Action::Activity
+    end
+
     private
 
     class ContextProxy
@@ -27,7 +32,7 @@ module Backbeat
       end
 
       def method_missing(method, *args)
-        activity = Action::Activity.build(
+        activity = contextible.action.build(
           build_name(method),
           contextible,
           method,
@@ -51,6 +56,18 @@ module Backbeat
           "#{contextible.class.to_s}##{method}"
         end
       end
+    end
+  end
+
+  module ContextableModel
+    include Contextable
+
+    def self.included(klass)
+      klass.extend(Contextable)
+    end
+
+    def action
+      Action::FindableActivity
     end
   end
 end

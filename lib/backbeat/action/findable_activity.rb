@@ -2,7 +2,7 @@ require "backbeat/action"
 
 module Backbeat
   class Action
-    class ActiveRecordActivity
+    class FindableActivity
       def self.build(name, object, method, args)
         new(name: name, class: object.class, id: object.id, method: method, args: args)
       end
@@ -17,7 +17,7 @@ module Backbeat
 
       def to_hash
         {
-          type: "ActiveRecordActivity",
+          type: "FindableActivity",
           name: name,
           class: klass,
           id: id,
