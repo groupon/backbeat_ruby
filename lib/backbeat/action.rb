@@ -1,7 +1,5 @@
 module Backbeat
   class Action
-    attr_reader :contextible, :method, :args
-
     def initialize(contextible, method, args)
       @contextible = contextible
       @method = method
@@ -20,5 +18,9 @@ module Backbeat
       context.errored
       raise
     end
+
+    private
+
+    attr_reader :contextible, :method, :args
   end
 end
