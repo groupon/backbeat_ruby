@@ -46,33 +46,18 @@ describe Backbeat::Context::Local do
     end
   end
 
-  context "registering actions" do
+  context "run_activity" do
     let(:context) { described_class.new({ event_name: "First Event", workflow_id: 2 }) }
     let(:now) { Time.now }
 
-    it "Runs a workflow locally, now" do
+    it "Runs a workflow locally" do
       action = Backbeat::Actors::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
-      value, new_context = context.now.run(action)
+      value, new_context = context.run_activity(action, :blocking)
 
       expect(value).to eq(33)
       expect(new_context.state[:event_history]).to eq(["Adding"])
       expect(new_context.state[:events]["Adding"][:statuses].last).to eq(:complete)
-    end
-
-    [:blocking, :non_blocking, :fire_and_forget].each do |event_type|
-
-      it "Returns a #{event_type} registry that runs the action now" do
-        registry = context.send(event_type, now)
-        action = Backbeat::Actors::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
-
-        value, context = registry.run(action)
-
-        expect(value).to eq(33)
-        expect(context.state[:event_history]).to eq(["Adding"])
-        expect(context.state[:events]["Adding"][:statuses].last).to eq(:complete)
-      end
-
     end
   end
 end

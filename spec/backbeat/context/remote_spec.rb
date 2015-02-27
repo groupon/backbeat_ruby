@@ -1,5 +1,6 @@
 require "spec_helper"
 require "support/memory_api"
+require "backbeat/packer"
 require "backbeat/context/remote"
 
 describe Backbeat::Context::Remote do
@@ -51,29 +52,57 @@ describe Backbeat::Context::Remote do
     expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
   end
 
-  context "registering actions" do
-    let(:context) { described_class.new({ event_id: 6, workflow_id: 2 }) }
+  context "run_activity" do
+    let(:api) {
+      MemoryApi.new(
+        events: {
+          10 => { child_events: [] },
+          11 => { child_events: [] }
+        },
+        workflows: {
+          5 => { signals: {}, subject: "A Subject" }
+        }
+      )
+    }
+
+    let(:workflow_data) {{
+      subject: "A Subject",
+      decider: "Decider",
+      name: "Workflow"
+    }}
+
+    let(:action) { Backbeat::Actors::Activity.new(name: "Fake Action") }
     let(:now) { Time.now }
 
-    it "creates a blocking action registry" do
-      registry = context.blocking(now)
+    it "signals the workflow if there is no event id in the workflow data" do
+      context = described_class.new(workflow_data, api)
 
-      expect(registry.mode).to eq(:blocking)
-      expect(registry.fires_at).to eq(now)
+      context.run_activity(action, :blocking, now)
+
+      expect(api.find_workflow_by_id(5)[:signals]["Fake Action"]).to eq(
+        Backbeat::Packer.pack_action(action, :blocking, now)
+      )
     end
 
-    it "creates a non blocking action registry" do
-      registry = context.non_blocking(now)
+    it "creates a new workflow if one is not found" do
+      new_data = workflow_data.merge(subject: "New Subject")
+      context = described_class.new(new_data, api)
 
-      expect(registry.mode).to eq(:non_blocking)
-      expect(registry.fires_at).to eq(now)
+      context.run_activity(action, :blocking, now)
+
+      expect(api.find_workflow_by_id(6)[:signals]["Fake Action"]).to eq(
+        Backbeat::Packer.pack_action(action, :blocking, now)
+      )
     end
 
-    it "creates a fire and forget action registry" do
-      registry = context.fire_and_forget(now)
+    it "registers a child node if there is an event_id in the workflow data" do
+      context = described_class.new({ event_id: 10 }, api)
 
-      expect(registry.mode).to eq(:fire_and_forget)
-      expect(registry.fires_at).to eq(now)
+      context.run_activity(action, :non_blocking, now)
+
+      expect(api.find_event_by_id(10)[:child_events].first).to eq(
+        Backbeat::Packer.pack_action(action, :non_blocking, now)
+      )
     end
   end
 end

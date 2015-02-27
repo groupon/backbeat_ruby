@@ -40,14 +40,13 @@ module Backbeat
       end
 
       def method_missing(method, *args)
-        context.send(mode, fires_at).run(
-          Actors::Activity.build(
-            name || build_name(method),
-            contextible,
-            method,
-            args
-          )
+        activity = Actors::Activity.build(
+          name || build_name(method),
+          contextible,
+          method,
+          args
         )
+        context.run_activity(activity, mode, fires_at)
       end
 
       private

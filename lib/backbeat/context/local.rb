@@ -8,22 +8,6 @@ module Backbeat
         @state = state
       end
 
-      def blocking(fires_at = nil)
-        now
-      end
-
-      def non_blocking(fires_at = nil)
-        now
-      end
-
-      def fire_and_forget(fires_at = nil)
-        now
-      end
-
-      def now
-        Registry.new(data, state)
-      end
-
       def processing
         add_event_status(:processing)
       end
@@ -44,18 +28,11 @@ module Backbeat
         state[:workflow_complete] = true
       end
 
-      class Registry
-        def initialize(data, state)
-          @data = data
-          @state = state
-        end
-
-        def run(action)
-          @state[:event_history] ||= []
-          @state[:event_history] << action.name
-          new_data = @data.merge(event_name: action.name)
-          action.run(Local.new(new_data, @state))
-        end
+      def run_activity(action, mode, fires_at = nil)
+        state[:event_history] ||= []
+        state[:event_history] << action.name
+        new_data = data.merge(event_name: action.name)
+        action.run(Local.new(new_data, state))
       end
 
       private
