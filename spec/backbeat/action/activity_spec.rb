@@ -17,12 +17,6 @@ describe Backbeat::Action::Activity do
     end
   end
 
-  it "has a name" do
-    action = described_class.new(name: "New Activity")
-
-    expect(action.name).to eq("New Activity")
-  end
-
   it "returns a hash representation of itself" do
     action = described_class.build("Blue", MyActivity, :perform, [1, 2, 3])
 

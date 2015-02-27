@@ -22,12 +22,13 @@ module Backbeat
     end
 
     def self.pack_action(action, mode, fires_at = nil)
+      action_hash = action.to_hash
       {
-        name: action.name,
+        name: action_hash[:name],
         mode: mode,
         fires_at: fires_at,
         client_data: {
-          action: action.to_hash
+          action: action_hash
         }
       }
     end

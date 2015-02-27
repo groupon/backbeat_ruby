@@ -8,13 +8,14 @@ describe Backbeat::Packer do
   context "pack_action" do
     it "returns a the api representation of node data" do
       action = Backbeat::Action::Activity.build("Action", "Klass", :method, args: [])
+      action_hash = action.to_hash
 
       expect(Backbeat::Packer.pack_action(action, :blocking, now)).to eq({
-        name: action.name,
+        name: action_hash[:name],
         mode: :blocking,
         fires_at: now,
         client_data: {
-          action: action.to_hash
+          action: action_hash
         }
       })
     end

@@ -34,7 +34,7 @@ module Backbeat
       def run_activity(action, mode, fires_at = nil)
         event_data = build_event_data(action, mode, fires_at)
         if signal?
-          api.signal_workflow(workflow_id, action.name, event_data)
+          api.signal_workflow(workflow_id, event_data[:name], event_data)
         else
           api.add_child_event(event_id, event_data)
         end

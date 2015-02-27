@@ -3,16 +3,12 @@ require "backbeat/action"
 module Backbeat
   class Action
     class ActiveRecordActivity
-      def self.build(name, object, method, *args)
+      def self.build(name, object, method, args)
         new(name: name, class: object.class, id: object.id, method: method, args: args)
       end
 
       def initialize(args)
         @args = args
-      end
-
-      def name
-        @args[:name]
       end
 
       def run(context)
@@ -34,6 +30,10 @@ module Backbeat
 
       def contextible
         klass.find(id)
+      end
+
+      def name
+        @args[:name]
       end
 
       def klass

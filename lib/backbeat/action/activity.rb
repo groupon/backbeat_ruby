@@ -11,10 +11,6 @@ module Backbeat
         @args = args
       end
 
-      def name
-        @args[:name]
-      end
-
       def run(context)
         Action.new(contextible, method, args).run(context)
       end
@@ -33,6 +29,10 @@ module Backbeat
 
       def contextible
         klass
+      end
+
+      def name
+        @args[:name]
       end
 
       def klass
