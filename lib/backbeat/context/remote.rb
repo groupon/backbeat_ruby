@@ -31,11 +31,16 @@ module Backbeat
         api.complete_workflow(workflow_id)
       end
 
+      def signal_workflow(action, fires_at = nil)
+        event_data = build_event_data(action, :blocking, fires_at)
+        api.signal_workflow(workflow_id, event_data[:name], event_data)
+      end
+
       def run_activity(action, mode, fires_at = nil)
-        event_data = build_event_data(action, mode, fires_at)
         if signal?
-          api.signal_workflow(workflow_id, event_data[:name], event_data)
+          signal_workflow(action, fires_at)
         else
+          event_data = build_event_data(action, mode, fires_at)
           api.add_child_event(event_id, event_data)
         end
       end

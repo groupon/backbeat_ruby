@@ -73,4 +73,12 @@ describe Backbeat::Contextable do
 
     expect(event[:mode]).to eq(:fire_and_forget)
   end
+
+  it "signals the workflow with an action" do
+    Decider.in_context_signal(remote_context, now).decision_one(:one, :two, :three)
+    signal = api.find_workflow_by_id(1)[:signals]["Decider.decision_one"]
+
+    expect(signal[:name]).to eq("Decider.decision_one")
+    expect(signal[:mode]).to eq(:blocking)
+  end
 end

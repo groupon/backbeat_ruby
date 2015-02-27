@@ -28,6 +28,10 @@ module Backbeat
         state[:workflow_complete] = true
       end
 
+      def signal_workflow(action, fires_at = nil)
+        run_activity(action, :blocking, fires_at)
+      end
+
       def run_activity(action, mode, fires_at = nil)
         state[:event_history] ||= []
         action_hash = action.to_hash

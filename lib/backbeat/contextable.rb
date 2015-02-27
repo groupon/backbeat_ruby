@@ -28,6 +28,10 @@ module Backbeat
       in_context(context, { mode: :fire_and_forget, fires_at: fires_at })
     end
 
+    def in_context_signal(context, fires_at = nil)
+      in_context(context, { mode: :blocking, fires_at: fires_at, signal: true })
+    end
+
     private
 
     class ContextProxy
@@ -37,6 +41,7 @@ module Backbeat
         @name = options[:name]
         @mode = options[:mode] || :blocking
         @fires_at = options[:fires_at]
+        @signal = options[:signal]
       end
 
       def method_missing(method, *args)
@@ -46,12 +51,16 @@ module Backbeat
           method,
           args
         )
-        context.run_activity(activity, mode, fires_at)
+        if signal
+          context.signal_workflow(activity, fires_at)
+        else
+          context.run_activity(activity, mode, fires_at)
+        end
       end
 
       private
 
-      attr_reader :contextible, :context, :name, :mode, :fires_at
+      attr_reader :contextible, :context, :name, :mode, :fires_at, :signal
 
       def build_name(method)
         if contextible.is_a?(Class)

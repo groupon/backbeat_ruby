@@ -48,11 +48,11 @@ describe Backbeat::Context::Local do
     end
   end
 
-  context "run_activity" do
+  context "running activities" do
     let(:context) { described_class.new({ event_name: "First Event", workflow_id: 2 }) }
     let(:now) { Time.now }
 
-    it "Runs a workflow locally" do
+    it "runs a workflow locally" do
       action = Backbeat::Action::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
       value, new_context = context.run_activity(action, :blocking)
@@ -60,6 +60,16 @@ describe Backbeat::Context::Local do
       expect(value).to eq(33)
       expect(new_context.state[:event_history]).to eq(["Adding"])
       expect(new_context.state[:events]["Adding"][:statuses].last).to eq(:complete)
+    end
+
+    it "runs the workflow locally on signal_workflow" do
+      action = Backbeat::Action::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
+
+      value, new_context = context.signal_workflow(action, now)
+
+      expect(value).to eq(6)
+      expect(new_context.state[:event_history]).to eq(["MATH"])
+      expect(new_context.state[:events]["MATH"][:statuses].last).to eq(:complete)
     end
   end
 end

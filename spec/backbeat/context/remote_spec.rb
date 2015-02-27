@@ -53,7 +53,7 @@ describe Backbeat::Context::Remote do
     expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
   end
 
-  context "run_activity" do
+  context "running activities" do
     let(:api) {
       Backbeat::MemoryApi.new(
         events: {
@@ -85,17 +85,6 @@ describe Backbeat::Context::Remote do
       )
     end
 
-    it "creates a new workflow if one is not found" do
-      new_data = workflow_data.merge(subject: "New Subject")
-      context = described_class.new(new_data, api)
-
-      context.run_activity(action, :blocking, now)
-
-      expect(api.find_workflow_by_id(6)[:signals]["Fake Action"]).to eq(
-        Backbeat::Packer.pack_action(action, :blocking, now)
-      )
-    end
-
     it "registers a child node if there is an event_id in the workflow data" do
       context = described_class.new({ event_id: 10 }, api)
 
@@ -103,6 +92,27 @@ describe Backbeat::Context::Remote do
 
       expect(api.find_event_by_id(10)[:child_events].first).to eq(
         Backbeat::Packer.pack_action(action, :non_blocking, now)
+      )
+    end
+
+    it "creates a new workflow if one is not found" do
+      new_data = workflow_data.merge(subject: "New Subject")
+      context = described_class.new(new_data, api)
+
+      context.signal_workflow(action)
+
+      expect(api.find_workflow_by_id(6)[:signals]["Fake Action"]).to eq(
+        Backbeat::Packer.pack_action(action, :blocking, nil)
+      )
+    end
+
+    it "signals the workflow with the action" do
+      context = described_class.new(workflow_data, api)
+
+      context.signal_workflow(action, now)
+
+      expect(api.find_workflow_by_id(5)[:signals]["Fake Action"]).to eq(
+        Backbeat::Packer.pack_action(action, :blocking, now)
       )
     end
   end
