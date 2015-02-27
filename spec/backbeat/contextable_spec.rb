@@ -20,7 +20,7 @@ describe Backbeat::Contextable do
     end
   end
 
-  let(:api) { MemoryApi.new({}) }
+  let(:api) { Backbeat::MemoryApi.new({}) }
   let(:remote_context) { Backbeat::Context::Remote.new({ event_id: 1 }, api) }
   let(:now) { Time.now }
 

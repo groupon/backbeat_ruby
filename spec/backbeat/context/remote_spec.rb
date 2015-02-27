@@ -5,7 +5,7 @@ require "backbeat/context/remote"
 
 describe Backbeat::Context::Remote do
   let(:api) {
-    MemoryApi.new(
+    Backbeat::MemoryApi.new(
       events: {
         5 => {},
         6 => {}
@@ -54,7 +54,7 @@ describe Backbeat::Context::Remote do
 
   context "run_activity" do
     let(:api) {
-      MemoryApi.new(
+      Backbeat::MemoryApi.new(
         events: {
           10 => { child_events: [] },
           11 => { child_events: [] }

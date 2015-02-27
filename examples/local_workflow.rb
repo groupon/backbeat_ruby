@@ -72,7 +72,7 @@ decision_data = {
 }
 
 require_relative "../spec/support/memory_api"
-api = MemoryApi.new
+api = Backbeat::MemoryApi.new
 context = Backbeat::Packer.unpack_context(decision_data, api)
 action = Backbeat::Packer.unpack_action(decision_data)
 
