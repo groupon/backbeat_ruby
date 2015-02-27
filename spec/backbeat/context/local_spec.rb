@@ -51,7 +51,7 @@ describe Backbeat::Context::Local do
     let(:now) { Time.now }
 
     it "Runs a workflow locally, now" do
-      action = Backbeat::Actors::Activity.build("Adding", TheActivity, :do_some_addition, 10, 11, 12)
+      action = Backbeat::Actors::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
       value, new_context = context.now.run(action)
 
@@ -64,7 +64,7 @@ describe Backbeat::Context::Local do
 
       it "Returns a #{event_type} registry that runs the action now" do
         registry = context.send(event_type, now)
-        action = Backbeat::Actors::Activity.build("Adding", TheActivity, :do_some_addition, 10, 11, 12)
+        action = Backbeat::Actors::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
         value, context = registry.run(action)
 

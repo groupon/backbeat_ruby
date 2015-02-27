@@ -10,14 +10,15 @@ module Backbeat
 
     def run(context)
       ret_value = nil
-      contextible.with_context(context) do |contextible|
+      contextible.with_context(context) do
         context.processing
         ret_value = contextible.send(method, *args)
         context.complete
       end
       ret_value
-    rescue => e
+    rescue
       context.errored
+      raise
     end
   end
 end

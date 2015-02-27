@@ -4,10 +4,12 @@ class MemoryApi
   end
 
   def events
+    seeds[:events] ||= {}
     seeds[:events]
   end
 
   def workflows
+    seeds[:workflows] ||= {}
     seeds[:workflows]
   end
 
@@ -35,24 +37,25 @@ class MemoryApi
   end
 
   def update_event_status(event_id, status)
-    seeds[:events][event_id] ||= {}
-    seeds[:events][event_id][:status] = status
+    events[event_id] ||= {}
+    events[event_id][:status] = status
   end
 
   def find_all_workflow_events(workflow_id)
-    seeds[:workflows][workflow_id][:events]
+    workflows[workflow_id][:events]
   end
 
   def complete_workflow(workflow_id)
-    seeds[:workflows][workflow_id][:complete] = true
+    workflows[workflow_id][:complete] = true
   end
 
   def add_child_event(event_id, data)
-    seeds[:events][event_id][:child_events] << data
+    events[event_id] ||= { child_events: [] }
+    events[event_id][:child_events] << data
   end
 
   def signal_workflow(id, name, data)
-    seeds[:workflows][id][:signals][name] = data
+    workflows[id][:signals][name] = data
   end
 
   private

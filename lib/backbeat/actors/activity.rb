@@ -3,7 +3,7 @@ require "backbeat/action"
 module Backbeat
   module Actors
     class Activity
-      def self.build(name, klass, method, *args)
+      def self.build(name, klass, method, args)
         new(name: name, class: klass, method: method, args: args)
       end
 

@@ -45,7 +45,7 @@ module Backbeat
       end
 
       def method
-        :call
+        @args[:method]
       end
 
       def args

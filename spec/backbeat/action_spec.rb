@@ -37,9 +37,9 @@ describe Backbeat::Action do
   end
 
   it "sends an error message to the context on error" do
-    action = described_class.new("Blue", MyActivity, [:boom])
+    action = described_class.new(MyActivity, :boom, [])
 
-    action.run(context)
+    expect { action.run(context) }.to raise_error
 
     expect(context.state[:events]["Maths"][:statuses].last).to eq(:errored)
   end

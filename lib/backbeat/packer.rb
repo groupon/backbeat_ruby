@@ -1,6 +1,5 @@
 require "backbeat"
 require "backbeat/actors/activity"
-require "backbeat/actors/command"
 require "backbeat/actors/active_record_activity"
 
 module Backbeat

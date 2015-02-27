@@ -24,7 +24,7 @@ describe Backbeat::Actors::Activity do
   end
 
   it "returns a hash representation of itself" do
-    action = described_class.build("Blue", MyActivity, :perform, 1, 2, 3)
+    action = described_class.build("Blue", MyActivity, :perform, [1, 2, 3])
 
     expect(action.to_hash).to eq({
       type: "Activity",
@@ -36,7 +36,7 @@ describe Backbeat::Actors::Activity do
   end
 
   context "run" do
-    let(:action) { described_class.build("Blue", MyActivity, :perform, 1, 2, 3) }
+    let(:action) { described_class.build("Blue", MyActivity, :perform, [1, 2, 3]) }
 
     let(:context) { Backbeat::Context::Local.new({ event_name: "Blue" }) }
 
@@ -57,9 +57,9 @@ describe Backbeat::Actors::Activity do
     end
 
     it "sends an error message to the context on error" do
-      action = described_class.build("Blue", MyActivity, :boom)
+      action = described_class.build("Blue", MyActivity, :boom, [])
 
-      action.run(context)
+      expect { action.run(context) }.to raise_error
 
       expect(context.state[:events]["Blue"][:statuses].last).to eq(:errored)
     end
