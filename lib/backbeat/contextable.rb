@@ -12,24 +12,24 @@ module Backbeat
       yield
     end
 
-    def in_context(context, options = {})
-      ContextProxy.new(self, context, options)
+    def in_context(new_context, options = {})
+      ContextProxy.new(self, new_context, options)
     end
 
-    def in_context_blocking(context, fires_at = nil)
-      in_context(context, { mode: :blocking, fires_at: fires_at })
+    def in_context_blocking(new_context, fires_at = nil)
+      in_context(new_context, { mode: :blocking, fires_at: fires_at })
     end
 
-    def in_context_non_blocking(context, fires_at = nil)
-      in_context(context, { mode: :non_blocking, fires_at: fires_at })
+    def in_context_non_blocking(new_context, fires_at = nil)
+      in_context(new_context, { mode: :non_blocking, fires_at: fires_at })
     end
 
-    def in_context_fire_forget(context, fires_at = nil)
-      in_context(context, { mode: :fire_and_forget, fires_at: fires_at })
+    def in_context_fire_forget(new_context, fires_at = nil)
+      in_context(new_context, { mode: :fire_and_forget, fires_at: fires_at })
     end
 
-    def in_context_signal(context, fires_at = nil)
-      in_context(context, { mode: :blocking, fires_at: fires_at, signal: true })
+    def in_context_signal(new_context, fires_at = nil)
+      in_context(new_context, { mode: :blocking, fires_at: fires_at, signal: true })
     end
 
     private
