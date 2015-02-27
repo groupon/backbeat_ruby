@@ -16,7 +16,9 @@ module Backbeat
       end
 
       def find_workflow_by_subject(data)
-        http_client.get("/v2/workflows", { query: data })
+        http_client.get("/v2/workflows", { query: data }, {
+          404 => lambda { |response| false }
+        })
       end
 
       def signal_workflow(id, name, data)

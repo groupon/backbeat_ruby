@@ -110,13 +110,13 @@ describe Backbeat::Api do
         expect(workflow).to eq(workflow_data)
       end
 
-      it "raises a not found error if the workflow is not found" do
+      it "returns false if the workflow is not found" do
         expect(client).to receive(:get).with("/v2/workflows", {
           headers: { "Accept" => "application/json"},
           query: workflow_query
         }).and_return({ status: 404 })
 
-        expect { api.find_workflow_by_subject(workflow_query) }.to raise_error Backbeat::Api::NotFoundError
+        expect(api.find_workflow_by_subject(workflow_query)).to eq(false)
       end
     end
 
