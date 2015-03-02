@@ -6,10 +6,10 @@ module Backbeat
 
     def create_workflow(data)
       last_id = workflows.keys.sort.last || 0
-      id = last_id + 1
-      workflow = { signals: {}, subject: data[:subject] }
-      workflows[id] = workflow
-      workflow.merge(id: id)
+      new_id = last_id + 1
+      workflow = { id: new_id, subject: data[:subject] }
+      workflows[new_id] = workflow
+      workflow
     end
 
     def find_workflow_by_id(id)
@@ -28,7 +28,6 @@ module Backbeat
     end
 
     def update_event_status(event_id, status)
-      events[event_id] ||= {}
       events[event_id][:status] = status
     end
 
@@ -41,13 +40,17 @@ module Backbeat
     end
 
     def add_child_event(event_id, data)
-      events[event_id] ||= { child_events: [] }
-      events[event_id][:child_events] << data
+      child_event = data.merge(new_event)
+      events[child_event[:id]] = child_event
+      events[event_id][:child_events] ||= []
+      events[event_id][:child_events] << child_event[:id]
     end
 
     def signal_workflow(id, name, data)
-      workflows[id] ||= { signals: {} }
-      workflows[id][:signals][name] = data
+      child_event = data.merge(new_event)
+      events[child_event[:id]] = child_event
+      workflows[id][:signals] ||= {}
+      workflows[id][:signals][name] = child_event
     end
 
     def find_all_workflow_children(id)
@@ -68,6 +71,18 @@ module Backbeat
     private
 
     attr_reader :seeds
+
+    def new_event
+      { id: next_event_id }
+    end
+
+    def next_event_id
+      last_id = events.keys.sort.last || 0
+      last_id + 1
+    end
+
+    def next_workflow_id
+    end
 
     def events
       seeds[:events] ||= {}

@@ -21,15 +21,18 @@ describe Backbeat::Contextable do
     end
   end
 
-  let(:api) { Backbeat::MemoryApi.new({}) }
+  let(:api) { Backbeat::MemoryApi.new({ events: { 1 => {} } }) }
   let(:remote_context) { Backbeat::Context::Remote.new({ event_id: 1 }, api) }
   let(:now) { Time.now }
 
   it "runs an activity in the set context" do
     Decider.in_context(remote_context, :blocking, now).decision_one(:one, :two, :three)
+    event_id = api.find_event_by_id(1)[:child_events].first
+    event = api.find_event_by_id(event_id)
 
-    expect(api.find_event_by_id(1)[:child_events].first).to eq(
+    expect(event).to eq(
       {
+        id: 2,
         name: "Decider.decision_one",
         mode: :blocking,
         fires_at: now,
@@ -55,21 +58,24 @@ describe Backbeat::Contextable do
 
   it "sets the mode to blocking" do
     Decider.in_context(remote_context).decision_one(:one, :two, :three)
-    event = api.find_event_by_id(1)[:child_events].first
+    event_id = api.find_event_by_id(1)[:child_events].first
+    event = api.find_event_by_id(event_id)
 
     expect(event[:mode]).to eq(:blocking)
   end
 
   it "sets the mode to non_blocking" do
     Decider.in_context(remote_context, :non_blocking).decision_one(:one, :two, :three)
-    event = api.find_event_by_id(1)[:child_events].first
+    event_id = api.find_event_by_id(1)[:child_events].first
+    event = api.find_event_by_id(event_id)
 
     expect(event[:mode]).to eq(:non_blocking)
   end
 
   it "sets the mode to fire_and_forget" do
     Decider.in_context(remote_context, :fire_and_forget).decision_one(:one, :two, :three)
-    event = api.find_event_by_id(1)[:child_events].first
+    event_id = api.find_event_by_id(1)[:child_events].first
+    event = api.find_event_by_id(event_id)
 
     expect(event[:mode]).to eq(:fire_and_forget)
   end
@@ -107,9 +113,12 @@ describe Backbeat::Contextable do
 
     it "runs activities on an findable instance of a class" do
       object.in_context(remote_context).update_attributes({ name: "Lemon" })
+      event_id = api.find_event_by_id(1)[:child_events].first
+      event = api.find_event_by_id(event_id)
 
-      expect(api.find_event_by_id(1)[:child_events].first).to eq(
+      expect(event).to eq(
         {
+          id: 2,
           name: "MyModel#update_attributes",
           mode: :blocking,
           fires_at: nil,

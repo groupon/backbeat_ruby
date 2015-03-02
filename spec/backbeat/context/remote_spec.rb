@@ -75,14 +75,10 @@ describe Backbeat::Context::Remote do
     let(:action) { Backbeat::Action::Activity.new(name: "Fake Action") }
     let(:now) { Time.now }
 
-    it "signals the workflow if there is no event id in the workflow data" do
+    it "raises an error if there is not an event id when running an activity" do
       context = described_class.new(workflow_data, api)
 
-      context.run_activity(action, :blocking, now)
-
-      expect(api.find_workflow_by_id(5)[:signals]["Fake Action"]).to eq(
-        Backbeat::Packer.pack_action(action, :blocking, now)
-      )
+      expect { context.run_activity(action, :blocking, now) }.to raise_error Backbeat::Context::Remote::ContextError
     end
 
     it "registers a child node if there is an event_id in the workflow data" do
@@ -90,29 +86,32 @@ describe Backbeat::Context::Remote do
 
       context.run_activity(action, :non_blocking, now)
 
-      expect(api.find_event_by_id(10)[:child_events].first).to eq(
-        Backbeat::Packer.pack_action(action, :non_blocking, now)
+      event_id = api.find_event_by_id(10)[:child_events].first
+      event = api.find_event_by_id(event_id)
+
+      expect(event).to eq(
+        Backbeat::Packer.pack_action(action, :non_blocking, now).merge(id: 12)
       )
     end
 
-    it "creates a new workflow if one is not found" do
+    it "creates a new workflow if one is not found when signalling" do
       new_data = workflow_data.merge(subject: "New Subject")
       context = described_class.new(new_data, api)
 
       context.signal_workflow(action)
 
       expect(api.find_workflow_by_id(6)[:signals]["Fake Action"]).to eq(
-        Backbeat::Packer.pack_action(action, :blocking, nil)
+        Backbeat::Packer.pack_action(action, :blocking, nil).merge(id: 12)
       )
     end
 
-    it "signals the workflow with the action" do
+    it "signals the workflow with the action when signalling" do
       context = described_class.new(workflow_data, api)
 
       context.signal_workflow(action, now)
 
       expect(api.find_workflow_by_id(5)[:signals]["Fake Action"]).to eq(
-        Backbeat::Packer.pack_action(action, :blocking, now)
+        Backbeat::Packer.pack_action(action, :blocking, now).merge(id: 12)
       )
     end
   end
