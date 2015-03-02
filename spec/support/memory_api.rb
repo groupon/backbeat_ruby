@@ -28,6 +28,7 @@ module Backbeat
     end
 
     def update_event_status(event_id, status)
+      events[event_id] ||= {}
       events[event_id][:status] = status
     end
 
@@ -36,6 +37,7 @@ module Backbeat
     end
 
     def complete_workflow(workflow_id)
+      workflows[workflow_id] ||= {}
       workflows[workflow_id][:complete] = true
     end
 

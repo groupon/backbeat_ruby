@@ -62,19 +62,18 @@ api = Backbeat::MemoryApi.new({ workflows: { 2 => { signals: {} }}})
 
 # Send a signal
 
-starting_context = Backbeat::Packer.unpack_context({ workflow_id: 2 }, api)
-
-AddSomething.in_context(starting_context, :signal).add_3(1, 2, 3, 50)
+Backbeat::Packer.unpack_context({ workflow_id: 2 }, api) do |context|
+  AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)
+end
 
 # Receive the decision data
 
 decision_data = api.find_workflow_by_id(2)[:signals]["AddSomething.add_3"]
 
-# Build the decision
-context = Backbeat::Packer.unpack_context(decision_data, api)
-action = Backbeat::Packer.unpack_action(decision_data)
-
 # Run the activity
-action.run(context)
+
+Backbeat::Packer.unpack(decision_data, api) do |context, action|
+  action.run(context)
+end
 
 p api.find_workflow_by_id(2)

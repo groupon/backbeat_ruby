@@ -4,13 +4,21 @@ require "backbeat/action/findable_activity"
 
 module Backbeat
   class Packer
+    def self.unpack(data, api = nil)
+      context = unpack_context(data, api)
+      action = unpack_action(data)
+      yield context, action
+    end
+
     def self.unpack_context(data, api = nil)
-      Backbeat.context.new({
+      context = Backbeat.context.new({
         workflow_id: data[:workflow_id],
         event_id: data[:id],
         subject: data[:subject],
         decider: data[:decider]
       }, api)
+      yield context if block_given?
+      context
     end
 
     def self.unpack_action(data)
