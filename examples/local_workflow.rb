@@ -49,18 +49,20 @@ end
 # Using a remote context
 ############################
 
-Backbeat.configure do |config|
-  config.context = Backbeat::Context::Remote
-end
-
-# Send a signal
 # Use the memory api here just for testing
 require_relative "../spec/support/memory_api"
 api = Backbeat::MemoryApi.new({ workflows: { 2 => { signals: {} }}})
 
+Backbeat.configure do |config|
+  config.context = Backbeat::Context::Remote
+  config.api = api
+end
+
+# Send a signal
+
 puts "\nSimulating signalling the workflow"
 
-Backbeat::Packer.unpack_context({ workflow_id: 2 }, api) do |context|
+Backbeat::Packer.unpack_context({ workflow_id: 2 }) do |context|
   AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)
 end
 
@@ -73,7 +75,7 @@ decision_data = api.find_workflow_by_id(2)[:signals]["AddSomething.add_3"]
 
 # Run the activity
 
-Backbeat::Packer.unpack(decision_data, api) do |context, action|
+Backbeat::Packer.unpack(decision_data) do |context, action|
   action.run(context)
 end
 

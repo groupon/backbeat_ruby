@@ -3,9 +3,9 @@ module Backbeat
     class Local
       attr_reader :state
 
-      def initialize(data, state = nil)
+      def initialize(data, state = {})
         @data = data
-        @state = state || {}
+        @state = state
       end
 
       def processing

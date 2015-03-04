@@ -1,14 +1,11 @@
-require "backbeat"
-require "backbeat/api"
-require "backbeat/api/http_client"
 require "backbeat/packer"
 
 module Backbeat
   module Context
     class Remote
-      def initialize(data, api = nil)
+      def initialize(data, api)
         @data = data
-        @api = api || backbeat_api
+        @api = api
       end
 
       def processing
@@ -65,13 +62,6 @@ module Backbeat
 
       def context_error(message)
         raise ContextError.new(message)
-      end
-
-      def backbeat_api
-        Api.new(Api::HttpClient.new(
-          Backbeat.config.host,
-          Backbeat.config.client_id
-        ))
       end
     end
   end

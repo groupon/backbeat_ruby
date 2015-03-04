@@ -6,11 +6,16 @@ describe Backbeat::Packer do
   let(:now) { Time.now }
   let(:api) { Backbeat::MemoryApi.new }
 
+  before do
+    Backbeat.configure do |config|
+      config.context = Backbeat::Context::Remote
+      config.api = api
+    end
+  end
+
   context "unpack_context" do
     it "returns a new instance of the configured context type" do
-      Backbeat.config.context = Backbeat::Context::Remote
-
-      Backbeat::Packer.unpack_context({ workflow_id: 1 }, api) do |context|
+      Backbeat::Packer.unpack_context({ workflow_id: 1 }) do |context|
         context.complete_workflow!
       end
 
@@ -57,14 +62,12 @@ describe Backbeat::Packer do
     end
 
     it "yields the unpacked context and action" do
-      Backbeat.config.context = Backbeat::Context::Remote
-
       action = Backbeat::Action::Activity.build("Action", MyArray, :new, [5])
       action_data = Backbeat::Packer.pack_action(action, :fire_and_forget, now)
 
       decision_data = action_data.merge(workflow_id: 1, id: 2)
 
-      Backbeat::Packer.unpack(decision_data, api) do |context, action|
+      Backbeat::Packer.unpack(decision_data) do |context, action|
         expect(action.run(context).value).to eq(Array.new(5))
       end
     end
