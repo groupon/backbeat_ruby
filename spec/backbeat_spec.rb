@@ -51,10 +51,18 @@ describe Backbeat do
     expect(Backbeat.api).to eq({})
   end
 
-  it "throws an error if the default context is not configured" do
+  it "raises an error if the context is unknown" do
+    Backbeat.configure do |config|
+      config.context = Backbeat::Context
+    end
+
+    expect { Backbeat.api }.to raise_error Backbeat::ConfigurationError
+  end
+
+  it "raises an error if the default context is not configured" do
     Backbeat.configure { |_| }
 
-    expect { Backbeat.context }.to raise_error Backbeat::ContextNotConfiguredError
+    expect { Backbeat.context }.to raise_error Backbeat::ConfigurationError
 
     Backbeat.configure do |config|
       config.context = Backbeat::Context::Local

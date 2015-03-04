@@ -13,6 +13,8 @@ module Backbeat
     attr_accessor :api
   end
 
+  class ConfigurationError < StandardError; end
+
   def self.configure
     @config = Config.new
     yield config
@@ -22,13 +24,11 @@ module Backbeat
     @config ||= Config.new
   end
 
-  class ContextNotConfiguredError < StandardError; end
-
   def self.context
     if config.context
       config.context
     else
-      raise ContextNotConfiguredError
+      raise ConfigurationError.new("Context not configured")
     end
   end
 
@@ -39,14 +39,11 @@ module Backbeat
   def self.default_api
     case context.name
     when Context::Remote.name
-      Api.new(
-        Api::HttpClient.new(
-          Backbeat.config.host,
-          Backbeat.config.client_id
-        )
-      )
+      Api.new(Api::HttpClient.new(config.host, config.client_id))
     when Context::Local.name
       {}
+    else
+      raise ConfigurationError.new("Unknown default api for context #{context}")
     end
   end
 
