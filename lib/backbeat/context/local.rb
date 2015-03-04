@@ -1,10 +1,8 @@
 module Backbeat
   module Context
     class Local
-      attr_reader :state
-
-      def initialize(data, state = {})
-        @data = data
+      def initialize(current_node, state = {})
+        @current_node = current_node
         @state = state
       end
 
@@ -21,11 +19,11 @@ module Backbeat
       end
 
       def event_history
-        state[:event_history]
+        state[:event_history] ||= []
       end
 
       def complete_workflow!
-        state[:workflow_complete] = true
+        event_history << { name: :workflow_complete }
       end
 
       def signal_workflow(action, fires_at = nil)
@@ -33,26 +31,29 @@ module Backbeat
       end
 
       def run_activity(action, mode, fires_at = nil)
-        state[:event_history] ||= []
         action_hash = action.to_hash
         action_name = action_hash[:name]
-        state[:event_history] << action_name
-        new_data = data.merge(event_name: action_name)
-        action.run(Local.new(new_data, state))
+        event_history << { name: action_name, action: action_hash }
+        new_node = current_node.merge(event_name: action_name)
+        action.run(Local.new(new_node, state))
       end
 
       private
 
-      attr_reader :data
+      attr_reader :current_node, :state
 
       def event_name
-        data[:event_name]
+        current_node[:event_name]
+      end
+
+      def event_record
+        @event_record ||= event_history.last
       end
 
       def add_event_status(status)
-        state[:events] ||= {}
-        state[:events][event_name] ||= { statuses: [] }
-        state[:events][event_name][:statuses] << status
+        event_history << { name: event_name } if event_history.empty?
+        event_record[:statuses] ||= []
+        event_record[:statuses] << status
       end
     end
   end

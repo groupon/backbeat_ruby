@@ -41,14 +41,18 @@ describe Backbeat::Action::Activity do
 
     it "sends a processing message to the context" do
       action.run(context)
+      event = context.event_history.last
 
-      expect(context.state[:events]["Blue"][:statuses].first).to eq(:processing)
+      expect(event[:name]).to eq("Blue")
+      expect(event[:statuses].first).to eq(:processing)
     end
 
     it "sends a complete message to the context" do
       action.run(context)
+      event = context.event_history.last
 
-      expect(context.state[:events]["Blue"][:statuses].last).to eq(:complete)
+      expect(event[:name]).to eq("Blue")
+      expect(event[:statuses].last).to eq(:complete)
     end
 
     it "sends an error message to the context on error" do
@@ -56,7 +60,10 @@ describe Backbeat::Action::Activity do
 
       expect { action.run(context) }.to raise_error
 
-      expect(context.state[:events]["Blue"][:statuses].last).to eq(:errored)
+      event = context.event_history.last
+
+      expect(event[:name]).to eq("Blue")
+      expect(event[:statuses].last).to eq(:errored)
     end
   end
 end

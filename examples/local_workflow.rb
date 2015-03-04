@@ -94,6 +94,6 @@ Backbeat::Packer.unpack_context({ workflow_id: 2 }) do |context|
 
   AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)
 
-  puts "Local workflow state"
-  PP.pp context.state
+  puts "Local workflow history"
+  PP.pp context.event_history
 end

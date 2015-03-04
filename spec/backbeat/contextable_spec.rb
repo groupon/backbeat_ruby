@@ -53,7 +53,7 @@ describe Backbeat::Contextable do
     result = Decider.decision_one(1, 2, 3)
 
     expect(result).to eq(3)
-    expect(Decider.context.event_history).to eq(["DoActivity.do_something"])
+    expect(Decider.context.event_history.last[:name]).to eq("DoActivity.do_something")
   end
 
   it "sets the mode to blocking" do
@@ -141,7 +141,7 @@ describe Backbeat::Contextable do
         result = object.in_context(context).update_attributes({ name: "Orange" })
 
         expect(result.name).to eq("Orange")
-        expect(context.event_history).to eq(["MyModel#update_attributes"])
+        expect(context.event_history.last[:name]).to eq("MyModel#update_attributes")
       end
     end
 
@@ -151,7 +151,7 @@ describe Backbeat::Contextable do
 
         expect(result.name).to eq("A findable object")
         expect(result.id).to eq(100)
-        expect(context.event_history).to eq(["MyModel.find"])
+        expect(context.event_history.last[:name]).to eq("MyModel.find")
       end
     end
   end

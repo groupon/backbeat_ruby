@@ -75,7 +75,7 @@ describe Backbeat do
     Backbeat.local do |context|
       context.complete_workflow!
 
-      expect(context.state[:workflow_complete]).to eq(true)
+      expect(context.event_history.last[:name]).to eq(:workflow_complete)
     end
   end
 end

@@ -1,29 +1,9 @@
 require "spec_helper"
+require "backbeat/contextable"
 require "backbeat/action/activity"
 require "backbeat/context/local"
 
 describe Backbeat::Context::Local do
-
-  it "marks an event as processing" do
-    context = described_class.new({ event_name: "First Event" })
-    context.processing
-
-    expect(context.state[:events]["First Event"][:statuses].last).to eq(:processing)
-  end
-
-  it "marks an event as complete" do
-    context = described_class.new({ event_name: "First Event" })
-    context.complete
-
-    expect(context.state[:events]["First Event"][:statuses].last).to eq(:complete)
-  end
-
-  it "marks an event as errored" do
-    context = described_class.new({ event_name: "First Event" })
-    context.errored
-
-    expect(context.state[:events]["First Event"][:statuses].last).to eq(:errored)
-  end
 
   it "returns the workflow event history" do
     context = described_class.new({ event_name: "First Event" }, { event_history: [:one] })
@@ -32,11 +12,36 @@ describe Backbeat::Context::Local do
     expect(history).to eq([:one])
   end
 
+  it "marks an event as processing" do
+    context = described_class.new({ event_name: "First Event" })
+    context.processing
+
+    event = context.event_history.first
+    expect(event[:name]).to eq("First Event")
+    expect(event[:statuses]).to eq([:processing])
+  end
+
+  it "marks an event as complete" do
+    context = described_class.new({ event_name: "First Event" })
+    context.complete
+
+    event = context.event_history.first
+    expect(event[:statuses]).to eq([:complete])
+  end
+
+  it "marks an event as errored" do
+    context = described_class.new({ event_name: "First Event" })
+    context.errored
+
+    event = context.event_history.first
+    expect(event[:statuses]).to eq([:errored])
+  end
+
   it "completes a workflow" do
     context = described_class.new({ event_name: "First Event" })
     context.complete_workflow!
 
-    expect(context.state[:workflow_complete]).to eq(true)
+    expect(context.event_history.last[:name]).to eq(:workflow_complete)
   end
 
   class TheActivity
@@ -56,20 +61,24 @@ describe Backbeat::Context::Local do
       action = Backbeat::Action::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
       value, new_context = context.run_activity(action, :blocking)
+      event = context.event_history.last
 
       expect(value).to eq(33)
-      expect(new_context.state[:event_history]).to eq(["Adding"])
-      expect(new_context.state[:events]["Adding"][:statuses].last).to eq(:complete)
+      expect(event[:name]).to eq("Adding")
+      expect(event[:action]).to eq(action.to_hash)
+      expect(event[:statuses].last).to eq(:complete)
     end
 
     it "runs the workflow locally on signal_workflow" do
       action = Backbeat::Action::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
 
       value, new_context = context.signal_workflow(action, now)
+      event = context.event_history.last
 
       expect(value).to eq(6)
-      expect(new_context.state[:event_history]).to eq(["MATH"])
-      expect(new_context.state[:events]["MATH"][:statuses].last).to eq(:complete)
+      expect(event[:name]).to eq("MATH")
+      expect(event[:action]).to eq(action.to_hash)
+      expect(event[:statuses].last).to eq(:complete)
     end
   end
 end

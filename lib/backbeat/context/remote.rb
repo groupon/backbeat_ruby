@@ -3,8 +3,8 @@ require "backbeat/packer"
 module Backbeat
   module Context
     class Remote
-      def initialize(data, api)
-        @data = data
+      def initialize(current_node, api)
+        @current_node = current_node
         @api = api
       end
 
@@ -21,7 +21,7 @@ module Backbeat
       end
 
       def event_history
-        api.find_all_workflow_events(data[:workflow_id])
+        api.find_all_workflow_events(workflow_id)
       end
 
       def complete_workflow!
@@ -40,18 +40,18 @@ module Backbeat
 
       private
 
-      attr_reader :api, :data
+      attr_reader :api, :current_node
 
       def event_id
-        data[:event_id] || context_error("No event id present in current context")
+        current_node[:event_id] || context_error("No event id present in current context")
       end
 
       def workflow_id
-        @workflow_id ||= data[:workflow_id] || get_workflow_for_subject[:id]
+        @workflow_id ||= current_node[:workflow_id] || get_workflow_for_subject[:id]
       end
 
       def get_workflow_for_subject
-        api.find_workflow_by_subject(data) || api.create_workflow(data)
+        api.find_workflow_by_subject(current_node) || api.create_workflow(current_node)
       end
 
       def build_event_data(action, mode, fires_at)
