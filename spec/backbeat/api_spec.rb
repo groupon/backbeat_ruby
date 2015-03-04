@@ -4,7 +4,7 @@ require "backbeat/api/errors"
 require "support/mock_http_client"
 
 describe Backbeat::Api do
-  let(:client) { MockHttpClient.new }
+  let(:client) { Backbeat::MockHttpClient.new }
   let(:api) { Backbeat::Api.new(client) }
 
   context "workflows" do

@@ -1,10 +1,16 @@
-class MockHttpClient
-  def get(path, options = {})
-  end
+require "surrogate"
 
-  def post(path, data, options = {})
-  end
+module Backbeat
+  class MockHttpClient
+    Surrogate.endow self
 
-  def put(path, data, options = {})
+    define(:get) do |path, options = {}|
+    end
+
+    define(:post) do |path, data, options = {}|
+    end
+
+    define(:put) do |path, data, options = {}|
+    end
   end
 end

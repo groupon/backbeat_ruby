@@ -1,4 +1,4 @@
-require 'surrogate'
+require "surrogate"
 
 module Backbeat
   class MockApi
