@@ -40,10 +40,54 @@ describe Backbeat::Packer do
   end
 
   context "unpack_action" do
+    let(:action) {
+      Backbeat::Action::Activity.build("Action name", Array, :method, [])
+    }
+
     it "returns the action object specified in the action type with the action data" do
-      action = Backbeat::Action::Activity.build("Action", "Klass", :method, [])
-      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget, now)
-      unpacked_action = Backbeat::Packer.unpack_action(action_data)
+      unpacked_action = Backbeat::Packer.unpack_action({
+        client_data: {
+          action: {
+            name: "Action name",
+            type: "Activity",
+            class: Array,
+            method: :method,
+            args: []
+          }
+        }
+      })
+
+      expect(unpacked_action.to_hash).to eq(action.to_hash)
+    end
+
+    it "resolves the class name of the action" do
+      unpacked_action = Backbeat::Packer.unpack_action({
+        client_data: {
+          action: {
+            name: "Action name",
+            type: "Activity",
+            class: "Array",
+            method: :method,
+            args: []
+          }
+        }
+      })
+
+      expect(unpacked_action.to_hash).to eq(action.to_hash)
+    end
+
+    it "symbolizes the method name" do
+      unpacked_action = Backbeat::Packer.unpack_action({
+        client_data: {
+          action: {
+            name: "Action name",
+            type: "Activity",
+            class: "Array",
+            method: "method",
+            args: []
+          }
+        }
+      })
 
       expect(unpacked_action.to_hash).to eq(action.to_hash)
     end

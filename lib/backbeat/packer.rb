@@ -11,20 +11,22 @@ module Backbeat
     end
 
     def self.unpack_context(data)
-      context = Backbeat.context.new({
+      context_data = {
         workflow_id: data[:workflow_id],
         event_id: data[:id],
         subject: data[:subject],
         decider: data[:decider]
-      }, Backbeat.api)
+      }
+      context = Backbeat.context.new(context_data, Backbeat.api)
       yield context if block_given?
       context
     end
 
     def self.unpack_action(data)
-      action_type = data[:client_data][:action][:type]
-      action_klass = Action.const_get(action_type)
       action_data = data[:client_data][:action]
+      action_data[:class] = Object.const_get(action_data[:class].to_s)
+      action_data[:method] = action_data[:method].to_sym
+      action_klass = Action.const_get(action_data[:type])
       action_klass.new(action_data)
     end
 

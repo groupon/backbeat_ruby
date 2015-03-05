@@ -1,3 +1,6 @@
+require "multi_json"
+require "backbeat/packer"
+
 module Backbeat
   module Context
     class Local
@@ -35,12 +38,22 @@ module Backbeat
         action_name = action_hash[:name]
         event_history << { name: action_name, action: action_hash }
         new_node = current_node.merge(event_name: action_name)
-        action.run(Local.new(new_node, state))
+        new_action = jsonify_action(action, mode, fires_at)
+        new_action.run(Local.new(new_node, state))
       end
 
       private
 
       attr_reader :current_node, :state
+
+      def jsonify_action(action, mode, fires_at)
+        Packer.unpack_action(
+          MultiJson.load(
+            MultiJson.dump(Packer.pack_action(action, mode, fires_at)),
+            symbolize_keys: true
+          )
+        )
+      end
 
       def event_name
         current_node[:event_name]

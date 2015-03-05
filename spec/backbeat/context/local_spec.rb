@@ -51,6 +51,10 @@ describe Backbeat::Context::Local do
       answer = a + b + c
       [answer, context]
     end
+
+    def self.return_the_arg(arg)
+      arg
+    end
   end
 
   context "running activities" do
@@ -79,6 +83,14 @@ describe Backbeat::Context::Local do
       expect(event[:name]).to eq("MATH")
       expect(event[:action]).to eq(action.to_hash)
       expect(event[:statuses].last).to eq(:complete)
+    end
+
+    it "json parses the action arguments to ensure proper expectations during testing" do
+      action = Backbeat::Action::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
+
+      value, new_context = context.run_activity(action, :blocking)
+
+      expect(value).to eq("orange")
     end
   end
 end

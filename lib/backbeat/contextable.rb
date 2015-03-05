@@ -27,7 +27,7 @@ module Backbeat
       def initialize(contextible, context, options)
         @contextible = contextible
         @context = context
-        @mode = options[:mode] || :blocking
+        @mode = options[:mode]
         @fires_at = options[:fires_at]
       end
 
