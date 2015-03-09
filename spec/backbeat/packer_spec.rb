@@ -96,23 +96,21 @@ describe Backbeat::Packer do
   context "unpack" do
 
     class MyArray
-      extend Backbeat::Contextable
+      include Backbeat::Contextable
 
-      attr_reader :value
-
-      def initialize(n)
-        @value = Array.new(n)
+      def build(n)
+        Array.new(n)
       end
     end
 
     it "yields the unpacked context and action" do
-      action = Backbeat::Action::Activity.build("Action", MyArray, :new, [5])
+      action = Backbeat::Action::Activity.build("Action", MyArray, :build, [5])
       action_data = Backbeat::Packer.pack_action(action, :fire_and_forget, now)
 
       decision_data = action_data.merge(workflow_id: 1, id: 2)
 
       Backbeat::Packer.unpack(decision_data) do |context, action|
-        expect(action.run(context).value).to eq(Array.new(5))
+        expect(action.run(context)).to eq(Array.new(5))
       end
     end
   end

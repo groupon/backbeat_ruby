@@ -45,14 +45,14 @@ describe Backbeat::Context::Local do
   end
 
   class TheActivity
-    extend Backbeat::Contextable
+    include Backbeat::Contextable
 
-    def self.do_some_addition(a, b, c)
+    def do_some_addition(a, b, c)
       answer = a + b + c
       [answer, context]
     end
 
-    def self.return_the_arg(arg)
+    def return_the_arg(arg)
       arg
     end
   end

@@ -6,13 +6,13 @@ require "backbeat/action/activity"
 describe Backbeat::Action::Activity do
 
   class MyActivity
-    extend Backbeat::Contextable
+    include Backbeat::Contextable
 
-    def self.boom
+    def boom
       raise
     end
 
-    def self.perform(a, b, c)
+    def perform(a, b, c)
       a + b + c
     end
   end

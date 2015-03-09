@@ -5,20 +5,20 @@ require "backbeat/action"
 describe Backbeat::Action do
 
   class MyContextible
-    extend Backbeat::Contextable
+    include Backbeat::Contextable
 
-    def self.boom
+    def boom
       raise
     end
 
-    def self.perform(a, b, c)
+    def perform(a, b, c)
       a + b + c
     end
   end
 
   let(:context) { Backbeat::Context::Local.new({ event_name: "Maths" }) }
 
-  let(:action) { described_class.new(MyContextible, :perform, [1, 2, 3]) }
+  let(:action) { described_class.new(MyContextible.new, :perform, [1, 2, 3]) }
 
   it "calls the method on the contextible object with the arguments" do
     expect(action.run(context)).to eq(6)
@@ -41,7 +41,7 @@ describe Backbeat::Action do
   end
 
   it "sends an error message to the context on error" do
-    action = described_class.new(MyActivity, :boom, [])
+    action = described_class.new(MyContextible, :boom, [])
 
     expect { action.run(context) }.to raise_error
 

@@ -6,17 +6,17 @@ require "backbeat/contextable"
 describe Backbeat::Contextable do
 
   class DoActivity
-    extend Backbeat::Contextable
+    include Backbeat::Contextable
 
-    def self.do_something(x, y)
+    def do_something(x, y)
       x + y
     end
   end
 
   class Decider
-    extend Backbeat::Contextable
+    include Backbeat::Contextable
 
-    def self.decision_one(a, b, c)
+    def decision_one(a, b, c)
       DoActivity.in_context(context, :blocking).do_something(1, 2)
     end
   end
@@ -50,10 +50,11 @@ describe Backbeat::Contextable do
   end
 
   it "defaults to a local context if the context is not already set" do
-    result = Decider.decision_one(1, 2, 3)
+    decider = Decider.new
+    result = decider.decision_one(1, 2, 3)
 
     expect(result).to eq(3)
-    expect(Decider.context.event_history.last[:name]).to eq("DoActivity.do_something")
+    expect(decider.context.event_history.last[:name]).to eq("DoActivity.do_something")
   end
 
   it "sets the mode to blocking" do
@@ -142,16 +143,6 @@ describe Backbeat::Contextable do
 
         expect(result.name).to eq("Orange")
         expect(context.event_history.last[:name]).to eq("MyModel#update_attributes")
-      end
-    end
-
-    it "extends contextable to the model class" do
-      Backbeat.local do |context|
-        result = MyModel.in_context(context).find(100)
-
-        expect(result.name).to eq("A findable object")
-        expect(result.id).to eq(100)
-        expect(context.event_history.last[:name]).to eq("MyModel.find")
       end
     end
   end

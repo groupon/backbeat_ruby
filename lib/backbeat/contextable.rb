@@ -4,6 +4,21 @@ require "backbeat/context/local"
 
 module Backbeat
   module Contextable
+
+    module InContext
+      def in_context(new_context, mode = :blocking, fires_at = nil)
+        ContextProxy.new(self, new_context, { mode: mode, fires_at: fires_at })
+      end
+
+      def action
+        Action::Activity
+      end
+    end
+
+    def self.included(klass)
+      klass.extend(InContext)
+    end
+
     def context
       @context ||= Context::Local.new({})
     end
@@ -11,14 +26,6 @@ module Backbeat
     def with_context(context)
       @context = context
       yield
-    end
-
-    def in_context(new_context, mode = :blocking, fires_at = nil)
-      ContextProxy.new(self, new_context, { mode: mode, fires_at: fires_at })
-    end
-
-    def action
-      Action::Activity
     end
 
     private
@@ -61,10 +68,7 @@ module Backbeat
 
   module ContextableModel
     include Contextable
-
-    def self.included(klass)
-      klass.extend(Contextable)
-    end
+    include Contextable::InContext
 
     def action
       Action::FindableActivity

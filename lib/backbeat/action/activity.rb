@@ -28,7 +28,7 @@ module Backbeat
       private
 
       def contextible
-        klass
+        klass.new
       end
 
       def name
