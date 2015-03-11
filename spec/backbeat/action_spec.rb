@@ -37,7 +37,7 @@ describe Backbeat::Action do
     event = context.event_history.last
 
     expect(event[:name]).to eq("Maths")
-    expect(event[:statuses].last).to eq(:complete)
+    expect(event[:statuses].last).to eq(:completed)
   end
 
   it "sends an error message to the context on error" do

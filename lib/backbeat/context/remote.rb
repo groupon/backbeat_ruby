@@ -13,7 +13,7 @@ module Backbeat
       end
 
       def complete
-        api.update_event_status(event_id, :complete)
+        api.update_event_status(event_id, :completed)
       end
 
       def errored

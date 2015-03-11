@@ -14,7 +14,7 @@ module Backbeat
       end
 
       def complete
-        add_event_status(:complete)
+        add_event_status(:completed)
       end
 
       def errored

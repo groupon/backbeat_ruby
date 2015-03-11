@@ -29,7 +29,7 @@ describe Backbeat::Context::Remote do
     context = described_class.new({ event_id: 6 }, api)
     context.complete
 
-    expect(api.find_event_by_id(6)[:status]).to eq(:complete)
+    expect(api.find_event_by_id(6)[:status]).to eq(:completed)
   end
 
   it "marks an event as errored" do

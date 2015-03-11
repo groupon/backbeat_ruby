@@ -26,7 +26,7 @@ describe Backbeat::Context::Local do
     context.complete
 
     event = context.event_history.first
-    expect(event[:statuses]).to eq([:complete])
+    expect(event[:statuses]).to eq([:completed])
   end
 
   it "marks an event as errored" do
@@ -70,7 +70,7 @@ describe Backbeat::Context::Local do
       expect(value).to eq(33)
       expect(event[:name]).to eq("Adding")
       expect(event[:action]).to eq(action.to_hash)
-      expect(event[:statuses].last).to eq(:complete)
+      expect(event[:statuses].last).to eq(:completed)
     end
 
     it "runs the workflow locally on signal_workflow" do
@@ -82,7 +82,7 @@ describe Backbeat::Context::Local do
       expect(value).to eq(6)
       expect(event[:name]).to eq("MATH")
       expect(event[:action]).to eq(action.to_hash)
-      expect(event[:statuses].last).to eq(:complete)
+      expect(event[:statuses].last).to eq(:completed)
     end
 
     it "json parses the action arguments to ensure proper expectations during testing" do
