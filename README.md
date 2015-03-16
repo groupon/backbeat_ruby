@@ -59,7 +59,7 @@ Continue the workflow from your app's activity endpoint:
 
 ```ruby
 
-get "/perform_activity" do
+post "/perform_activity" do
   Backbeat::Packer.unpack(params) do |context, action|
     action.run(context)
   end
