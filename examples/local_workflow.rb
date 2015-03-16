@@ -51,7 +51,7 @@ end
 
 # Use the memory api here just for testing
 require_relative "../spec/support/memory_api"
-api = Backbeat::MemoryApi.new({ workflows: { 2 => { signals: {} }}})
+api = Backbeat::MemoryApi.new
 
 Backbeat.configure do |config|
   config.context = Backbeat::Context::Remote
@@ -62,16 +62,18 @@ end
 
 puts "\nSimulating signalling the workflow"
 
-Backbeat::Packer.unpack_context({ workflow_id: 2 }) do |context|
+workflow_data = { decider: "Adding something", subject: "a subject" }
+
+Backbeat::Packer.unpack_context(workflow_data) do |context|
   AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)
 end
 
 puts "Remote workflow state"
-PP.pp api.find_workflow_by_id(2)
+PP.pp api.find_workflow_by_id(1)
 
 # Receive the decision data
 
-decision_data = api.find_workflow_by_id(2)[:signals]["AddSomething.add_3"]
+decision_data = api.find_workflow_by_id(1)[:signals]["AddSomething.add_3"]
 
 # Run the activity
 
@@ -89,7 +91,7 @@ end
 
 # Sending a signal runs the complete workflow
 
-Backbeat::Packer.unpack_context({ workflow_id: 2 }) do |context|
+Backbeat::Packer.unpack_context(workflow_data) do |context|
   puts "\nRunning the workflow locally"
 
   AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)
