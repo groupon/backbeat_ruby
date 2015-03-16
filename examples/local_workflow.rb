@@ -1,6 +1,5 @@
 $: << File.expand_path("../../lib", __FILE__)
 
-require "pp"
 require "backbeat"
 
 class SubtractSomething
@@ -36,6 +35,8 @@ end
 ############################
 # Using an explicit local context
 ############################
+
+require "pp"
 
 Backbeat.local do |context|
   puts "Testing in a local context"
