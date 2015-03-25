@@ -39,6 +39,14 @@ describe Backbeat::Context::Remote do
     expect(api.find_event_by_id(6)[:status]).to eq(:errored)
   end
 
+  it "marks an event and previous events as deactivated" do
+    context = described_class.new({ event_id: 6 }, api)
+    context.deactivated
+
+    expect(api.find_event_by_id(5)[:status]).to eq(:deactivated)
+    expect(api.find_event_by_id(6)[:status]).to eq(:deactivated)
+  end
+
   it "returns the workflow event history" do
     context = described_class.new({ event_id: 6, workflow_id: 1 }, api)
     history = context.event_history

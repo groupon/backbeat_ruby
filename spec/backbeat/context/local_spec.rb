@@ -29,6 +29,18 @@ describe Backbeat::Context::Local do
     expect(event[:statuses]).to eq([:completed])
   end
 
+  it "marks an event and previous events as deactivated" do
+    context = described_class.new(
+      { event_name: "Second Event" },
+      { event_history: [{ name: "First Event", statuses: [] }] }
+    )
+    context.deactivated
+
+    context.event_history.each do |event|
+      expect(event[:statuses]).to eq([:deactivated])
+    end
+  end
+
   it "marks an event as errored" do
     context = described_class.new({ event_name: "First Event" })
     context.errored

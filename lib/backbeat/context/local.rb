@@ -21,6 +21,10 @@ module Backbeat
         add_event_status(:errored)
       end
 
+      def deactivated
+        add_event_status(:deactivated)
+      end
+
       def event_history
         state[:event_history] ||= []
       end
@@ -60,13 +64,26 @@ module Backbeat
       end
 
       def event_record
-        @event_record ||= event_history.last
+        @event_record ||= get_current_event_record
+      end
+
+      def get_current_event_record
+        if event = event_history.find { |event| event[:name] == event_name }
+          event
+        else
+          new_event = { name: event_name }
+          event_history << new_event
+          new_event
+        end
       end
 
       def add_event_status(status)
-        event_history << { name: event_name } if event_history.empty?
         event_record[:statuses] ||= []
-        event_record[:statuses] << status
+        if status == :deactivated
+          event_history.each { |event| event[:statuses] << :deactivated }
+        else
+          event_record[:statuses] << status
+        end
       end
     end
   end

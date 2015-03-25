@@ -30,6 +30,11 @@ module Backbeat
     def update_event_status(event_id, status)
       events[event_id] ||= {}
       events[event_id][:status] = status
+      if status == :deactivated
+        events.each do |event_id, event_data|
+          event_data[:status] = :deactivated
+        end
+      end
     end
 
     def find_all_workflow_events(workflow_id)

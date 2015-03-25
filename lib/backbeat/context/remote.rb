@@ -20,6 +20,10 @@ module Backbeat
         api.update_event_status(event_id, :errored)
       end
 
+      def deactivated
+        api.update_event_status(event_id, :deactivated)
+      end
+
       def event_history
         api.find_all_workflow_events(workflow_id)
       end
