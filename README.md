@@ -8,6 +8,12 @@ Ruby client for [Backbeat](https://github.groupondev.com/finance-engineering/bac
 $ rspec
 ```
 
+## Running the examples
+
+```bash
+$ ruby examples/local_workflow.rb
+```
+
 ## Usage
 
 Configure:
