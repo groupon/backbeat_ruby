@@ -77,11 +77,9 @@ PP.pp api.find_workflow_by_id(1)
 
 decision_data = api.find_workflow_by_id(1)[:signals]["AddSomething.add_3"]
 
-# Run the activity
+# Run the activity by continuing the workflow
 
-Backbeat::Packer.unpack(decision_data) do |context, action|
-  action.run(context)
-end
+Backbeat::Packer.continue(decision_data)
 
 ############################
 # Using a local context

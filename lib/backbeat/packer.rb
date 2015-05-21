@@ -4,10 +4,10 @@ require "backbeat/action/findable_activity"
 
 module Backbeat
   class Packer
-    def self.unpack(data)
-      context = unpack_context(data)
-      action = unpack_action(data)
-      yield context, action
+    def self.continue(context_data)
+      context = unpack_context(context_data)
+      action = unpack_action(context_data)
+      action.run(context)
     end
 
     def self.unpack_context(data)

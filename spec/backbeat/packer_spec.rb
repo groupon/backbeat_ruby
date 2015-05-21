@@ -93,7 +93,7 @@ describe Backbeat::Packer do
     end
   end
 
-  context "unpack" do
+  context "continue" do
 
     class MyArray
       include Backbeat::Contextable
@@ -103,15 +103,14 @@ describe Backbeat::Packer do
       end
     end
 
-    it "yields the unpacked context and action" do
+    it "continues the workflow from the context data" do
       action = Backbeat::Action::Activity.build("Action", MyArray, :build, [5])
       action_data = Backbeat::Packer.pack_action(action, :fire_and_forget, now)
-
       decision_data = action_data.merge(workflow_id: 1, id: 2)
 
-      Backbeat::Packer.unpack(decision_data) do |context, action|
-        expect(action.run(context)).to eq(Array.new(5))
-      end
+      result = Backbeat::Packer.continue(decision_data)
+
+      expect(result).to eq(Array.new(5))
     end
   end
 end
