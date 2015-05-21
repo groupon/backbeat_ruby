@@ -17,7 +17,7 @@ describe Backbeat::Contextable do
     include Backbeat::Contextable
 
     def decision_one(a, b, c)
-      DoActivity.in_context(context, :blocking).do_something(1, 2)
+      DoActivity.in_context(current, :blocking).do_something(1, 2)
     end
   end
 

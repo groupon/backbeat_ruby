@@ -23,6 +23,10 @@ module Backbeat
       @context ||= Context::Local.new({})
     end
 
+    def current
+      context
+    end
+
     def with_context(context)
       @context = context
       yield

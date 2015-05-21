@@ -7,8 +7,8 @@ class SubtractSomething
 
   def subtract_2(x, y, total)
     new_total = total - x - y
-    SubtractSomething.in_context(context, :non_blocking).subtract_3(3, 1, 1, new_total)
-    SubtractSomething.in_context(context).subtract_3(1, 2, 1, new_total)
+    SubtractSomething.in_context(current, :non_blocking).subtract_3(3, 1, 1, new_total)
+    SubtractSomething.in_context(current).subtract_3(1, 2, 1, new_total)
     context.complete_workflow!
     :done
   end
@@ -24,12 +24,12 @@ class AddSomething
 
   def add_2(x, y, total)
     new_total = total + x + y
-    SubtractSomething.in_context(context, :blocking, Time.now + 500).subtract_2(1, 2, new_total)
+    SubtractSomething.in_context(current, :blocking, Time.now + 500).subtract_2(1, 2, new_total)
   end
 
   def add_3(x, y, z, total)
     new_total = total + x + y + z
-    AddSomething.in_context(context, :fire_and_forget).add_2(5, 5, new_total)
+    AddSomething.in_context(current, :fire_and_forget).add_2(5, 5, new_total)
   end
 end
 
