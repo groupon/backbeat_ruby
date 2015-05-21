@@ -35,7 +35,8 @@ class MyActivities
   def activity_one(order, customer)
     DoSomething.call(order)
     MyOtherActivities.in_context(current, :non_blocking).send_notification(customer)
-    MyOtherActivities.in_context(current, :non_blocking, Time.now + 1.day).complete_order(order)
+    MyOtherActivities.in_context(current, :blocking, Time.now + 1.day).complete_order(order)
+    MyOtherActivities.in_context(current, :fire_and_forget).mark_complete(order)
   end
 end
 
