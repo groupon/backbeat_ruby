@@ -28,8 +28,8 @@ class MyActivities
 
   def activity_one(order, customer)
     DoSomething.call(order)
-    MyOtherActivities.in_context(context, :non_blocking).send_notification(customer)
-    MyOtherActivities.in_context(context, :non_blocking, Time.now + 1.day).complete_order(order)
+    MyOtherActivities.in_context(current, :non_blocking).send_notification(customer)
+    MyOtherActivities.in_context(current, :non_blocking, Time.now + 1.day).complete_order(order)
   end
 end
 
@@ -39,9 +39,9 @@ class MyDecider
   def my_decision(subject)
     customer = FindCustomer.call(subject)
     if subject[:type] == :one
-      MyActivities.in_context(context).activity_one(subject, customer)
+      MyActivities.in_context(current).activity_one(subject, customer)
     else
-      MyActivities.in_context(context).activity_two(subject, customer)
+      MyActivities.in_context(current).activity_two(subject, customer)
     end
   end
 end
