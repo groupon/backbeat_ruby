@@ -44,7 +44,8 @@ module Backbeat
       end
 
       def authorization_header
-        { "Authorization" => "Backbeat #{client_id}" }
+        { "Authorization" => "Backbeat #{client_id}",
+          "client_id" => client_id }
       end
 
       def url(path)
