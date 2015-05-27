@@ -64,7 +64,7 @@ end
 
 puts "\nSimulating signalling the workflow"
 
-workflow_data = { decider: "Adding something", subject: "a subject" }
+workflow_data = { name: :bob, decider: "Adding something", subject: "a subject" }
 
 Backbeat::Packer.unpack_context(workflow_data) do |context|
   AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)

@@ -12,6 +12,7 @@ module Backbeat
 
     def self.unpack_context(data)
       context_data = {
+        workflow_type: data[:name],
         workflow_id: data[:workflow_id],
         event_id: data[:id],
         subject: data[:subject],
