@@ -77,7 +77,8 @@ describe Backbeat::Context::Remote do
     let(:workflow_data) {{
       subject: "A Subject",
       decider: "Decider",
-      name: "Workflow"
+      name: "Workflow",
+      workflow_type: "Workflow"
     }}
 
     let(:action) { Backbeat::Action::Activity.new(name: "Fake Action") }

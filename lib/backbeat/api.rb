@@ -60,7 +60,7 @@ module Backbeat
     end
 
     def add_child_events(id, data)
-      events_api.add_child_events(id, data)
+      events_api.add_child_events(id, { args: { decisions: data }})
     end
 
     private

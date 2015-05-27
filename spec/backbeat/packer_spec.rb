@@ -15,9 +15,8 @@ describe Backbeat::Packer do
 
   context "unpack_context" do
     it "returns a new instance of the configured context type" do
-      Backbeat::Packer.unpack_context({ workflow_id: 1 }) do |context|
-        context.complete_workflow!
-      end
+      context = Backbeat::Packer.unpack_context({ workflow_id: 1 })
+      context.complete_workflow!
 
       expect(api.find_workflow_by_id(1)[:complete]).to eq(true)
     end

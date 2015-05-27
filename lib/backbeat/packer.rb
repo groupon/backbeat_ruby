@@ -12,15 +12,14 @@ module Backbeat
 
     def self.unpack_context(data)
       context_data = {
+        name: data[:name],
         workflow_type: data[:name],
         workflow_id: data[:workflow_id],
         event_id: data[:id],
         subject: data[:subject],
         decider: data[:decider]
       }
-      context = Backbeat.context.new(context_data, Backbeat.api)
-      yield context if block_given?
-      context
+      Backbeat.context.new(context_data, Backbeat.api)
     end
 
     def self.unpack_action(data)
@@ -37,9 +36,9 @@ module Backbeat
         name: action_hash[:name],
         mode: mode,
         fires_at: fires_at,
-        options: {client_data: {
+        client_data: {
           action: action_hash
-        }}
+        }
       }
     end
   end
