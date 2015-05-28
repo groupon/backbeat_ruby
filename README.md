@@ -19,6 +19,8 @@ $ ruby examples/local_workflow.rb
 Configure:
 
 ```ruby
+require 'backbeat'
+
 Backbeat.configure do |config|
   config.host      = "http://your_backbeat_host"
   config.client_id = "your_backbeat_user_id"

@@ -1,5 +1,5 @@
 Gem::Specification.new do |spec|
-  spec.name          = "backbeat_ruby_client"
+  spec.name          = "backbeat"
   spec.version       = "1.0.0"
   spec.authors       = ["FED"]
   spec.email         = ["fed@groupon.com"]
