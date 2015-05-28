@@ -2,7 +2,7 @@ require "multi_json"
 require "backbeat/packer"
 
 module Backbeat
-  module Context
+  module Workflow
     class Local
       def initialize(current_node, state = {})
         @current_node = current_node

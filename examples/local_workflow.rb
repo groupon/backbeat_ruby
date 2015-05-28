@@ -3,13 +3,13 @@ $: << File.expand_path("../../lib", __FILE__)
 require "backbeat"
 
 class SubtractSomething
-  include Backbeat::Contextable
+  include Backbeat::Workflowable
 
   def subtract_2(x, y, total)
     new_total = total - x - y
-    SubtractSomething.in_context(current, :non_blocking).subtract_3(3, 1, 1, new_total)
-    SubtractSomething.in_context(current).subtract_3(1, 2, 1, new_total)
-    context.complete_workflow!
+    SubtractSomething.in_context(workflow, :non_blocking).subtract_3(3, 1, 1, new_total)
+    SubtractSomething.in_context(workflow).subtract_3(1, 2, 1, new_total)
+    workflow.complete_workflow!
     :done
   end
 
@@ -20,16 +20,16 @@ class SubtractSomething
 end
 
 class AddSomething
-  include Backbeat::Contextable
+  include Backbeat::Workflowable
 
   def add_2(x, y, total)
     new_total = total + x + y
-    SubtractSomething.in_context(current, :blocking, Time.now + 500).subtract_2(1, 2, new_total)
+    SubtractSomething.in_context(workflow, :blocking, Time.now + 500).subtract_2(1, 2, new_total)
   end
 
   def add_3(x, y, z, total)
     new_total = total + x + y + z
-    AddSomething.in_context(current, :fire_and_forget).add_2(5, 5, new_total)
+    AddSomething.in_context(workflow, :fire_and_forget).add_2(5, 5, new_total)
   end
 end
 
@@ -39,12 +39,12 @@ end
 
 require "pp"
 
-Backbeat.local do |context|
+Backbeat.local do |workflow|
   puts "Testing in a local context"
-  result = AddSomething.in_context(context).add_3(1, 2, 3, 50)
+  result = AddSomething.in_context(workflow).add_3(1, 2, 3, 50)
   puts "Result: #{result}"
   puts "Event History:"
-  PP.pp context.event_history
+  PP.pp workflow.event_history
 end
 
 ############################
@@ -56,7 +56,7 @@ require_relative "../spec/support/memory_api"
 api = Backbeat::MemoryApi.new
 
 Backbeat.configure do |config|
-  config.context = Backbeat::Context::Remote
+  config.context = :remote
   config.api = api
 end
 
@@ -66,8 +66,8 @@ puts "\nSimulating signalling the workflow"
 
 workflow_data = { name: :bob, decider: "Adding something", subject: "a subject" }
 
-Backbeat::Packer.unpack_context(workflow_data) do |context|
-  AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)
+Backbeat::Packer.unpack_workflow(workflow_data) do |workflow|
+  AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
 end
 
 puts "Remote workflow state"
@@ -86,16 +86,16 @@ Backbeat::Packer.continue(decision_data)
 ############################
 
 Backbeat.configure do |config|
-  config.context = Backbeat::Context::Local
+  config.context = :local
 end
 
 # Sending a signal runs the complete workflow
 
-Backbeat::Packer.unpack_context(workflow_data) do |context|
+Backbeat::Packer.unpack_workflow(workflow_data) do |workflow|
   puts "\nRunning the workflow locally"
 
-  AddSomething.in_context(context, :signal).add_3(1, 2, 3, 50)
+  AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
 
   puts "Local workflow history"
-  PP.pp context.event_history
+  PP.pp workflow.event_history
 end
