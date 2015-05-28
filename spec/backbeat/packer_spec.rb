@@ -1,6 +1,6 @@
 require "spec_helper"
-require "backbeat/action/activity"
 require "backbeat/packer"
+require "backbeat/action/activity"
 require "support/memory_api"
 
 describe Backbeat::Packer do
@@ -90,27 +90,6 @@ describe Backbeat::Packer do
       })
 
       expect(unpacked_action.to_hash).to eq(action.to_hash)
-    end
-  end
-
-  context "continue" do
-
-    class MyArray
-      include Backbeat::Workflowable
-
-      def build(n)
-        Array.new(n)
-      end
-    end
-
-    it "continues the workflow from the workflow data" do
-      action = Backbeat::Action::Activity.build("Action", MyArray, :build, [5])
-      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget, now)
-      decision_data = action_data.merge(workflow_id: 1, id: 2)
-
-      result = Backbeat::Packer.continue(decision_data)
-
-      expect(result).to eq(Array.new(5))
     end
   end
 end

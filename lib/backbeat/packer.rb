@@ -4,12 +4,6 @@ require "backbeat/action/findable_activity"
 
 module Backbeat
   class Packer
-    def self.continue(workflow_data)
-      workflow = unpack_workflow(workflow_data)
-      action = unpack_action(workflow_data)
-      action.run(workflow)
-    end
-
     def self.unpack_workflow(data)
       workflow_data = {
         name: data[:name],
@@ -19,9 +13,7 @@ module Backbeat
         subject: data[:subject],
         decider: data[:decider]
       }
-      workflow = Backbeat.workflow_type.new(workflow_data, Backbeat.api)
-      yield workflow if block_given?
-      workflow
+      Backbeat.workflow_type.new(workflow_data, Backbeat.api)
     end
 
     def self.unpack_action(data)

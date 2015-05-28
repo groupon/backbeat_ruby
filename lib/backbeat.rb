@@ -1,9 +1,9 @@
 require "backbeat/api"
 require "backbeat/api/http_client"
 require "backbeat/workflowable"
+require "backbeat/workflow"
 require "backbeat/workflow/local"
 require "backbeat/workflow/remote"
-require "backbeat/packer"
 
 module Backbeat
   class Config

@@ -66,9 +66,8 @@ puts "\nSimulating signalling the workflow"
 
 workflow_data = { name: :bob, decider: "Adding something", subject: "a subject" }
 
-Backbeat::Packer.unpack_workflow(workflow_data) do |workflow|
-  AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
-end
+workflow = Backbeat::Workflow.new(workflow_data)
+AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
 
 puts "Remote workflow state"
 PP.pp api.find_workflow_by_id(1)
@@ -79,7 +78,7 @@ decision_data = api.find_workflow_by_id(1)[:signals]["AddSomething.add_3"]
 
 # Run the activity by continuing the workflow
 
-Backbeat::Packer.continue(decision_data)
+Backbeat::Workflow.continue(decision_data)
 
 ############################
 # Using a local context
@@ -91,11 +90,10 @@ end
 
 # Sending a signal runs the complete workflow
 
-Backbeat::Packer.unpack_workflow(workflow_data) do |workflow|
-  puts "\nRunning the workflow locally"
+workflow = Backbeat::Workflow.new(workflow_data)
+puts "\nRunning the workflow locally"
 
-  AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
+AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
 
-  puts "Local workflow history"
-  PP.pp workflow.event_history
-end
+puts "Local workflow history"
+PP.pp workflow.event_history

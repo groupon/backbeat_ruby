@@ -60,16 +60,15 @@ Signal the workflow:
 
 ```ruby
 subject = Order.last.to_hash
-workflow = Backbeat::Packer.unpack_workflow(subject: subject, decider: "MyDecider", name: "My Workflow")
+workflow = Backbeat::Workflow.new(subject: subject, decider: "MyDecider", name: "My Workflow")
 MyDecider.in_context(workflow, :signal).my_decision(subject)
 ```
 
 Continue the workflow from your app's activity endpoint:
 
 ```ruby
-
 post "/perform_activity" do
-  Backbeat::Packer.continue(params)
+  Backbeat::Workflow.continue(params)
 end
 ```
 
@@ -83,7 +82,7 @@ Backbeat.configure do |config|
 end
 
 subject = Order.last.to_hash
-workflow = Backbeat::Packer.unpack_workflow(subject: subject, decider: "MyDecider")
+workflow = Backbeat::Workflow.new(subject: subject, decider: "MyDecider")
 MyDecider.in_context(workflow, :signal).my_decision(subject)
 ```
 
