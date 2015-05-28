@@ -1,9 +1,9 @@
 require "backbeat/api"
 require "backbeat/api/http_client"
-require "backbeat/contextable"
-require "backbeat/context/local"
-require "backbeat/context/remote"
-require "backbeat/packer"
+require "backbeat/workflowable"
+require "backbeat/workflow"
+require "backbeat/workflow/local"
+require "backbeat/workflow/remote"
 
 module Backbeat
   class Config
@@ -36,11 +36,20 @@ module Backbeat
     config.api ||= default_api
   end
 
+  def self.workflow_type
+    case context
+    when :remote
+      Workflow::Remote
+    when :local
+      Workflow::Local
+    end
+  end
+
   def self.default_api
-    case context.name
-    when Context::Remote.name
+    case context
+    when :remote
       Api.new(Api::HttpClient.new(config.host, config.client_id))
-    when Context::Local.name
+    when :local
       {}
     else
       raise ConfigurationError.new("Unknown default api for context #{context}")
@@ -48,6 +57,6 @@ module Backbeat
   end
 
   def self.local
-    yield Context::Local.new({})
+    yield Workflow::Local.new({})
   end
 end

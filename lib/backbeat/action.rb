@@ -1,26 +1,26 @@
 module Backbeat
   class Action
-    def initialize(contextible, method, args)
-      @contextible = contextible
+    def initialize(workflowable, method, args)
+      @workflowable = workflowable
       @method = method
       @args = args
     end
 
-    def run(context)
+    def run(workflow)
       ret_value = nil
-      contextible.with_context(context) do
-        context.processing
-        ret_value = contextible.send(method, *args)
-        context.complete
+      workflowable.with_context(workflow) do
+        workflow.processing
+        ret_value = workflowable.send(method, *args)
+        workflow.complete
       end
       ret_value
     rescue
-      context.errored
+      workflow.errored
       raise
     end
 
     private
 
-    attr_reader :contextible, :method, :args
+    attr_reader :workflowable, :method, :args
   end
 end

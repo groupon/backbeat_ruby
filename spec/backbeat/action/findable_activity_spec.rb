@@ -1,12 +1,12 @@
 require "spec_helper"
-require "backbeat/contextable"
-require "backbeat/context/local"
+require "backbeat/workflowable"
+require "backbeat/workflow/local"
 require "backbeat/action/findable_activity"
 
 describe Backbeat::Action::FindableActivity do
 
   class MyModel
-    include Backbeat::Contextable
+    include Backbeat::Workflowable
 
     attr_reader :id, :name
 
@@ -46,10 +46,10 @@ describe Backbeat::Action::FindableActivity do
 
     let(:action) { described_class.new(action_hash) }
 
-    let(:context) { Backbeat::Context::Local.new({ event_name: "Yellow" }) }
+    let(:workflow) { Backbeat::Workflow::Local.new({ event_name: "Yellow" }) }
 
     it "calls the method on the object with the arguments" do
-      new_object = action.run(context)
+      new_object = action.run(workflow)
 
       expect(new_object.id).to eq(4)
       expect(new_object.name).to eq("New name")

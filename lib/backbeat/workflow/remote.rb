@@ -1,7 +1,7 @@
 require "backbeat/packer"
 
 module Backbeat
-  module Context
+  module Workflow
     class Remote
       def initialize(current_node, api)
         @current_node = current_node
@@ -47,7 +47,7 @@ module Backbeat
       attr_reader :api, :current_node
 
       def event_id
-        current_node[:event_id] || context_error("No event id present in current context")
+        current_node[:event_id] || workflow_error("No event id present in current workflow data")
       end
 
       def workflow_id
@@ -62,10 +62,10 @@ module Backbeat
         Packer.pack_action(action, mode, fires_at)
       end
 
-      class ContextError < StandardError; end
+      class WorkflowError < StandardError; end
 
-      def context_error(message)
-        raise ContextError.new(message)
+      def workflow_error(message)
+        raise WorkflowError.new(message)
       end
     end
   end

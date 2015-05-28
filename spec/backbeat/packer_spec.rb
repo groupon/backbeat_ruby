@@ -1,6 +1,7 @@
 require "spec_helper"
-require "backbeat/action/activity"
 require "backbeat/packer"
+require "backbeat/action/activity"
+require "support/memory_api"
 
 describe Backbeat::Packer do
   let(:now) { Time.now }
@@ -8,15 +9,15 @@ describe Backbeat::Packer do
 
   before do
     Backbeat.configure do |config|
-      config.context = Backbeat::Context::Remote
+      config.context = :remote
       config.api = api
     end
   end
 
-  context "unpack_context" do
-    it "returns a new instance of the configured context type" do
-      context = Backbeat::Packer.unpack_context({ workflow_id: 1 })
-      context.complete_workflow!
+  context "unpack_workflow" do
+    it "returns a new instance of the configured workflow type" do
+      workflow = Backbeat::Packer.unpack_workflow({ workflow_id: 1 })
+      workflow.complete_workflow!
 
       expect(api.find_workflow_by_id(1)[:complete]).to eq(true)
     end
@@ -89,27 +90,6 @@ describe Backbeat::Packer do
       })
 
       expect(unpacked_action.to_hash).to eq(action.to_hash)
-    end
-  end
-
-  context "continue" do
-
-    class MyArray
-      include Backbeat::Contextable
-
-      def build(n)
-        Array.new(n)
-      end
-    end
-
-    it "continues the workflow from the context data" do
-      action = Backbeat::Action::Activity.build("Action", MyArray, :build, [5])
-      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget, now)
-      decision_data = action_data.merge(workflow_id: 1, id: 2)
-
-      result = Backbeat::Packer.continue(decision_data)
-
-      expect(result).to eq(Array.new(5))
     end
   end
 end

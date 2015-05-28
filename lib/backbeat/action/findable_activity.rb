@@ -11,8 +11,8 @@ module Backbeat
         @args = args
       end
 
-      def run(context)
-        Action.new(contextible, method, args).run(context)
+      def run(workflow)
+        Action.new(workflowable, method, args).run(workflow)
       end
 
       def to_hash
@@ -28,7 +28,7 @@ module Backbeat
 
       private
 
-      def contextible
+      def workflowable
         klass.find(id)
       end
 

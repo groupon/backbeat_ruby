@@ -5,10 +5,10 @@ describe Backbeat do
 
   it "allows the default context to be configured" do
     Backbeat.configure do |config|
-      config.context = Backbeat::Context::Remote
+      config.context = :remote
     end
 
-    expect(Backbeat.config.context).to eq(Backbeat::Context::Remote)
+    expect(Backbeat.config.context).to eq(:remote)
   end
 
   it "allows the backbeat host to be configured" do
@@ -35,9 +35,25 @@ describe Backbeat do
     expect(Backbeat.api).to eq({ events: [1, 2] })
   end
 
+  it "returns the correct workflow type for a remote context" do
+    Backbeat.configure do |config|
+      config.context = :remote
+    end
+
+    expect(Backbeat.workflow_type).to eq(Backbeat::Workflow::Remote)
+  end
+
+  it "returns the correct workflow type for a local context" do
+    Backbeat.configure do |config|
+      config.context = :local
+    end
+
+    expect(Backbeat.workflow_type).to eq(Backbeat::Workflow::Local)
+  end
+
   it "defaults to the backbeat api in a remote context" do
     Backbeat.configure do |config|
-      config.context = Backbeat::Context::Remote
+      config.context = :remote
     end
 
     expect(Backbeat.api).to be_a(Backbeat::Api)
@@ -45,7 +61,7 @@ describe Backbeat do
 
   it "defaults to an empty hash in a local context" do
     Backbeat.configure do |config|
-      config.context = Backbeat::Context::Local
+      config.context = :local
     end
 
     expect(Backbeat.api).to eq({})
@@ -53,7 +69,7 @@ describe Backbeat do
 
   it "raises an error if the context is unknown" do
     Backbeat.configure do |config|
-      config.context = Backbeat::Context
+      config.context = :foo
     end
 
     expect { Backbeat.api }.to raise_error Backbeat::ConfigurationError
@@ -65,17 +81,17 @@ describe Backbeat do
     expect { Backbeat.context }.to raise_error Backbeat::ConfigurationError
 
     Backbeat.configure do |config|
-      config.context = Backbeat::Context::Local
+      config.context = :local
     end
 
     expect { Backbeat.context }.to_not raise_error
   end
 
-  it "yields a local context to use" do
-    Backbeat.local do |context|
-      context.complete_workflow!
+  it "yields a local workflow to use" do
+    Backbeat.local do |workflow|
+      workflow.complete_workflow!
 
-      expect(context.event_history.last[:name]).to eq(:workflow_complete)
+      expect(workflow.event_history.last[:name]).to eq(:workflow_complete)
     end
   end
 end
