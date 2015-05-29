@@ -17,7 +17,7 @@ module Backbeat
     end
 
     def self.unpack_action(data)
-      action_data = data[:client_data][:action]
+      action_data = data[:client_data]
       action_data[:class] = Object.const_get(action_data[:class].to_s)
       action_data[:method] = action_data[:method].to_sym
       action_klass = Action.const_get(action_data[:type])
