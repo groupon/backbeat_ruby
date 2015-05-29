@@ -30,9 +30,10 @@ module Backbeat
         name: action_hash[:name],
         mode: mode,
         fires_at: fires_at,
+        options: {
         client_data: {
           action: action_hash
-        }
+        }}
       }
     end
   end
