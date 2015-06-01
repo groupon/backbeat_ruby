@@ -35,6 +35,7 @@ describe Backbeat::Workflowable do
         id: 2,
         name: "Decider.decision_one",
         mode: :blocking,
+        type: :none,
         fires_at: now,
         client_data: {
           action: {
@@ -122,6 +123,7 @@ describe Backbeat::Workflowable do
           id: 2,
           name: "MyModel#update_attributes",
           mode: :blocking,
+          type: :none,
           fires_at: nil,
           client_data: {
             action: {
