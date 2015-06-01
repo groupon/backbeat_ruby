@@ -35,6 +35,19 @@ describe Backbeat do
     expect(Backbeat.api).to eq({ events: [1, 2] })
   end
 
+  require "logger"
+
+  it "allows the logger to be configured" do
+    logger = Logger.new("/dev/null")
+    Backbeat.configure do |config|
+      config.logger = logger
+      config.logger.level = Logger::WARN
+    end
+
+    expect(Backbeat.config.logger).to eq(logger)
+    expect(logger.level).to eq(Logger::WARN)
+  end
+
   it "returns the correct workflow type for a remote context" do
     Backbeat.configure do |config|
       config.context = :remote
