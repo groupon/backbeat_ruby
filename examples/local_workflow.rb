@@ -55,9 +55,12 @@ end
 require_relative "../spec/support/memory_api"
 api = Backbeat::MemoryApi.new
 
+require "logger"
+
 Backbeat.configure do |config|
   config.context = :remote
   config.api = api
+  config.logger = Logger.new(STDOUT)
 end
 
 # Send a signal

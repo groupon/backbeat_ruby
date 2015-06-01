@@ -31,6 +31,7 @@ describe Backbeat::Packer do
       expect(Backbeat::Packer.pack_action(action, :blocking, now)).to eq({
         name: action_hash[:name],
         mode: :blocking,
+        type: :none,
         fires_at: now,
         client_data: {
           action: action_hash

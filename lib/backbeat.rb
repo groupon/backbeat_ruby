@@ -11,6 +11,7 @@ module Backbeat
     attr_accessor :host
     attr_accessor :client_id
     attr_accessor :api
+    attr_accessor :logger
   end
 
   class ConfigurationError < StandardError; end
