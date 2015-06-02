@@ -286,6 +286,19 @@ describe Backbeat::Api do
       end
     end
 
+    context "reset_event" do
+      it "sends a request to reset the node" do
+        expect(client).to receive(:put).with("/v2/events/30/reset", MultiJson.dump({}), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 200 })
+
+        api.reset_event(30)
+      end
+    end
+
     context "add_child_events" do
       it "creates new child events on the event" do
         expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [event_data] }}), {

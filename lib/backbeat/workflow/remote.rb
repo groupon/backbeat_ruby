@@ -42,6 +42,10 @@ module Backbeat
         api.add_child_event(event_id, event_data)
       end
 
+      def reset_event
+        api.reset_event(event_id)
+      end
+
       private
 
       attr_reader :api, :current_node

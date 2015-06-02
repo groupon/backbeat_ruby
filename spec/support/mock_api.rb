@@ -43,6 +43,9 @@ module Backbeat
     define(:restart_event) do |id|
     end
 
+    define(:reset_event) do |id|
+    end
+
     define(:add_child_event) do |id, data|
     end
 

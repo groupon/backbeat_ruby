@@ -61,6 +61,14 @@ describe Backbeat::Workflow::Remote do
     expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
   end
 
+  it "resets the current node" do
+    workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
+
+    workflow.reset_event
+
+    expect(api.find_event_by_id(6)[:reset]).to eq(true)
+  end
+
   context "running activities" do
     let(:api) {
       Backbeat::MemoryApi.new(

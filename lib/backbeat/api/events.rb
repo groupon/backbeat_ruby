@@ -19,6 +19,10 @@ module Backbeat
         http_client.put("/v2/events/#{id}/restart", {})
       end
 
+      def reset_event(id)
+        http_client.put("/v2/events/#{id}/reset", {})
+      end
+
       def add_child_events(id, data)
         http_client.post("/v2/events/#{id}/decisions", data)
       end

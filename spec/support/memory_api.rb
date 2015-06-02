@@ -72,6 +72,11 @@ module Backbeat
     def restart_event(id)
     end
 
+    def reset_event(event_id)
+      events[event_id] ||= {}
+      events[event_id][:reset] = true
+    end
+
     def add_child_events(id, data)
     end
 
