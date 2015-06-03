@@ -65,10 +65,11 @@ workflow = Backbeat::Workflow.new(subject: subject, decider: "MyDecider", name: 
 MyDecider.in_context(workflow, :signal).my_decision(subject)
 ```
 
-Continue the workflow from your app's activity endpoint:
+Continue the workflow from your app's activity endpoint. This should match the endpoint
+specified when creating a user on the Backbeat server.
 
 ```ruby
-post "/perform_activity" do
+post 'perform_activity' do
   Backbeat::Workflow.continue(params)
 end
 ```
