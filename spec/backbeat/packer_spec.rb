@@ -93,4 +93,13 @@ describe Backbeat::Packer do
       expect(unpacked_action.to_hash).to eq(action.to_hash)
     end
   end
+
+  context "underscore_keys" do
+    it "converts camel cased keys to underscored keys" do
+      data = { "fooBar" => [{"barBaz" => "baz"}]}
+      expect(Backbeat::Packer.underscore_keys(data)).to eq(
+        { foo_bar: [{ bar_baz: "baz" }]}
+      )
+    end
+  end
 end

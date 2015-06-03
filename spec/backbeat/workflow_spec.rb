@@ -25,5 +25,25 @@ describe Backbeat::Workflow do
 
       expect(result).to eq(Array.new(5))
     end
+
+    it "handles workflow data returned as a decision" do
+      action = Backbeat::Action::Activity.build("Action", MyArray, :build, [6])
+      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget)
+      decision_data = action_data.merge(workflow_id: 1, id: 2)
+
+      result = Backbeat::Workflow.continue({ "decision" => decision_data })
+
+      expect(result).to eq(Array.new(6))
+    end
+
+    it "handles workflow data returned as an activity" do
+      action = Backbeat::Action::Activity.build("Action", MyArray, :build, [7])
+      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget)
+      decision_data = action_data.merge(workflow_id: 1, id: 2)
+
+      result = Backbeat::Workflow.continue({ "activity" => decision_data })
+
+      expect(result).to eq(Array.new(7))
+    end
   end
 end

@@ -19,6 +19,7 @@ module Backbeat
   def self.configure
     @config = Config.new
     yield config
+    config
   end
 
   def self.config
