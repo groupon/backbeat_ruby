@@ -50,7 +50,7 @@ describe Backbeat::Packer do
         client_data: {
           action: {
             name: "Action name",
-            type: "Activity",
+            type: "Backbeat::Action::Activity",
             class: Array,
             method: :method,
             args: []
@@ -66,7 +66,7 @@ describe Backbeat::Packer do
         client_data: {
           action: {
             name: "Action name",
-            type: "Activity",
+            type: "Backbeat::Action::Activity",
             class: "Array",
             method: :method,
             args: []
@@ -82,7 +82,7 @@ describe Backbeat::Packer do
         client_data: {
           action: {
             name: "Action name",
-            type: "Activity",
+            type: "Backbeat::Action::Activity",
             class: "Array",
             method: "method",
             args: []

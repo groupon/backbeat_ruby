@@ -1,6 +1,7 @@
 require "backbeat"
 require "backbeat/action/activity"
 require "backbeat/action/findable_activity"
+require "active_support/inflector"
 
 module Backbeat
   class Packer
@@ -18,9 +19,9 @@ module Backbeat
 
     def self.unpack_action(data)
       action_data = data[:client_data][:action]
-      action_data[:class] = Object.const_get(action_data[:class].to_s)
+      action_data[:class] = Inflector.constantize(action_data[:class].to_s)
       action_data[:method] = action_data[:method].to_sym
-      action_klass = Action.const_get(action_data[:type])
+      action_klass = Inflector.constantize(action_data[:type])
       action_klass.new(action_data)
     end
 
@@ -42,20 +43,17 @@ module Backbeat
       when Array
         data.map { |v| underscore_keys(v) }
       when Hash
-        Hash[data.map { |(k, v)| [underscore(k.to_s).to_sym, underscore_keys(v)] }]
+        underscored_data = data.map do |(k, v)|
+          [Inflector.underscore(k.to_s).to_sym, underscore_keys(v)]
+        end
+        Hash[underscored_data]
       else
         data
       end
     end
 
-    def self.underscore(camel_cased_word)
-      return camel_cased_word unless camel_cased_word =~ /[A-Z-]|::/
-      word = camel_cased_word.to_s.gsub(/::/, '/')
-      word.gsub!(/([A-Z\d]+)([A-Z][a-z])/,'\1_\2')
-      word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
-      word.tr!("-", "_")
-      word.downcase!
-      word
+    class Inflector
+      extend ActiveSupport::Inflector
     end
   end
 end

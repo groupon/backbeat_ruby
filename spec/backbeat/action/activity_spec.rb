@@ -21,7 +21,7 @@ describe Backbeat::Action::Activity do
     action = described_class.build("Blue", MyActivity, :perform, [1, 2, 3])
 
     expect(action.to_hash).to eq({
-      type: "Activity",
+      type: "Backbeat::Action::Activity",
       name: "Blue",
       class: MyActivity,
       method: :perform,

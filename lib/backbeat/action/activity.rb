@@ -17,7 +17,7 @@ module Backbeat
 
       def to_hash
         {
-          type: "Activity",
+          type: self.class.to_s,
           name: name,
           class: klass,
           method: method,

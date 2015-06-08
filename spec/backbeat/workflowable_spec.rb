@@ -39,7 +39,7 @@ describe Backbeat::Workflowable do
         fires_at: now,
         client_data: {
           action: {
-            type: "Activity",
+            type: "Backbeat::Action::Activity",
             name: "Decider.decision_one",
             class: Decider,
             method: :decision_one,
@@ -127,7 +127,7 @@ describe Backbeat::Workflowable do
           fires_at: nil,
           client_data: {
             action: {
-              type: "FindableActivity",
+              type: "Backbeat::Action::FindableActivity",
               name: "MyModel#update_attributes",
               class: MyModel,
               id: 10,

@@ -12,6 +12,7 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'httparty', '~> 0.13.1'
   spec.add_runtime_dependency 'multi_json', '~> 1.10.0'
+  spec.add_runtime_dependency 'activesupport', '~> 4.2.0'
 
   spec.add_development_dependency 'rspec', '~> 3.0.0'
   spec.add_development_dependency 'webmock', '~> 1.20.0'
