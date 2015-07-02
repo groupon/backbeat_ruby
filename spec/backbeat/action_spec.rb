@@ -1,6 +1,7 @@
 require "spec_helper"
 require "backbeat/workflowable"
 require "backbeat/action"
+require "support/mock_logger"
 
 describe Backbeat::Action do
 
@@ -49,5 +50,24 @@ describe Backbeat::Action do
 
     expect(event[:name]).to eq("Maths")
     expect(event[:statuses].last).to eq(:errored)
+  end
+
+  context ".build" do
+    it "returns a log decorator if a logger is configured" do
+      logger = Backbeat::MockLogger.new
+      Backbeat.config.logger = logger
+      action = described_class.build(MyWorkflowable.new, :perform, [10, 11, 12])
+
+      action.run(workflow)
+
+      expect(logger.msgs[:info].count).to eq(2)
+    end
+
+    it "returns the action without the decorator if a logger is not configured" do
+      Backbeat.config.logger = nil
+      action = described_class.build(MyWorkflowable.new, :perform, [10, 11, 12])
+
+      expect(action).to be_a(Backbeat::Action)
+    end
   end
 end

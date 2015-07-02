@@ -12,7 +12,7 @@ module Backbeat
       end
 
       def run(workflow)
-        Action.new(workflowable, method, args).run(workflow)
+        Action.build(workflowable, method, args).run(workflow)
       end
 
       def to_hash

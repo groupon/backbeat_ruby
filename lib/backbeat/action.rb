@@ -1,8 +1,13 @@
-require "backbeat/logging"
-
 module Backbeat
   class Action
-    include Logging
+    def self.build(workflowable, method, args)
+      action = new(workflowable, method, args)
+      if logger = Backbeat.config.logger
+        LogDecorator.new(action, logger)
+      else
+        action
+      end
+    end
 
     def initialize(workflowable, method, args)
       @workflowable = workflowable
@@ -12,16 +17,13 @@ module Backbeat
 
     def run(workflow)
       ret_value = nil
-      logger.info({ name: :action_started, node: workflow })
       workflowable.with_context(workflow) do
         workflow.processing
         ret_value = workflowable.send(method, *args)
         workflow.complete
       end
-      logger.info({ name: :action_complete, node: workflow })
       ret_value
     rescue => e
-      logger.error({ name: :action_errored, error: e, node: workflow })
       workflow.errored
       raise
     end
