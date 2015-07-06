@@ -29,7 +29,7 @@ describe Backbeat::Action::Activity do
     })
   end
 
-  context "run" do
+  context "#run" do
     let(:action_hash) { described_class.build("Blue", MyActivity, :perform, [1, 2, 3]).to_hash }
     let(:action) { described_class.new(action_hash) }
 

@@ -39,7 +39,7 @@ describe Backbeat::Action::FindableActivity do
     })
   end
 
-  context "run" do
+  context "#run" do
     let(:action_hash) {
       described_class.build("Yellow", object, :update_attributes, [{ name: "New name" }]).to_hash
     }

@@ -8,7 +8,7 @@ describe Backbeat::Api do
   let(:api) { Backbeat::Api.new(client) }
 
   context "workflows" do
-    context "create_workflow" do
+    context "#create_workflow" do
       it "creates a workflow" do
         workflow_data = {
           name: "My Workflow",
@@ -53,7 +53,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "find_workflow_by_id" do
+    context "#find_workflow_by_id" do
       it "finds a workflow by id" do
         workflow_data = {
           id: 5,
@@ -83,7 +83,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "find_workflow_by_subject" do
+    context "#find_workflow_by_subject" do
       let(:workflow_query) {{
         name: "My Workflow",
         subject: "Subject",
@@ -120,7 +120,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "signal_workflow" do
+    context "#signal_workflow" do
       let(:signal_data) {{ client_data: { arguments: [1, 2, 3] }}}
 
       it "signals the workflow with the id, name, and client data" do
@@ -148,7 +148,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "complete_workflow" do
+    context "#complete_workflow" do
       it "makes a request to mark the workflow complete" do
         expect(client).to receive(:put).with("/v2/workflows/20/complete", MultiJson.dump({}), {
           headers: {
@@ -161,7 +161,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "find_all_workflow_children" do
+    context "#find_all_workflow_children" do
       it "gets the workflow children" do
         child_data = [{
           id: 5,
@@ -183,7 +183,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "find_all_workflow_events" do
+    context "#find_all_workflow_events" do
       it "gets the workflow event history" do
         event_data = [{
           id: 5,
@@ -205,7 +205,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "get_tree" do
+    context "#get_tree" do
       it "gets the hash representation of the workflow tree" do
         tree_data = { id: 5, children: [] }
 
@@ -219,7 +219,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "get_printable_tree" do
+    context "#get_printable_tree" do
       it "gets the printable representation of the workflow tree" do
         tree_data = { print: "ID NAME \n\n ID Name etc" }
 
@@ -248,7 +248,7 @@ describe Backbeat::Api do
       user_id: "123"
     }}
 
-    context "find_event_by_id" do
+    context "#find_event_by_id" do
       it "finds an event by id" do
         expect(client).to receive(:get).with("/v2/events/25", {
           headers: { "Accept" => "application/json"}
@@ -260,7 +260,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "update_event_status" do
+    context "#update_event_status" do
       it "sends a request to update the event status" do
         expect(client).to receive(:put).with("/v2/events/25/status/errored", MultiJson.dump({}), {
           headers: {
@@ -273,7 +273,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "restart_event" do
+    context "#restart_event" do
       it "sends a request to restart the event" do
         expect(client).to receive(:put).with("/v2/events/25/restart", MultiJson.dump({}), {
           headers: {
@@ -286,7 +286,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "reset_event" do
+    context "#reset_event" do
       it "sends a request to reset the node" do
         expect(client).to receive(:put).with("/v2/events/30/reset", MultiJson.dump({}), {
           headers: {
@@ -299,7 +299,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "add_child_events" do
+    context "#add_child_events" do
       it "creates new child events on the event" do
         expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [event_data] }}), {
           headers: {
@@ -312,7 +312,7 @@ describe Backbeat::Api do
       end
     end
 
-    context "add_child_event" do
+    context "#add_child_event" do
       it "creates a new child event on the event" do
         expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [event_data] }}), {
           headers: {

@@ -5,7 +5,7 @@ require "backbeat/api/http_client"
 describe Backbeat::Api::HttpClient do
   let(:client) { Backbeat::Api::HttpClient.new("http://backbeat.com", "987") }
 
-  context "get" do
+  context "#get" do
     it "makes a get request to the backbeat host with the client id" do
       request = WebMock.stub_request(:get, "http://backbeat.com/events").with(
         headers: { "Authorization" => "Backbeat 987" }
@@ -50,7 +50,7 @@ describe Backbeat::Api::HttpClient do
     end
   end
 
-  context "post" do
+  context "#post" do
     it "makes a post request to the backbeat host with the client id" do
       request = WebMock.stub_request(:post, "http://backbeat.com/workflows").with(
         headers: { "Authorization" => "Backbeat 987" },
@@ -78,7 +78,7 @@ describe Backbeat::Api::HttpClient do
     end
   end
 
-  context "put" do
+  context "#put" do
     it "makes a put request to the backbeat host with the client id" do
       request = WebMock.stub_request(:put, "http://backbeat.com/workflows").with(
         headers: { "Authorization" => "Backbeat 987" },

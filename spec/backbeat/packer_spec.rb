@@ -14,7 +14,7 @@ describe Backbeat::Packer do
     end
   end
 
-  context "unpack_workflow" do
+  context ".unpack_workflow" do
     it "returns a new instance of the configured workflow type" do
       workflow = Backbeat::Packer.unpack_workflow({ workflow_id: 1 })
       workflow.complete_workflow!
@@ -23,7 +23,7 @@ describe Backbeat::Packer do
     end
   end
 
-  context "pack_action" do
+  context ".pack_action" do
     it "returns a the api representation of node data" do
       action = Backbeat::Action::Activity.build("Action", "Klass", :method, [])
       action_hash = action.to_hash
@@ -40,7 +40,7 @@ describe Backbeat::Packer do
     end
   end
 
-  context "unpack_action" do
+  context ".unpack_action" do
     let(:action) {
       Backbeat::Action::Activity.build("Action name", Array, :method, [])
     }
@@ -94,7 +94,7 @@ describe Backbeat::Packer do
     end
   end
 
-  context "underscore_keys" do
+  context ".underscore_keys" do
     it "converts camel cased keys to underscored keys" do
       data = { "fooBar" => [{"barBaz" => "baz"}]}
       expect(Backbeat::Packer.underscore_keys(data)).to eq(

@@ -6,7 +6,7 @@ require "backbeat/action/activity"
 
 describe Backbeat::Workflow do
 
-  context "continue" do
+  context ".continue" do
 
     class MyArray
       include Backbeat::Workflowable
