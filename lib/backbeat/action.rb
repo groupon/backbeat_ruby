@@ -1,3 +1,5 @@
+require "backbeat/action/log_decorator"
+
 module Backbeat
   class Action
     def self.build(workflowable, method, args)
