@@ -52,6 +52,14 @@ module Backbeat
       end
     end
 
+    def self.constantize_maybe(klass)
+      if klass.is_a?(String)
+        Inflector.constantize(klass)
+      else
+        klass
+      end
+    end
+
     class Inflector
       extend ActiveSupport::Inflector
     end

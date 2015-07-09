@@ -41,7 +41,7 @@ describe Backbeat::Workflowable do
           action: {
             type: "Backbeat::Action::Activity",
             name: "Decider.decision_one",
-            class: Decider,
+            class: "Decider",
             method: :decision_one,
             args: [:one, :two, :three]
           }
@@ -129,7 +129,7 @@ describe Backbeat::Workflowable do
             action: {
               type: "Backbeat::Action::FindableActivity",
               name: "MyModel#update_attributes",
-              class: MyModel,
+              class: "MyModel",
               id: 10,
               method: :update_attributes,
               args: [{ name: "Lemon" }]

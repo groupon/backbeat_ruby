@@ -1,4 +1,5 @@
 require "backbeat/action"
+require "backbeat/packer"
 
 module Backbeat
   class Action
@@ -19,7 +20,7 @@ module Backbeat
         {
           type: self.class.to_s,
           name: name,
-          class: klass,
+          class: klass.to_s,
           id: id,
           method: method,
           args: args
@@ -29,7 +30,7 @@ module Backbeat
       private
 
       def workflowable
-        klass.find(id)
+        Packer.constantize_maybe(klass).find(id)
       end
 
       def name

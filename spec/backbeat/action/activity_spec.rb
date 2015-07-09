@@ -23,7 +23,7 @@ describe Backbeat::Action::Activity do
     expect(action.to_hash).to eq({
       type: "Backbeat::Action::Activity",
       name: "Blue",
-      class: MyActivity,
+      class: "MyActivity",
       method: :perform,
       args: [1, 2, 3]
     })

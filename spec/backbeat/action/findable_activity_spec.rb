@@ -32,7 +32,7 @@ describe Backbeat::Action::FindableActivity do
     expect(action.to_hash).to eq({
       type: "Backbeat::Action::FindableActivity",
       name: "Yellow",
-      class: MyModel,
+      class: "MyModel",
       id: 4,
       method: :update_attributes,
       args: [{ name: "New name" }]
