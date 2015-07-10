@@ -1,6 +1,6 @@
 require "spec_helper"
 require "backbeat/packer"
-require "backbeat/action/activity"
+require "backbeat/serializer/activity"
 require "support/memory_api"
 
 describe Backbeat::Packer do
@@ -25,7 +25,7 @@ describe Backbeat::Packer do
 
   context ".pack_action" do
     it "returns a the api representation of node data" do
-      action = Backbeat::Action::Activity.build("Action", "Klass", :method, [])
+      action = Backbeat::Serializer::Activity.build("Action", "Klass", :method, [])
       action_hash = action.to_hash
 
       expect(Backbeat::Packer.pack_action(action, :blocking, now)).to eq({
@@ -41,8 +41,8 @@ describe Backbeat::Packer do
   end
 
   context ".unpack_action" do
-    let(:action) {
-      Backbeat::Action::Activity.build("Action name", Array, :method, [])
+    let(:serializer) {
+      Backbeat::Serializer::Activity.build("Action name", Array, :method, [])
     }
 
     it "returns the action object specified in the action type with the action data" do
@@ -50,15 +50,15 @@ describe Backbeat::Packer do
         client_data: {
           action: {
             name: "Action name",
-            type: "Backbeat::Action::Activity",
-            class: Array,
+            serializer: "Backbeat::Serializer::Activity",
+            class: "Array",
             method: :method,
             args: []
           }
         }
       })
 
-      expect(unpacked_action.to_hash).to eq(action.to_hash)
+      expect(unpacked_action.to_hash).to eq(serializer.to_hash)
     end
 
     it "resolves the class name of the action" do
@@ -66,7 +66,7 @@ describe Backbeat::Packer do
         client_data: {
           action: {
             name: "Action name",
-            type: "Backbeat::Action::Activity",
+            serializer: "Backbeat::Serializer::Activity",
             class: "Array",
             method: :method,
             args: []
@@ -74,7 +74,7 @@ describe Backbeat::Packer do
         }
       })
 
-      expect(unpacked_action.to_hash).to eq(action.to_hash)
+      expect(unpacked_action.to_hash).to eq(serializer.to_hash)
     end
 
     it "symbolizes the method name" do
@@ -82,7 +82,7 @@ describe Backbeat::Packer do
         client_data: {
           action: {
             name: "Action name",
-            type: "Backbeat::Action::Activity",
+            serializer: "Backbeat::Serializer::Activity",
             class: "Array",
             method: "method",
             args: []
@@ -90,7 +90,7 @@ describe Backbeat::Packer do
         }
       })
 
-      expect(unpacked_action.to_hash).to eq(action.to_hash)
+      expect(unpacked_action.to_hash).to eq(serializer.to_hash)
     end
   end
 

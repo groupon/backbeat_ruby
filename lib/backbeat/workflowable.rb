@@ -1,17 +1,16 @@
-require "backbeat/action/activity"
-require "backbeat/action/findable_activity"
+require "backbeat/serializer/activity"
+require "backbeat/serializer/findable_activity"
 require "backbeat/workflow/local"
 
 module Backbeat
   module Workflowable
-
     module InContext
       def in_context(workflow, mode = :blocking, fires_at = nil)
         ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
       end
 
-      def action
-        Action::Activity
+      def serializer
+        Serializer::Activity
       end
     end
 
@@ -39,22 +38,26 @@ module Backbeat
       end
 
       def method_missing(method, *args)
-        activity = workflowable.action.build(
-          build_name(method),
-          workflowable,
-          method,
-          args
-        )
+        action = Action.new(build_serializer(method, args))
         if mode == :signal
-          workflow.signal_workflow(activity, fires_at)
+          workflow.signal_workflow(action, fires_at)
         else
-          workflow.run_activity(activity, mode, fires_at)
+          workflow.run_activity(action, mode, fires_at)
         end
       end
 
       private
 
       attr_reader :workflowable, :workflow, :mode, :fires_at
+
+      def build_serializer(method, args)
+        workflowable.serializer.build(
+          build_name(method),
+          workflowable,
+          method,
+          args
+        )
+      end
 
       def build_name(method)
         if workflowable.is_a?(Class)
@@ -70,8 +73,8 @@ module Backbeat
     include Workflowable
     include Workflowable::InContext
 
-    def action
-      Action::FindableActivity
+    def serializer
+      Serializer::FindableActivity
     end
   end
 end

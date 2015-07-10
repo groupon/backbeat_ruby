@@ -1,6 +1,6 @@
 require "spec_helper"
 require "backbeat/workflowable"
-require "backbeat/action/activity"
+require "backbeat/serializer/activity"
 require "backbeat/workflow/local"
 
 describe Backbeat::Workflow::Local do
@@ -74,7 +74,7 @@ describe Backbeat::Workflow::Local do
     let(:now) { Time.now }
 
     it "runs a workflow locally" do
-      action = Backbeat::Action::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
+      action = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
       value, new_workflow = workflow.run_activity(action, :blocking)
       event = workflow.event_history.last
@@ -86,7 +86,7 @@ describe Backbeat::Workflow::Local do
     end
 
     it "runs the workflow locally on signal_workflow" do
-      action = Backbeat::Action::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
+      action = Backbeat::Serializer::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
 
       value, new_workflow = workflow.signal_workflow(action, now)
       event = workflow.event_history.last
@@ -98,7 +98,7 @@ describe Backbeat::Workflow::Local do
     end
 
     it "json parses the action arguments to ensure proper expectations during testing" do
-      action = Backbeat::Action::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
+      action = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
 
       value, new_workflow = workflow.run_activity(action, :blocking)
 

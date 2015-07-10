@@ -1,6 +1,6 @@
 require "spec_helper"
 require "support/memory_api"
-require "backbeat/action/activity"
+require "backbeat/serializer/activity"
 require "backbeat/packer"
 require "backbeat/workflow/remote"
 
@@ -89,7 +89,7 @@ describe Backbeat::Workflow::Remote do
       workflow_type: "Workflow"
     }}
 
-    let(:action) { Backbeat::Action::Activity.new(name: "Fake Action") }
+    let(:action) { Backbeat::Serializer::Activity.new(name: "Fake Action") }
     let(:now) { Time.now }
 
     it "raises an error if there is not an event id when running an activity" do

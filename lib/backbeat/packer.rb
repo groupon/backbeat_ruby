@@ -1,6 +1,7 @@
 require "backbeat"
-require "backbeat/action/activity"
-require "backbeat/action/findable_activity"
+require "backbeat/action"
+require "backbeat/serializer/activity"
+require "backbeat/serializer/findable_activity"
 require "active_support/inflector"
 
 module Backbeat
@@ -19,10 +20,10 @@ module Backbeat
 
     def self.unpack_action(data)
       action_data = data[:client_data][:action]
-      action_data[:class] = Inflector.constantize(action_data[:class].to_s)
+      action_data[:class] = Inflector.constantize(action_data[:class])
       action_data[:method] = action_data[:method].to_sym
-      action_klass = Inflector.constantize(action_data[:type])
-      action_klass.new(action_data)
+      serializer = Inflector.constantize(action_data[:serializer])
+      Action.new(serializer.new(action_data))
     end
 
     def self.pack_action(action, mode, fires_at = nil)

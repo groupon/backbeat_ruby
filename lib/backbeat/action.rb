@@ -2,8 +2,8 @@ require "backbeat/action/log_decorator"
 
 module Backbeat
   class Action
-    def self.build(workflowable, method, args)
-      action = new(workflowable, method, args)
+    def self.build(serializer)
+      action = new(serializer)
       if logger = Backbeat.config.logger
         LogDecorator.new(action, logger)
       else
@@ -11,10 +11,8 @@ module Backbeat
       end
     end
 
-    def initialize(workflowable, method, args)
-      @workflowable = workflowable
-      @method = method
-      @args = args
+    def initialize(serializer)
+      @serializer = serializer
     end
 
     def run(workflow)
@@ -30,8 +28,24 @@ module Backbeat
       raise
     end
 
+    def to_hash
+      serializer.to_hash
+    end
+
     private
 
-    attr_reader :workflowable, :method, :args
+    attr_reader :serializer
+
+    def workflowable
+      serializer.workflowable
+    end
+
+    def method
+      serializer.method
+    end
+
+    def args
+      serializer.args
+    end
   end
 end
