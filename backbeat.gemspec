@@ -1,6 +1,10 @@
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require "backbeat/version"
+
 Gem::Specification.new do |spec|
   spec.name          = "backbeat"
-  spec.version       = "1.0.0"
+  spec.version       = Backbeat::VERSION
   spec.authors       = ["FED"]
   spec.email         = ["fed@groupon.com"]
   spec.homepage      = "https://github.groupondevcom/finance-engineering/backbeat_ruby_client"
