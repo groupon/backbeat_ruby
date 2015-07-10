@@ -27,9 +27,9 @@ describe Backbeat::Action::FindableActivity do
   let(:object) { MyModel.new(id: 4, name: "A name") }
 
   it "returns a hash representation of itself" do
-    action = described_class.build("Yellow", object, :update_attributes, [{ name: "New name" }])
+    activity = described_class.build("Yellow", object, :update_attributes, [{ name: "New name" }])
 
-    expect(action.to_hash).to eq({
+    expect(activity.to_hash).to eq({
       type: "Backbeat::Action::FindableActivity",
       name: "Yellow",
       class: "MyModel",
@@ -40,16 +40,20 @@ describe Backbeat::Action::FindableActivity do
   end
 
   context "#run" do
-    let(:action_hash) {
-      described_class.build("Yellow", object, :update_attributes, [{ name: "New name" }]).to_hash
+    let(:activity) {
+      described_class.new(
+        name: "Yellow",
+        class: object.class,
+        id: object.id,
+        method: :update_attributes,
+        args: [{ name: "New name" }]
+      )
     }
-
-    let(:action) { described_class.new(action_hash) }
 
     let(:workflow) { Backbeat::Workflow::Local.new({ event_name: "Yellow" }) }
 
     it "calls the method on the object with the arguments" do
-      new_object = action.run(workflow)
+      new_object = activity.run(workflow)
 
       expect(new_object.id).to eq(4)
       expect(new_object.name).to eq("New name")

@@ -30,7 +30,7 @@ module Backbeat
       private
 
       def workflowable
-        Packer.constantize_maybe(klass).find(id)
+        klass.find(id)
       end
 
       def name
