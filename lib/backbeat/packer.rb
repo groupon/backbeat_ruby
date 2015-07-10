@@ -6,18 +6,6 @@ require "active_support/inflector"
 
 module Backbeat
   class Packer
-    def self.unpack_workflow(data)
-      workflow_data = {
-        name: data[:name],
-        workflow_type: data[:name],
-        workflow_id: data[:workflow_id],
-        event_id: data[:id],
-        subject: data[:subject],
-        decider: data[:decider]
-      }
-      Backbeat.workflow_type.new(workflow_data, Backbeat.api)
-    end
-
     def self.unpack_action(data)
       action_data = data[:client_data][:action]
       action_data[:class] = Inflector.constantize(action_data[:class])

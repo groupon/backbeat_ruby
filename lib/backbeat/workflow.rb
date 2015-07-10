@@ -10,8 +10,14 @@ module Backbeat
       action.run(workflow)
     end
 
-    def self.new(workflow_data)
-      Packer.unpack_workflow(workflow_data)
+    def self.new(workflow_data, state = Backbeat.api)
+      Backbeat.workflow_type.new(
+        workflow_data.merge({
+          workflow_type: workflow_data[:name],
+          event_id: workflow_data[:id]
+        }),
+        state
+      )
     end
   end
 end

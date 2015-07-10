@@ -14,15 +14,6 @@ describe Backbeat::Packer do
     end
   end
 
-  context ".unpack_workflow" do
-    it "returns a new instance of the configured workflow type" do
-      workflow = Backbeat::Packer.unpack_workflow({ workflow_id: 1 })
-      workflow.complete_workflow!
-
-      expect(api.find_workflow_by_id(1)[:complete]).to eq(true)
-    end
-  end
-
   context ".pack_action" do
     it "returns a the api representation of node data" do
       action = Backbeat::Serializer::Activity.build("Action", "Klass", :method, [])

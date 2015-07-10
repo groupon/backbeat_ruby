@@ -33,12 +33,12 @@ module Backbeat
       end
 
       def signal_workflow(action, fires_at = nil)
-        event_data = build_event_data(action, :blocking, fires_at)
+        event_data = Packer.pack_action(action, :blocking, fires_at)
         api.signal_workflow(workflow_id, event_data[:name], event_data)
       end
 
       def run_activity(action, mode, fires_at = nil)
-        event_data = build_event_data(action, mode, fires_at)
+        event_data = Packer.pack_action(action, mode, fires_at)
         api.add_child_event(event_id, event_data)
       end
 
@@ -60,10 +60,6 @@ module Backbeat
 
       def get_workflow_for_subject
         api.find_workflow_by_subject(current_node) || api.create_workflow(current_node)
-      end
-
-      def build_event_data(action, mode, fires_at)
-        Packer.pack_action(action, mode, fires_at)
       end
 
       class WorkflowError < StandardError; end

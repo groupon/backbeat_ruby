@@ -7,6 +7,17 @@ require "backbeat/serializer/activity"
 
 describe Backbeat::Workflow do
 
+  context ".new" do
+    it "returns the configured backbeat workflow type" do
+      Backbeat.config.context = :remote
+      workflow = Backbeat::Workflow.new({ name: "New Workflow", id: 1, workflow_id: 2 })
+      workflow.processing
+
+      expect(workflow).to be_a(Backbeat::Workflow::Remote)
+      expect(Backbeat.api.find_event_by_id(1)[:status]).to eq(:processing)
+    end
+  end
+
   context ".continue" do
 
     class MyArray
