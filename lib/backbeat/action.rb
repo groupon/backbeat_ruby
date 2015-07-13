@@ -13,6 +13,9 @@ module Backbeat
 
     def initialize(serializer)
       @serializer = serializer
+      @workflowable = serializer.workflowable
+      @method = serializer.method
+      @args = serializer.args
     end
 
     def run(workflow)
@@ -34,18 +37,6 @@ module Backbeat
 
     private
 
-    attr_reader :serializer
-
-    def workflowable
-      serializer.workflowable
-    end
-
-    def method
-      serializer.method
-    end
-
-    def args
-      serializer.args
-    end
+    attr_reader :serializer, :workflowable, :method, :args
   end
 end

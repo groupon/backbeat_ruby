@@ -19,11 +19,11 @@ module Backbeat
     end
 
     def workflow
-      @workflow ||= Workflow::Local.new({})
+      @workflow
     end
 
-    def with_context(workflow)
-      @workflow = workflow
+    def with_context(current_workflow)
+      @workflow = current_workflow
       yield
     end
 
@@ -61,7 +61,7 @@ module Backbeat
 
       def build_name(method)
         if workflowable.is_a?(Class)
-          "#{workflowable.to_s}.#{method}"
+          "#{workflowable.to_s}##{method}"
         else
           "#{workflowable.class.to_s}##{method}"
         end

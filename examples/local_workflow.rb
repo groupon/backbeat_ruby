@@ -77,7 +77,7 @@ PP.pp api.find_workflow_by_id(1)
 
 # Receive the decision data
 
-decision_data = api.find_workflow_by_id(1)[:signals]["AddSomething.add_3"]
+decision_data = api.find_workflow_by_id(1)[:signals]["AddSomething#add_3"]
 
 # Run the activity by continuing the workflow
 

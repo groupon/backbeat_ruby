@@ -14,7 +14,11 @@ describe Backbeat::Action do
     end
 
     def perform(a, b, c)
+      workflow.complete
       a + b + c
+    end
+
+    def finish
     end
   end
 
@@ -37,7 +41,7 @@ describe Backbeat::Action do
 
     it "sends a processing message to the workflow" do
       action.run(workflow)
-      event = workflow.event_history.last
+      event = workflow.event_history.first
 
       expect(event[:name]).to eq("Maths")
       expect(event[:statuses].first).to eq(:processing)
@@ -45,7 +49,7 @@ describe Backbeat::Action do
 
     it "sends a complete message to the workflow" do
       action.run(workflow)
-      event = workflow.event_history.last
+      event = workflow.event_history.first
 
       expect(event[:name]).to eq("Maths")
       expect(event[:statuses].last).to eq(:completed)
@@ -53,7 +57,7 @@ describe Backbeat::Action do
 
     it "sends an error message to the workflow on error" do
       serializer = Backbeat::Serializer::Activity.new({
-        workflowable: MyWorkflowable,
+        class: MyWorkflowable,
         method: :boom,
         args: []
       })

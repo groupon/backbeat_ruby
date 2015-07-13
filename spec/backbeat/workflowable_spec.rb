@@ -33,14 +33,14 @@ describe Backbeat::Workflowable do
     expect(event).to eq(
       {
         id: 2,
-        name: "Decider.decision_one",
+        name: "Decider#decision_one",
         mode: :blocking,
         type: :none,
         fires_at: now,
         client_data: {
           action: {
             serializer: "Backbeat::Serializer::Activity",
-            name: "Decider.decision_one",
+            name: "Decider#decision_one",
             class: "Decider",
             method: :decision_one,
             args: [:one, :two, :three]
@@ -48,14 +48,6 @@ describe Backbeat::Workflowable do
         }
       }
     )
-  end
-
-  it "defaults to a local workflow if the workflow is not already set" do
-    decider = Decider.new
-    result = decider.decision_one(1, 2, 3)
-
-    expect(result).to eq(3)
-    expect(decider.workflow.event_history.last[:name]).to eq("DoActivity.do_something")
   end
 
   it "sets the mode to blocking" do
@@ -84,9 +76,9 @@ describe Backbeat::Workflowable do
 
   it "signals the workflow with an action" do
     Decider.in_context(remote_workflow, :signal).decision_one(:one, :two, :three)
-    signal = api.find_workflow_by_id(1)[:signals]["Decider.decision_one"]
+    signal = api.find_workflow_by_id(1)[:signals]["Decider#decision_one"]
 
-    expect(signal[:name]).to eq("Decider.decision_one")
+    expect(signal[:name]).to eq("Decider#decision_one")
     expect(signal[:mode]).to eq(:blocking)
   end
 
