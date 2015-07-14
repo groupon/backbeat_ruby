@@ -47,9 +47,9 @@ describe Backbeat::Api do
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           }
-        }).and_return({ status: 401 })
+        }).and_return({ status: 401, body: "Unauthorized" })
 
-        expect { api.create_workflow({}) }.to raise_error Backbeat::Api::AuthenticationError
+        expect { api.create_workflow({}) }.to raise_error Backbeat::Api::AuthenticationError, "Unauthorized"
       end
     end
 
@@ -77,9 +77,9 @@ describe Backbeat::Api do
       it "raises a not found error if the workflow is not found" do
         expect(client).to receive(:get).with("/v2/workflows/5", {
           headers: { "Accept" => "application/json"}
-        }).and_return({ status: 404 })
+        }).and_return({ status: 404, body: { error: "Record not found" }.to_json})
 
-        expect { api.find_workflow_by_id(5) }.to raise_error Backbeat::Api::NotFoundError
+        expect { api.find_workflow_by_id(5) }.to raise_error Backbeat::Api::NotFoundError, { error: "Record not found" }.to_s
       end
     end
 
@@ -142,9 +142,9 @@ describe Backbeat::Api do
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           }
-        }).and_return({ status: 422 })
+        }).and_return({ status: 422, body: { error: "Invalid" }.to_json })
 
-        expect { api.signal_workflow(10, :my_signal, signal_data) }.to raise_error Backbeat::Api::ValidationError
+        expect { api.signal_workflow(10, :my_signal, signal_data) }.to raise_error Backbeat::Api::ValidationError, { error: "Invalid" }.to_s
       end
     end
 

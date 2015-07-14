@@ -34,10 +34,6 @@ module Backbeat
     end
   end
 
-  def self.api
-    config.api ||= default_api
-  end
-
   def self.workflow_type
     case context
     when :remote
@@ -45,6 +41,10 @@ module Backbeat
     when :local
       Workflow::Local
     end
+  end
+
+  def self.api
+    config.api ||= default_api
   end
 
   def self.default_api

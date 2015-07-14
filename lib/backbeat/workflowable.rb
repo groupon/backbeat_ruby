@@ -25,6 +25,8 @@ module Backbeat
     def with_context(current_workflow)
       @workflow = current_workflow
       yield
+    ensure
+      @workflow = nil
     end
 
     private

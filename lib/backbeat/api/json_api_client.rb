@@ -41,6 +41,8 @@ module Backbeat
 
       def parse_body(response)
         MultiJson.load(response[:body], symbolize_keys: true) if response[:body]
+      rescue MultiJson::ParseError
+        response[:body]
       end
 
       def handle_response(response, handlers)
@@ -54,13 +56,13 @@ module Backbeat
           when 201
             parse_body(response)
           when 401
-            raise AuthenticationError
+            raise AuthenticationError, parse_body(response)
           when 404
-            raise NotFoundError
+            raise NotFoundError, parse_body(response)
           when 422
-            raise ValidationError
+            raise ValidationError, parse_body(response)
           else
-            raise ApiError
+            raise ApiError, parse_body(response)
           end
         end
       end
