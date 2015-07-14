@@ -40,7 +40,7 @@ module Backbeat
       end
 
       def method_missing(method, *args)
-        action = Action.new(build_serializer(method, args))
+        action = Action.build(build_serializer(method, args))
         if mode == :signal
           workflow.signal_workflow(action, fires_at)
         else

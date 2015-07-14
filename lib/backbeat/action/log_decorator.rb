@@ -16,6 +16,10 @@ module Backbeat
         raise
       end
 
+      def to_hash
+        action.to_hash
+      end
+
       private
 
       attr_reader :action, :logger

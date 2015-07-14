@@ -11,6 +11,10 @@ describe Backbeat::Action::LogDecorator do
     def run(workflow)
       @run.call(workflow)
     end
+
+    def to_hash
+      { key: :val }
+    end
   end
 
   class MockLogger
@@ -50,5 +54,12 @@ describe Backbeat::Action::LogDecorator do
     expect(logger.msgs[:info].first[:name]).to eq(:action_started)
     expect(logger.msgs[:error].count).to eq(1)
     expect(logger.msgs[:error].last[:name]).to eq(:action_errored)
+  end
+
+  it "returns the action as a hash" do
+    action = MockAction.new { 1 }
+    decorator = described_class.new(action, logger)
+
+    expect(decorator.to_hash).to eq(action.to_hash)
   end
 end

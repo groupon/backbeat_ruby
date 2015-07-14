@@ -11,7 +11,7 @@ module Backbeat
       action_data[:class] = Inflector.constantize(action_data[:class])
       action_data[:method] = action_data[:method].to_sym
       serializer = Inflector.constantize(action_data[:serializer])
-      Action.new(serializer.new(action_data))
+      Action.build(serializer.new(action_data))
     end
 
     def self.pack_action(action, mode, fires_at = nil)
