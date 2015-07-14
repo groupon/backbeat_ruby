@@ -51,7 +51,7 @@ module Backbeat
       end
 
       def url(path)
-        host + path
+        "http://#{host}#{path}"
       end
     end
   end
