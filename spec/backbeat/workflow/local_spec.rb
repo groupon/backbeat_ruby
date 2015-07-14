@@ -5,55 +5,81 @@ require "backbeat/workflow/local"
 
 describe Backbeat::Workflow::Local do
 
-  it "returns the workflow event history" do
-    workflow = described_class.new({ event_name: "First Event" }, { event_history: [:one] })
-    history = workflow.event_history
+  context "#event_history" do
+    it "returns the workflow event history" do
+      workflow = described_class.new({ event_name: "First Event" }, { event_history: [:one] })
+      history = workflow.event_history
 
-    expect(history).to eq([:one])
-  end
-
-  it "marks an event as processing" do
-    workflow = described_class.new({ event_name: "First Event" })
-    workflow.event_processing
-
-    event = workflow.event_history.first
-    expect(event[:name]).to eq("First Event")
-    expect(event[:statuses]).to eq([:processing])
-  end
-
-  it "marks an event as completed" do
-    workflow = described_class.new({ event_name: "First Event" })
-    workflow.event_completed
-
-    event = workflow.event_history.first
-    expect(event[:statuses]).to eq([:completed])
-  end
-
-  it "marks an event and previous events as deactivated" do
-    workflow = described_class.new(
-      { event_name: "Second Event" },
-      { event_history: [{ name: "First Event", statuses: [] }] }
-    )
-    workflow.deactivate
-
-    workflow.event_history.each do |event|
-      expect(event[:statuses]).to eq([:deactivated])
+      expect(history).to eq([:one])
     end
   end
 
-  it "marks an event as errored" do
-    workflow = described_class.new({ event_name: "First Event" })
-    workflow.event_errored
+  context "#event_processing" do
+    it "marks an event as processing" do
+      workflow = described_class.new({ event_name: "First Event" })
+      workflow.event_processing
 
-    event = workflow.event_history.first
-    expect(event[:statuses]).to eq([:errored])
+      event = workflow.event_history.first
+      expect(event[:name]).to eq("First Event")
+      expect(event[:statuses]).to eq([:processing])
+    end
   end
 
-  it "completes a workflow" do
-    workflow = described_class.new({ event_name: "First Event" })
-    workflow.complete
+  context "#event_completed" do
+    it "marks an event as completed" do
+      workflow = described_class.new({ event_name: "First Event" })
+      workflow.event_completed
 
-    expect(workflow.event_history.last[:name]).to eq(:workflow_complete)
+      event = workflow.event_history.first
+      expect(event[:statuses]).to eq([:completed])
+    end
+  end
+
+  context "#event_errored" do
+    it "marks an event as errored" do
+      workflow = described_class.new({ event_name: "First Event" })
+      workflow.event_errored
+
+      event = workflow.event_history.first
+      expect(event[:statuses]).to eq([:errored])
+    end
+  end
+
+  context "#deactivate" do
+    it "marks an event and previous events as deactivated" do
+      workflow = described_class.new(
+        { event_name: "Second Event" },
+        { event_history: [{ name: "First Event", statuses: [] }] }
+      )
+      workflow.deactivate
+
+      workflow.event_history.each do |event|
+        expect(event[:statuses]).to eq([:deactivated])
+      end
+    end
+  end
+
+  context "#complete" do
+    it "completes a workflow" do
+      workflow = described_class.new({ event_name: "First Event" })
+      workflow.complete
+
+      expect(workflow.event_history.last[:name]).to eq(:workflow_complete)
+    end
+  end
+
+  context "#complete?" do
+    let(:workflow) { described_class.new({ event_name: "An event" }) }
+
+    it "returns false if the workflow is not complete" do
+      expect(workflow.complete?).to eq(false)
+    end
+
+    it "returns true if the workflow is complete" do
+      workflow.complete
+
+      expect(workflow.complete?).to eq(true)
+    end
   end
 
   class TheActivity

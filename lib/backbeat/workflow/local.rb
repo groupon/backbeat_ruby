@@ -1,12 +1,16 @@
 require "multi_json"
+require "securerandom"
 require "backbeat/packer"
 
 module Backbeat
   module Workflow
     class Local
+      attr_reader :id
+
       def initialize(current_node, state = {})
         @current_node = current_node
         @state = state
+        @id = current_node[:workflow_id] ||= SecureRandom.uuid
       end
 
       def event_processing
@@ -27,6 +31,10 @@ module Backbeat
 
       def event_history
         state[:event_history] ||= []
+      end
+
+      def complete?
+        !!event_history.find { |e| e[:name] == :workflow_complete }
       end
 
       def complete

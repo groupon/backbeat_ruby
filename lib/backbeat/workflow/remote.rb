@@ -3,9 +3,12 @@ require "backbeat/packer"
 module Backbeat
   module Workflow
     class Remote
+      attr_reader :id
+
       def initialize(current_node, api)
         @current_node = current_node
         @api = api
+        @id = current_node[:workflow_id] || get_workflow_for_subject[:id]
       end
 
       def event_processing
@@ -25,16 +28,20 @@ module Backbeat
       end
 
       def event_history
-        api.find_all_workflow_events(workflow_id)
+        api.find_all_workflow_events(id)
+      end
+
+      def complete?
+        api.find_workflow_by_id(id)[:complete]
       end
 
       def complete
-        api.complete_workflow(workflow_id)
+        api.complete_workflow(id)
       end
 
       def signal_workflow(action, fires_at = nil)
         event_data = Packer.pack_action(action, :blocking, fires_at)
-        api.signal_workflow(workflow_id, event_data[:name], event_data)
+        api.signal_workflow(id, event_data[:name], event_data)
       end
 
       def run_activity(action, mode, fires_at = nil)
@@ -52,10 +59,6 @@ module Backbeat
 
       def event_id
         current_node[:event_id] || workflow_error("No event id present in current workflow data")
-      end
-
-      def workflow_id
-        @workflow_id ||= current_node[:workflow_id] || get_workflow_for_subject[:id]
       end
 
       def get_workflow_for_subject

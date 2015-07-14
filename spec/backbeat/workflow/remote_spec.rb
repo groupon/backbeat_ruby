@@ -18,55 +18,82 @@ describe Backbeat::Workflow::Remote do
     )
   }
 
-  it "marks an event as processing" do
-    workflow = described_class.new({ event_id: 5 }, api)
-    workflow.event_processing
+  context "#event_processing" do
+    it "marks an event as processing" do
+      workflow = described_class.new({ event_id: 5 }, api)
+      workflow.event_processing
 
-    expect(api.find_event_by_id(5)[:status]).to eq(:processing)
+      expect(api.find_event_by_id(5)[:status]).to eq(:processing)
+    end
   end
 
-  it "marks an event as completed" do
-    workflow = described_class.new({ event_id: 6 }, api)
-    workflow.event_completed
+  context "#event_completed" do
+    it "marks an event as completed" do
+      workflow = described_class.new({ event_id: 6 }, api)
+      workflow.event_completed
 
-    expect(api.find_event_by_id(6)[:status]).to eq(:completed)
+      expect(api.find_event_by_id(6)[:status]).to eq(:completed)
+    end
   end
 
-  it "marks an event as errored" do
-    workflow = described_class.new({ event_id: 6 }, api)
-    workflow.event_errored
+  context "#event_errored" do
+    it "marks an event as errored" do
+      workflow = described_class.new({ event_id: 6 }, api)
+      workflow.event_errored
 
-    expect(api.find_event_by_id(6)[:status]).to eq(:errored)
+      expect(api.find_event_by_id(6)[:status]).to eq(:errored)
+    end
   end
 
-  it "marks an event and previous events as deactivated" do
-    workflow = described_class.new({ event_id: 6 }, api)
-    workflow.deactivate
+  context "#deactivate" do
+    it "marks an event and previous events as deactivated" do
+      workflow = described_class.new({ event_id: 6 }, api)
+      workflow.deactivate
 
-    expect(api.find_event_by_id(5)[:status]).to eq(:deactivated)
-    expect(api.find_event_by_id(6)[:status]).to eq(:deactivated)
+      expect(api.find_event_by_id(5)[:status]).to eq(:deactivated)
+      expect(api.find_event_by_id(6)[:status]).to eq(:deactivated)
+    end
   end
 
-  it "returns the workflow event history" do
-    workflow = described_class.new({ event_id: 6, workflow_id: 1 }, api)
-    history = workflow.event_history
+  context "#event_history" do
+    it "returns the workflow event history" do
+      workflow = described_class.new({ event_id: 6, workflow_id: 1 }, api)
+      history = workflow.event_history
 
-    expect(history).to eq([:event_1, :event_2, :event_3])
+      expect(history).to eq([:event_1, :event_2, :event_3])
+    end
   end
 
-  it "completes a workflow" do
-    workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
-    workflow.complete
+  context "#complete" do
+    it "completes a workflow" do
+      workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
+      workflow.complete
 
-    expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
+      expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
+    end
   end
 
-  it "resets the current node" do
-    workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
+  context "#complete?" do
+    let(:workflow) { described_class.new({ event_id: 6, workflow_id: 2 }, api) }
+    it "returns false if the workflow is not complete" do
+      expect(workflow.complete?).to eq(false)
+    end
 
-    workflow.reset_event
+    it "returns true if the workflow is complete" do
+      workflow.complete
 
-    expect(api.find_event_by_id(6)[:reset]).to eq(true)
+      expect(workflow.complete?).to eq(true)
+    end
+  end
+
+  context "#reset_event" do
+    it "resets the current node" do
+      workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
+
+      workflow.reset_event
+
+      expect(api.find_event_by_id(6)[:reset]).to eq(true)
+    end
   end
 
   context "running activities" do
