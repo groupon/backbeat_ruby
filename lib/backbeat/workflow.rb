@@ -1,4 +1,6 @@
 require "backbeat/packer"
+require "backbeat/workflow/local"
+require "backbeat/workflow/remote"
 
 module Backbeat
   module Workflow

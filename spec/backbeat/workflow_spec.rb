@@ -4,13 +4,21 @@ require "backbeat/packer"
 require "backbeat/workflowable"
 require "backbeat/action"
 require "backbeat/serializer/activity"
+require "support/memory_api"
 
 describe Backbeat::Workflow do
 
   context ".new" do
     it "returns the configured backbeat workflow type" do
-      Backbeat.config.context = :remote
+      Backbeat.configure do |config|
+        config.context = :remote
+        config.host = 'backbeat'
+        config.client_id = 'backbeat'
+        config.api = Backbeat::MemoryApi.new({})
+      end
+
       workflow = Backbeat::Workflow.new({ name: "New Workflow", id: 1, workflow_id: 2 })
+
       workflow.event_processing
 
       expect(workflow).to be_a(Backbeat::Workflow::Remote)

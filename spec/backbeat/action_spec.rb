@@ -2,6 +2,7 @@ require "spec_helper"
 require "backbeat/action"
 require "backbeat/serializer/activity"
 require "backbeat/workflowable"
+require "backbeat/workflow/local"
 require "support/mock_logger"
 
 describe Backbeat::Action do

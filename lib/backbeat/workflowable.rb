@@ -1,6 +1,5 @@
 require "backbeat/serializer/activity"
 require "backbeat/serializer/findable_activity"
-require "backbeat/workflow/local"
 
 module Backbeat
   module Workflowable
