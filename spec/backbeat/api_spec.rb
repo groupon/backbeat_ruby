@@ -57,12 +57,12 @@ describe Backbeat::Api do
       it "finds a workflow by id" do
         workflow_data = {
           id: 5,
-          workflow_id: 5,
-          parent_id: nil,
+          workflowId: 5,
+          parentId: nil,
           name: "My Workflow",
           subject: "Subject",
           decider: "Decider",
-          user_id: "123"
+          userId: "123"
         }
 
         expect(client).to receive(:get).with("/v2/workflows/5", {
@@ -71,13 +71,13 @@ describe Backbeat::Api do
 
         workflow = api.find_workflow_by_id(5)
 
-        expect(workflow).to eq(workflow_data)
+        expect(workflow).to eq(Backbeat::Packer.underscore_keys(workflow_data))
       end
 
       it "raises a not found error if the workflow is not found" do
         expect(client).to receive(:get).with("/v2/workflows/5", {
           headers: { "Accept" => "application/json"}
-        }).and_return({ status: 404, body: { error: "Record not found" }.to_json})
+        }).and_return({ status: 404, body: MultiJson.dump({ error: "Record not found" })})
 
         expect { api.find_workflow_by_id(5) }.to raise_error Backbeat::Api::NotFoundError, { error: "Record not found" }.to_s
       end
@@ -93,9 +93,9 @@ describe Backbeat::Api do
       let(:workflow_data) {
         workflow_query.merge(
           id: 5,
-          workflow_id: 5,
-          parent_id: nil,
-          user_id: "123"
+          workflowId: 5,
+          parentId: nil,
+          userId: "123"
         )
       }
 
@@ -107,7 +107,7 @@ describe Backbeat::Api do
 
         workflow = api.find_workflow_by_subject(workflow_query)
 
-        expect(workflow).to eq(workflow_data)
+        expect(workflow).to eq(Backbeat::Packer.underscore_keys(workflow_data))
       end
 
       it "returns false if the workflow is not found" do
@@ -142,7 +142,7 @@ describe Backbeat::Api do
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           }
-        }).and_return({ status: 422, body: { error: "Invalid" }.to_json })
+        }).and_return({ status: 422, body: MultiJson.dump({ error: "Invalid" })})
 
         expect { api.signal_workflow(10, :my_signal, signal_data) }.to raise_error Backbeat::Api::ValidationError, { error: "Invalid" }.to_s
       end
@@ -165,12 +165,12 @@ describe Backbeat::Api do
       it "gets the workflow children" do
         child_data = [{
           id: 5,
-          workflow_id: 5,
-          parent_id: nil,
+          workflowId: 5,
+          parentId: nil,
           name: "My Activity",
           subject: "Subject",
           decider: "Decider",
-          user_id: "123"
+          userId: "123"
         }]
 
         expect(client).to receive(:get).with("/v2/workflows/5/children", {
@@ -179,7 +179,7 @@ describe Backbeat::Api do
 
         children = api.find_all_workflow_children(5)
 
-        expect(children).to eq(child_data)
+        expect(children).to eq(Backbeat::Packer.underscore_keys(child_data))
       end
     end
 
@@ -188,11 +188,11 @@ describe Backbeat::Api do
         event_data = [{
           id: 5,
           workflow_id: 5,
-          parent_id: nil,
+          parentId: nil,
           name: "My Activity",
           subject: "Subject",
           decider: "Decider",
-          user_id: "123"
+          userId: "123"
         }]
 
         expect(client).to receive(:get).with("/v2/workflows/3/events", {
@@ -201,7 +201,7 @@ describe Backbeat::Api do
 
         events = api.find_all_workflow_events(3)
 
-        expect(events).to eq(event_data)
+        expect(events).to eq(Backbeat::Packer.underscore_keys(event_data))
       end
     end
 

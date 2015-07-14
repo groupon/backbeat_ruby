@@ -1,5 +1,6 @@
 require "multi_json"
 require "backbeat/api/errors"
+require "backbeat/packer"
 
 module Backbeat
   class Api
@@ -40,7 +41,11 @@ module Backbeat
       attr_reader :http_client
 
       def parse_body(response)
-        MultiJson.load(response[:body], symbolize_keys: true) if response[:body]
+        if response[:body]
+          Packer.underscore_keys(
+            MultiJson.load(response[:body], symbolize_keys: true)
+          )
+        end
       rescue MultiJson::ParseError
         response[:body]
       end
