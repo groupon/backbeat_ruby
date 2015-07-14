@@ -10,14 +10,17 @@ module Backbeat
       action.run(workflow)
     end
 
-    def self.new(workflow_data, state = Backbeat.api)
-      Backbeat.workflow_type.new(
-        workflow_data.merge({
-          workflow_type: workflow_data[:name],
-          event_id: workflow_data[:id]
-        }),
-        state
-      )
+    def self.new(workflow_data)
+      data = workflow_data.merge({
+        workflow_type: workflow_data[:name],
+        event_id: workflow_data[:id]
+      })
+      case Backbeat.config.context
+      when :remote
+        Workflow::Remote.new(data, Backbeat.config.api)
+      when :local
+        Workflow::Local.new(data, {})
+      end
     end
   end
 end

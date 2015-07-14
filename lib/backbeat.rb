@@ -7,14 +7,34 @@ require "backbeat/workflow/remote"
 
 module Backbeat
   class Config
+    class ConfigurationError < StandardError; end
+
     attr_accessor :context
     attr_accessor :host
     attr_accessor :client_id
-    attr_accessor :api
     attr_accessor :logger
-  end
 
-  class ConfigurationError < StandardError; end
+    attr_writer :context
+    def context
+      @context || (
+        raise ConfigurationError.new("Context not configured")
+      )
+    end
+
+    attr_writer :api
+    def api
+      @api ||= (
+        case context
+        when :remote
+          Api.new(Api::HttpClient.new(host, client_id))
+        when :local
+          {}
+        else
+          raise ConfigurationError.new("Unknown default api for context #{context}")
+        end
+      )
+    end
+  end
 
   def self.configure
     @config = Config.new
@@ -24,38 +44,6 @@ module Backbeat
 
   def self.config
     @config ||= Config.new
-  end
-
-  def self.context
-    if config.context
-      config.context
-    else
-      raise ConfigurationError.new("Context not configured")
-    end
-  end
-
-  def self.workflow_type
-    case context
-    when :remote
-      Workflow::Remote
-    when :local
-      Workflow::Local
-    end
-  end
-
-  def self.api
-    config.api ||= default_api
-  end
-
-  def self.default_api
-    case context
-    when :remote
-      Api.new(Api::HttpClient.new(config.host, config.client_id))
-    when :local
-      {}
-    else
-      raise ConfigurationError.new("Unknown default api for context #{context}")
-    end
   end
 
   def self.local

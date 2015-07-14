@@ -14,7 +14,7 @@ describe Backbeat::Workflow do
       workflow.processing
 
       expect(workflow).to be_a(Backbeat::Workflow::Remote)
-      expect(Backbeat.api.find_event_by_id(1)[:status]).to eq(:processing)
+      expect(Backbeat.config.api.find_event_by_id(1)[:status]).to eq(:processing)
     end
   end
 

@@ -32,7 +32,7 @@ describe Backbeat do
       config.api = { events: [1, 2] }
     end
 
-    expect(Backbeat.api).to eq({ events: [1, 2] })
+    expect(Backbeat.config.api).to eq({ events: [1, 2] })
   end
 
   require "logger"
@@ -48,28 +48,12 @@ describe Backbeat do
     expect(logger.level).to eq(Logger::WARN)
   end
 
-  it "returns the correct workflow type for a remote context" do
-    Backbeat.configure do |config|
-      config.context = :remote
-    end
-
-    expect(Backbeat.workflow_type).to eq(Backbeat::Workflow::Remote)
-  end
-
-  it "returns the correct workflow type for a local context" do
-    Backbeat.configure do |config|
-      config.context = :local
-    end
-
-    expect(Backbeat.workflow_type).to eq(Backbeat::Workflow::Local)
-  end
-
   it "defaults to the backbeat api in a remote context" do
     Backbeat.configure do |config|
       config.context = :remote
     end
 
-    expect(Backbeat.api).to be_a(Backbeat::Api)
+    expect(Backbeat.config.api).to be_a(Backbeat::Api)
   end
 
   it "defaults to an empty hash in a local context" do
@@ -77,7 +61,7 @@ describe Backbeat do
       config.context = :local
     end
 
-    expect(Backbeat.api).to eq({})
+    expect(Backbeat.config.api).to eq({})
   end
 
   it "raises an error if the context is unknown" do
@@ -85,19 +69,19 @@ describe Backbeat do
       config.context = :foo
     end
 
-    expect { Backbeat.api }.to raise_error Backbeat::ConfigurationError
+    expect { Backbeat.config.api }.to raise_error Backbeat::Config::ConfigurationError
   end
 
-  it "raises an error if the default context is not configured" do
+  it "raises an error if the context is not configured" do
     Backbeat.configure { |_| }
 
-    expect { Backbeat.context }.to raise_error Backbeat::ConfigurationError
+    expect { Backbeat.config.context }.to raise_error Backbeat::Config::ConfigurationError
 
     Backbeat.configure do |config|
       config.context = :local
     end
 
-    expect { Backbeat.context }.to_not raise_error
+    expect { Backbeat.config.context }.to_not raise_error
   end
 
   it "yields a local workflow to use" do
