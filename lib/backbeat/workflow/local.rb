@@ -9,19 +9,19 @@ module Backbeat
         @state = state
       end
 
-      def processing
+      def event_processing
         add_event_status(:processing)
       end
 
-      def complete
+      def event_completed
         add_event_status(:completed)
       end
 
-      def errored
+      def event_errored
         add_event_status(:errored)
       end
 
-      def deactivated
+      def deactivate
         add_event_status(:deactivated)
       end
 
@@ -29,7 +29,7 @@ module Backbeat
         state[:event_history] ||= []
       end
 
-      def complete_workflow!
+      def complete
         event_history << { name: :workflow_complete }
       end
 

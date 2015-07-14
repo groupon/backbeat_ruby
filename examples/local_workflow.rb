@@ -9,7 +9,7 @@ class SubtractSomething
     new_total = total - x - y
     SubtractSomething.in_context(workflow, :non_blocking).subtract_3(3, 1, 1, new_total)
     SubtractSomething.in_context(workflow).subtract_3(1, 2, 1, new_total)
-    workflow.complete_workflow!
+    workflow.complete
     :done
   end
 

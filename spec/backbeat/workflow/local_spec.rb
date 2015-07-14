@@ -14,16 +14,16 @@ describe Backbeat::Workflow::Local do
 
   it "marks an event as processing" do
     workflow = described_class.new({ event_name: "First Event" })
-    workflow.processing
+    workflow.event_processing
 
     event = workflow.event_history.first
     expect(event[:name]).to eq("First Event")
     expect(event[:statuses]).to eq([:processing])
   end
 
-  it "marks an event as complete" do
+  it "marks an event as completed" do
     workflow = described_class.new({ event_name: "First Event" })
-    workflow.complete
+    workflow.event_completed
 
     event = workflow.event_history.first
     expect(event[:statuses]).to eq([:completed])
@@ -34,7 +34,7 @@ describe Backbeat::Workflow::Local do
       { event_name: "Second Event" },
       { event_history: [{ name: "First Event", statuses: [] }] }
     )
-    workflow.deactivated
+    workflow.deactivate
 
     workflow.event_history.each do |event|
       expect(event[:statuses]).to eq([:deactivated])
@@ -43,7 +43,7 @@ describe Backbeat::Workflow::Local do
 
   it "marks an event as errored" do
     workflow = described_class.new({ event_name: "First Event" })
-    workflow.errored
+    workflow.event_errored
 
     event = workflow.event_history.first
     expect(event[:statuses]).to eq([:errored])
@@ -51,7 +51,7 @@ describe Backbeat::Workflow::Local do
 
   it "completes a workflow" do
     workflow = described_class.new({ event_name: "First Event" })
-    workflow.complete_workflow!
+    workflow.complete
 
     expect(workflow.event_history.last[:name]).to eq(:workflow_complete)
   end

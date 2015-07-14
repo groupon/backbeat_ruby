@@ -20,28 +20,28 @@ describe Backbeat::Workflow::Remote do
 
   it "marks an event as processing" do
     workflow = described_class.new({ event_id: 5 }, api)
-    workflow.processing
+    workflow.event_processing
 
     expect(api.find_event_by_id(5)[:status]).to eq(:processing)
   end
 
-  it "marks an event as complete" do
+  it "marks an event as completed" do
     workflow = described_class.new({ event_id: 6 }, api)
-    workflow.complete
+    workflow.event_completed
 
     expect(api.find_event_by_id(6)[:status]).to eq(:completed)
   end
 
   it "marks an event as errored" do
     workflow = described_class.new({ event_id: 6 }, api)
-    workflow.errored
+    workflow.event_errored
 
     expect(api.find_event_by_id(6)[:status]).to eq(:errored)
   end
 
   it "marks an event and previous events as deactivated" do
     workflow = described_class.new({ event_id: 6 }, api)
-    workflow.deactivated
+    workflow.deactivate
 
     expect(api.find_event_by_id(5)[:status]).to eq(:deactivated)
     expect(api.find_event_by_id(6)[:status]).to eq(:deactivated)
@@ -56,7 +56,7 @@ describe Backbeat::Workflow::Remote do
 
   it "completes a workflow" do
     workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
-    workflow.complete_workflow!
+    workflow.complete
 
     expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
   end

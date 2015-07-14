@@ -11,7 +11,7 @@ describe Backbeat::Workflow do
     it "returns the configured backbeat workflow type" do
       Backbeat.config.context = :remote
       workflow = Backbeat::Workflow.new({ name: "New Workflow", id: 1, workflow_id: 2 })
-      workflow.processing
+      workflow.event_processing
 
       expect(workflow).to be_a(Backbeat::Workflow::Remote)
       expect(Backbeat.config.api.find_event_by_id(1)[:status]).to eq(:processing)

@@ -86,7 +86,7 @@ describe Backbeat do
 
   it "yields a local workflow to use" do
     Backbeat.local do |workflow|
-      workflow.complete_workflow!
+      workflow.complete
 
       expect(workflow.event_history.last[:name]).to eq(:workflow_complete)
     end

@@ -8,19 +8,19 @@ module Backbeat
         @api = api
       end
 
-      def processing
+      def event_processing
         api.update_event_status(event_id, :processing)
       end
 
-      def complete
+      def event_completed
         api.update_event_status(event_id, :completed)
       end
 
-      def errored
+      def event_errored
         api.update_event_status(event_id, :errored)
       end
 
-      def deactivated
+      def deactivate
         api.update_event_status(event_id, :deactivated)
       end
 
@@ -28,7 +28,7 @@ module Backbeat
         api.find_all_workflow_events(workflow_id)
       end
 
-      def complete_workflow!
+      def complete
         api.complete_workflow(workflow_id)
       end
 
