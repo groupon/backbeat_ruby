@@ -67,12 +67,9 @@ end
 
 puts "\nSimulating signalling the workflow"
 
-workflow_data = { name: :bob, decider: "Adding something", subject: "a subject" }
+workflow = AddSomething.start_context("The workflow subject goes here").add_3(1, 2, 3, 50)
 
-workflow = Backbeat::Workflow.new(workflow_data)
-AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
-
-puts "Remote workflow state"
+puts "Remote workflow state:"
 PP.pp api.find_workflow_by_id(1)
 
 # Receive the decision data
@@ -93,10 +90,12 @@ end
 
 # Sending a signal runs the complete workflow
 
-workflow = Backbeat::Workflow.new(workflow_data)
 puts "\nRunning the workflow locally"
 
-AddSomething.in_context(workflow, :signal).add_3(1, 2, 3, 50)
+Deal = Struct.new(:id)
+deal = Deal.new(5)
 
-puts "Local workflow history"
+workflow = AddSomething.start_context(deal).add_3(1, 2, 3, 50)
+
+puts "Local workflow history:"
 PP.pp workflow.event_history

@@ -25,67 +25,101 @@ describe Backbeat::Workflowable do
   let(:remote_workflow) { Backbeat::Workflow::Remote.new({ event_id: 1 }, api) }
   let(:now) { Time.now }
 
-  it "runs an activity in the set workflow" do
-    Decider.in_context(remote_workflow, :blocking, now).decision_one(:one, :two, :three)
-    event_id = api.find_event_by_id(1)[:child_events].first
-    event = api.find_event_by_id(event_id)
+  context ".in_context" do
+    it "runs an activity in the set workflow" do
+      Decider.in_context(remote_workflow, :blocking, now).decision_one(:one, :two, :three)
+      event_id = api.find_event_by_id(1)[:child_events].first
+      event = api.find_event_by_id(event_id)
 
-    expect(event).to eq(
-      {
-        id: 2,
-        name: "Decider#decision_one",
-        mode: :blocking,
-        type: :none,
-        fires_at: now,
-        client_data: {
-          action: {
-            serializer: "Backbeat::Serializer::Activity",
-            name: "Decider#decision_one",
-            class: "Decider",
-            method: :decision_one,
-            args: [:one, :two, :three]
+      expect(event).to eq(
+        {
+          id: 2,
+          name: "Decider#decision_one",
+          mode: :blocking,
+          type: :none,
+          fires_at: now,
+          client_data: {
+            action: {
+              serializer: "Backbeat::Serializer::Activity",
+              name: "Decider#decision_one",
+              class: "Decider",
+              method: :decision_one,
+              args: [:one, :two, :three]
+            }
           }
         }
-      }
-    )
+      )
+    end
+
+    it "sets the mode to blocking" do
+      Decider.in_context(remote_workflow).decision_one(:one, :two, :three)
+      event_id = api.find_event_by_id(1)[:child_events].first
+      event = api.find_event_by_id(event_id)
+
+      expect(event[:mode]).to eq(:blocking)
+    end
+
+    it "sets the mode to non_blocking" do
+      Decider.in_context(remote_workflow, :non_blocking).decision_one(:one, :two, :three)
+      event_id = api.find_event_by_id(1)[:child_events].first
+      event = api.find_event_by_id(event_id)
+
+      expect(event[:mode]).to eq(:non_blocking)
+    end
+
+    it "sets the mode to fire_and_forget" do
+      Decider.in_context(remote_workflow, :fire_and_forget).decision_one(:one, :two, :three)
+      event_id = api.find_event_by_id(1)[:child_events].first
+      event = api.find_event_by_id(event_id)
+
+      expect(event[:mode]).to eq(:fire_and_forget)
+    end
+
+    it "signals the workflow with an action" do
+      Decider.in_context(remote_workflow, :signal).decision_one(:one, :two, :three)
+      signal = api.find_workflow_by_id(1)[:signals]["Decider#decision_one"]
+
+      expect(signal[:name]).to eq("Decider#decision_one")
+      expect(signal[:mode]).to eq(:blocking)
+    end
   end
 
-  it "sets the mode to blocking" do
-    Decider.in_context(remote_workflow).decision_one(:one, :two, :three)
-    event_id = api.find_event_by_id(1)[:child_events].first
-    event = api.find_event_by_id(event_id)
+  context ".start_context" do
+    before do
+      Backbeat.configure do |config|
+        config.context = :remote
+        config.api = api
+      end
+    end
 
-    expect(event[:mode]).to eq(:blocking)
-  end
+    it "runs the activity on a new workflow for the subject" do
+      subject = { id: 1, class: Array }
 
-  it "sets the mode to non_blocking" do
-    Decider.in_context(remote_workflow, :non_blocking).decision_one(:one, :two, :three)
-    event_id = api.find_event_by_id(1)[:child_events].first
-    event = api.find_event_by_id(event_id)
+      Decider.start_context(subject).decision_one(:one, :two, :three)
 
-    expect(event[:mode]).to eq(:non_blocking)
-  end
-
-  it "sets the mode to fire_and_forget" do
-    Decider.in_context(remote_workflow, :fire_and_forget).decision_one(:one, :two, :three)
-    event_id = api.find_event_by_id(1)[:child_events].first
-    event = api.find_event_by_id(event_id)
-
-    expect(event[:mode]).to eq(:fire_and_forget)
-  end
-
-  it "signals the workflow with an action" do
-    Decider.in_context(remote_workflow, :signal).decision_one(:one, :two, :three)
-    signal = api.find_workflow_by_id(1)[:signals]["Decider#decision_one"]
-
-    expect(signal[:name]).to eq("Decider#decision_one")
-    expect(signal[:mode]).to eq(:blocking)
+      workflow = api.find_workflow_by_subject({ subject: subject.to_json })
+      expect(workflow[:id]).to eq(1)
+      expect(workflow[:name]).to eq("Decider")
+      expect(workflow[:subject]).to eq(subject.to_json)
+      expect(workflow[:signals].count).to eq(1)
+    end
   end
 
   context "worklflowable model" do
 
-    class MyModel
+    class WorkflowableModel
       include Backbeat::WorkflowableModel
+
+      def self.records
+        @records ||= []
+      end
+
+      def self.find(id)
+        records.fetch(id) do
+          records[id] = new(id: id, name: "A findable object")
+          records[id]
+        end
+      end
 
       attr_reader :id, :name
 
@@ -94,16 +128,12 @@ describe Backbeat::Workflowable do
         @name = attrs[:name]
       end
 
-      def self.find(id)
-        new(id: id, name: "A findable object")
-      end
-
       def update_attributes(attrs)
-        MyModel.new({ id: id }.merge(attrs))
+        WorkflowableModel.records[id] = WorkflowableModel.new({ id: id }.merge(attrs))
       end
     end
 
-    let(:object) { MyModel.new(id: 10, name: "Lime") }
+    let(:object) { WorkflowableModel.new(id: 10, name: "Lime") }
 
     it "runs activities on an findable instance of a class" do
       object.in_context(remote_workflow).update_attributes({ name: "Lemon" })
@@ -113,15 +143,15 @@ describe Backbeat::Workflowable do
       expect(event).to eq(
         {
           id: 2,
-          name: "MyModel#update_attributes",
+          name: "WorkflowableModel#update_attributes",
           mode: :blocking,
           type: :none,
           fires_at: nil,
           client_data: {
             action: {
               serializer: "Backbeat::Serializer::FindableActivity",
-              name: "MyModel#update_attributes",
-              class: "MyModel",
+              name: "WorkflowableModel#update_attributes",
+              class: "WorkflowableModel",
               id: 10,
               method: :update_attributes,
               args: [{ name: "Lemon" }]
@@ -133,10 +163,10 @@ describe Backbeat::Workflowable do
 
     it "can run in a local context" do
       Backbeat.local do |workflow|
-        result = object.in_context(workflow).update_attributes({ name: "Orange" })
+        workflow = object.in_context(workflow).update_attributes({ name: "Orange" })
 
-        expect(result.name).to eq("Orange")
-        expect(workflow.event_history.last[:name]).to eq("MyModel#update_attributes")
+        expect(WorkflowableModel.find(10).name).to eq("Orange")
+        expect(workflow.event_history.last[:name]).to eq("WorkflowableModel#update_attributes")
       end
     end
   end

@@ -7,7 +7,11 @@ module Backbeat
     def create_workflow(data)
       last_id = workflows.keys.sort.last || 0
       new_id = last_id + 1
-      workflow = { id: new_id, subject: data[:subject] }
+      workflow = {
+        id: new_id,
+        subject: data[:subject],
+        name: (data[:name] || data[:workflow_type]).to_s
+      }
       workflows[new_id] = workflow
       workflow
     end

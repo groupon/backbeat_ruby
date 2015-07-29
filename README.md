@@ -60,9 +60,8 @@ end
 Signal the workflow:
 
 ```ruby
-subject = Order.last.to_hash
-workflow = Backbeat::Workflow.new(subject: subject, decider: "MyDecider", name: "My Workflow")
-MyDecider.in_context(workflow, :signal).my_decision(subject)
+order = Order.last
+MyDecider.start_context(order).my_decision(subject)
 ```
 
 Continue the workflow from your app's activity endpoint. This should match the endpoint
@@ -83,16 +82,15 @@ Backbeat.configure do |config|
   config.context = :local
 end
 
-subject = Order.last.to_hash
-workflow = Backbeat::Workflow.new(subject: subject, decider: "MyDecider")
-MyDecider.in_context(workflow, :signal).my_decision(subject)
+order = Order.last
+MyDecider.start_context(order).my_decision(subject)
 ```
 
 Or:
 
 ```ruby
 Backbeat.local do |workflow|
-  subject = Order.last.to_hash
-  MyDecider.in_context(workflow, :signal).my_decision(subject)
+  order = Order.last
+  MyDecider.start_context(order).my_decision(subject)
 end
 ```

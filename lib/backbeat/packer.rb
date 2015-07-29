@@ -27,6 +27,21 @@ module Backbeat
       }
     end
 
+    def self.subject_to_string(subject)
+      case
+      when subject.is_a?(String)
+        subject
+      when subject.is_a?(Hash)
+        subject.to_json
+      when subject.respond_to?(:id)
+        { id: subject.id, class: subject.class }.to_json
+      when subject.respond_to?(:to_hash)
+        subject.to_hash.to_json
+      else
+        subject.to_json
+      end
+    end
+
     def self.underscore_keys(data)
       case data
       when Array

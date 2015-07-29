@@ -8,6 +8,15 @@ module Backbeat
         ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
       end
 
+      def start_context(subject, fires_at = nil)
+        workflow = Workflow.new({
+          subject: Packer.subject_to_string(subject),
+          decider: self,
+          name: self
+        })
+        in_context(workflow, :signal, fires_at)
+      end
+
       def serializer
         Serializer::Activity
       end
@@ -45,6 +54,7 @@ module Backbeat
         else
           workflow.run_activity(action, mode, fires_at)
         end
+        workflow
       end
 
       private
