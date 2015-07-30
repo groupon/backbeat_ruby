@@ -29,7 +29,7 @@ Backbeat.configure do |config|
 end
 ```
 
-Create some decider/activity/decision classes:
+Create some workflowable classes:
 
 ```ruby
 class MyActivities
@@ -46,7 +46,7 @@ end
 class MyDecider
   include Backbeat::Workflowable
 
-  def my_decision(subject)
+  def the_first_activity(subject)
     customer = FindCustomer.call(subject)
     if subject[:type] == :one
       MyActivities.in_context(workflow).activity_one(subject, customer)
@@ -61,7 +61,7 @@ Signal the workflow:
 
 ```ruby
 order = Order.last
-MyDecider.start_context(order).my_decision(subject)
+MyDecider.start_context(order).the_first_activity(subject)
 ```
 
 Continue the workflow from your app's activity endpoint. This should match the endpoint

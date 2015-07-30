@@ -5,71 +5,71 @@ require "backbeat/workflow/local"
 
 describe Backbeat::Workflow::Local do
 
-  context "#event_history" do
-    it "returns the workflow event history" do
-      workflow = described_class.new({ event_name: "First Event" }, { event_history: [:one] })
-      history = workflow.event_history
+  context "#activity_history" do
+    it "returns the workflow activity history" do
+      workflow = described_class.new({ activity_name: "First activity" }, { activity_history: [:one] })
+      history = workflow.activity_history
 
       expect(history).to eq([:one])
     end
   end
 
-  context "#event_processing" do
-    it "marks an event as processing" do
-      workflow = described_class.new({ event_name: "First Event" })
-      workflow.event_processing
+  context "#activity_processing" do
+    it "marks an activity as processing" do
+      workflow = described_class.new({ activity_name: "First activity" })
+      workflow.activity_processing
 
-      event = workflow.event_history.first
-      expect(event[:name]).to eq("First Event")
-      expect(event[:statuses]).to eq([:processing])
+      activity = workflow.activity_history.first
+      expect(activity[:name]).to eq("First activity")
+      expect(activity[:statuses]).to eq([:processing])
     end
   end
 
-  context "#event_completed" do
-    it "marks an event as completed" do
-      workflow = described_class.new({ event_name: "First Event" })
-      workflow.event_completed
+  context "#activity_completed" do
+    it "marks an activity as completed" do
+      workflow = described_class.new({ activity_name: "First activity" })
+      workflow.activity_completed
 
-      event = workflow.event_history.first
-      expect(event[:statuses]).to eq([:completed])
+      activity = workflow.activity_history.first
+      expect(activity[:statuses]).to eq([:completed])
     end
   end
 
-  context "#event_errored" do
-    it "marks an event as errored" do
-      workflow = described_class.new({ event_name: "First Event" })
-      workflow.event_errored
+  context "#activity_errored" do
+    it "marks an activity as errored" do
+      workflow = described_class.new({ activity_name: "First activity" })
+      workflow.activity_errored
 
-      event = workflow.event_history.first
-      expect(event[:statuses]).to eq([:errored])
+      activity = workflow.activity_history.first
+      expect(activity[:statuses]).to eq([:errored])
     end
   end
 
   context "#deactivate" do
-    it "marks an event and previous events as deactivated" do
+    it "marks an activity and previous activities as deactivated" do
       workflow = described_class.new(
-        { event_name: "Second Event" },
-        { event_history: [{ name: "First Event", statuses: [] }] }
+        { activity_name: "Second activity" },
+        { activity_history: [{ name: "First activity", statuses: [] }] }
       )
       workflow.deactivate
 
-      workflow.event_history.each do |event|
-        expect(event[:statuses]).to eq([:deactivated])
+      workflow.activity_history.each do |activity|
+        expect(activity[:statuses]).to eq([:deactivated])
       end
     end
   end
 
   context "#complete" do
     it "completes a workflow" do
-      workflow = described_class.new({ event_name: "First Event" })
+      workflow = described_class.new({ activity_name: "First activity" })
       workflow.complete
 
-      expect(workflow.event_history.last[:name]).to eq(:workflow_complete)
+      expect(workflow.activity_history.last[:name]).to eq(:workflow_complete)
     end
   end
 
   context "#complete?" do
-    let(:workflow) { described_class.new({ event_name: "An event" }) }
+    let(:workflow) { described_class.new({ activity_name: "An activity" }) }
 
     it "returns false if the workflow is not complete" do
       expect(workflow.complete?).to eq(false)
@@ -96,31 +96,31 @@ describe Backbeat::Workflow::Local do
   end
 
   context "running activities" do
-    let(:workflow) { described_class.new({ event_name: "First Event", workflow_id: 2 }) }
+    let(:workflow) { described_class.new({ activity_name: "First activity", workflow_id: 2 }) }
     let(:now) { Time.now }
 
     it "runs a workflow locally" do
       action = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
       value, new_workflow = workflow.run_activity(action, :blocking)
-      event = workflow.event_history.last
+      activity = workflow.activity_history.last
 
       expect(value).to eq(33)
-      expect(event[:name]).to eq("Adding")
-      expect(event[:action]).to eq(action.to_hash)
-      expect(event[:statuses].last).to eq(:completed)
+      expect(activity[:name]).to eq("Adding")
+      expect(activity[:action]).to eq(action.to_hash)
+      expect(activity[:statuses].last).to eq(:completed)
     end
 
     it "runs the workflow locally on signal_workflow" do
       action = Backbeat::Serializer::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
 
       value, new_workflow = workflow.signal_workflow(action, now)
-      event = workflow.event_history.last
+      activity = workflow.activity_history.last
 
       expect(value).to eq(6)
-      expect(event[:name]).to eq("MATH")
-      expect(event[:action]).to eq(action.to_hash)
-      expect(event[:statuses].last).to eq(:completed)
+      expect(activity[:name]).to eq("MATH")
+      expect(activity[:action]).to eq(action.to_hash)
+      expect(activity[:statuses].last).to eq(:completed)
     end
 
     it "json parses the action arguments to ensure proper expectations during testing" do

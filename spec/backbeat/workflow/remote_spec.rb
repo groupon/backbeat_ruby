@@ -7,66 +7,66 @@ require "backbeat/workflow/remote"
 describe Backbeat::Workflow::Remote do
   let(:api) {
     Backbeat::MemoryApi.new(
-      events: {
+      activities: {
         5 => {},
         6 => {}
       },
       workflows: {
-        1 => { events: [:event_1, :event_2, :event_3] },
+        1 => { activities: [:activity_1, :activity_2, :activity_3] },
         2 => { complete: false }
       }
     )
   }
 
-  context "#event_processing" do
-    it "marks an event as processing" do
-      workflow = described_class.new({ event_id: 5 }, api)
-      workflow.event_processing
+  context "#activity_processing" do
+    it "marks an activity as processing" do
+      workflow = described_class.new({ activity_id: 5 }, api)
+      workflow.activity_processing
 
-      expect(api.find_event_by_id(5)[:status]).to eq(:processing)
+      expect(api.find_activity_by_id(5)[:status]).to eq(:processing)
     end
   end
 
-  context "#event_completed" do
-    it "marks an event as completed" do
-      workflow = described_class.new({ event_id: 6 }, api)
-      workflow.event_completed
+  context "#activity_completed" do
+    it "marks an activity as completed" do
+      workflow = described_class.new({ activity_id: 6 }, api)
+      workflow.activity_completed
 
-      expect(api.find_event_by_id(6)[:status]).to eq(:completed)
+      expect(api.find_activity_by_id(6)[:status]).to eq(:completed)
     end
   end
 
-  context "#event_errored" do
-    it "marks an event as errored" do
-      workflow = described_class.new({ event_id: 6 }, api)
-      workflow.event_errored
+  context "#activity_errored" do
+    it "marks an activity as errored" do
+      workflow = described_class.new({ activity_id: 6 }, api)
+      workflow.activity_errored
 
-      expect(api.find_event_by_id(6)[:status]).to eq(:errored)
+      expect(api.find_activity_by_id(6)[:status]).to eq(:errored)
     end
   end
 
   context "#deactivate" do
-    it "marks an event and previous events as deactivated" do
-      workflow = described_class.new({ event_id: 6 }, api)
+    it "marks an activity and previous activities as deactivated" do
+      workflow = described_class.new({ activity_id: 6 }, api)
       workflow.deactivate
 
-      expect(api.find_event_by_id(5)[:status]).to eq(:deactivated)
-      expect(api.find_event_by_id(6)[:status]).to eq(:deactivated)
+      expect(api.find_activity_by_id(5)[:status]).to eq(:deactivated)
+      expect(api.find_activity_by_id(6)[:status]).to eq(:deactivated)
     end
   end
 
-  context "#event_history" do
-    it "returns the workflow event history" do
-      workflow = described_class.new({ event_id: 6, workflow_id: 1 }, api)
-      history = workflow.event_history
+  context "#activity_history" do
+    it "returns the workflow activity history" do
+      workflow = described_class.new({ activity_id: 6, workflow_id: 1 }, api)
+      history = workflow.activity_history
 
-      expect(history).to eq([:event_1, :event_2, :event_3])
+      expect(history).to eq([:activity_1, :activity_2, :activity_3])
     end
   end
 
   context "#complete" do
     it "completes a workflow" do
-      workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
+      workflow = described_class.new({ activity_id: 6, workflow_id: 2 }, api)
       workflow.complete
 
       expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
@@ -74,7 +74,7 @@ describe Backbeat::Workflow::Remote do
   end
 
   context "#complete?" do
-    let(:workflow) { described_class.new({ event_id: 6, workflow_id: 2 }, api) }
+    let(:workflow) { described_class.new({ activity_id: 6, workflow_id: 2 }, api) }
     it "returns false if the workflow is not complete" do
       expect(workflow.complete?).to eq(false)
     end
@@ -86,22 +86,22 @@ describe Backbeat::Workflow::Remote do
     end
   end
 
-  context "#reset_event" do
+  context "#reset_activity" do
     it "resets the current node" do
-      workflow = described_class.new({ event_id: 6, workflow_id: 2 }, api)
+      workflow = described_class.new({ activity_id: 6, workflow_id: 2 }, api)
 
-      workflow.reset_event
+      workflow.reset_activity
 
-      expect(api.find_event_by_id(6)[:reset]).to eq(true)
+      expect(api.find_activity_by_id(6)[:reset]).to eq(true)
     end
   end
 
   context "running activities" do
     let(:api) {
       Backbeat::MemoryApi.new(
-        events: {
-          10 => { child_events: [] },
-          11 => { child_events: [] }
+        activities: {
+          10 => { child_activities: [] },
+          11 => { child_activities: [] }
         },
         workflows: {
           5 => { signals: {}, subject: "A Subject" }
@@ -119,21 +119,21 @@ describe Backbeat::Workflow::Remote do
     let(:action) { Backbeat::Serializer::Activity.new(name: "Fake Action") }
     let(:now) { Time.now }
 
-    it "raises an error if there is not an event id when running an activity" do
+    it "raises an error if there is not an activity id when running an activity" do
       workflow = described_class.new(workflow_data, api)
 
       expect { workflow.run_activity(action, :blocking, now) }.to raise_error Backbeat::Workflow::Remote::WorkflowError
     end
 
-    it "registers a child node if there is an event_id in the workflow data" do
-      workflow = described_class.new({ event_id: 10 }, api)
+    it "registers a child node if there is an activity_id in the workflow data" do
+      workflow = described_class.new({ activity_id: 10 }, api)
 
       workflow.run_activity(action, :non_blocking, now)
 
-      event_id = api.find_event_by_id(10)[:child_events].first
-      event = api.find_event_by_id(event_id)
+      activity_id = api.find_activity_by_id(10)[:child_activities].first
+      activity = api.find_activity_by_id(activity_id)
 
-      expect(event).to eq(
+      expect(activity).to eq(
         Backbeat::Packer.pack_action(action, :non_blocking, now).merge(id: 12)
       )
     end

@@ -1,5 +1,5 @@
 require "backbeat/api/workflows"
-require "backbeat/api/events"
+require "backbeat/api/activities"
 
 module Backbeat
   class Api
@@ -31,8 +31,8 @@ module Backbeat
       workflows_api.find_all_children(id)
     end
 
-    def find_all_workflow_events(id)
-      workflows_api.find_all_events(id)
+    def find_all_workflow_activities(id)
+      workflows_api.find_all_activities(id)
     end
 
     def get_workflow_tree(id)
@@ -43,28 +43,28 @@ module Backbeat
       workflows_api.get_printable_tree(id)
     end
 
-    def find_event_by_id(id)
-      events_api.find_event_by_id(id)
+    def find_activity_by_id(id)
+      activities_api.find_activity_by_id(id)
     end
 
-    def update_event_status(id, status)
-      events_api.update_event_status(id, status)
+    def update_activity_status(id, status)
+      activities_api.update_activity_status(id, status)
     end
 
-    def restart_event(id)
-      events_api.restart_event(id)
+    def restart_activity(id)
+      activities_api.restart_activity(id)
     end
 
-    def reset_event(id)
-      events_api.reset_event(id)
+    def reset_activity(id)
+      activities_api.reset_activity(id)
     end
 
-    def add_child_event(id, data)
-      add_child_events(id, [data])
+    def add_child_activity(id, data)
+      add_child_activities(id, [data])
     end
 
-    def add_child_events(id, data)
-      events_api.add_child_events(id, { args: { decisions: data }})
+    def add_child_activities(id, data)
+      activities_api.add_child_activities(id, { args: { decisions: data }})
     end
 
     private
@@ -73,8 +73,8 @@ module Backbeat
       @workflows_api ||= Workflows.new(@http_client)
     end
 
-    def events_api
-      @events_api ||= Events.new(@http_client)
+    def activities_api
+      @activities_api ||= Activities.new(@http_client)
     end
   end
 end

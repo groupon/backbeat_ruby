@@ -33,7 +33,7 @@ module Backbeat
         http_client.get("/v2/workflows/#{id}/children")
       end
 
-      def find_all_events(id)
+      def find_all_activities(id)
         http_client.get("/v2/workflows/#{id}/events")
       end
 

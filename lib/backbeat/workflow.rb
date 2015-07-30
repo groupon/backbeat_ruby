@@ -15,7 +15,7 @@ module Backbeat
     def self.new(workflow_data)
       data = workflow_data.merge({
         workflow_type: workflow_data[:name],
-        event_id: workflow_data[:id]
+        activity_id: workflow_data[:id]
       })
       case Backbeat.config.context
       when :remote

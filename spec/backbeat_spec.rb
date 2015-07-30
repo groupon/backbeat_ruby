@@ -29,10 +29,10 @@ describe Backbeat do
 
   it "allows the backbeat api to be configured" do
     Backbeat.configure do |config|
-      config.api = { events: [1, 2] }
+      config.api = { activities: [1, 2] }
     end
 
-    expect(Backbeat.config.api).to eq({ events: [1, 2] })
+    expect(Backbeat.config.api).to eq({ activities: [1, 2] })
   end
 
   require "logger"
@@ -88,7 +88,7 @@ describe Backbeat do
     Backbeat.local do |workflow|
       workflow.complete
 
-      expect(workflow.event_history.last[:name]).to eq(:workflow_complete)
+      expect(workflow.activity_history.last[:name]).to eq(:workflow_complete)
     end
   end
 end

@@ -13,32 +13,32 @@ module Backbeat
         @id = current_node[:workflow_id] ||= SecureRandom.uuid
       end
 
-      def event_processing
-        add_event_status(:processing)
+      def activity_processing
+        add_activity_status(:processing)
       end
 
-      def event_completed
-        add_event_status(:completed)
+      def activity_completed
+        add_activity_status(:completed)
       end
 
-      def event_errored
-        add_event_status(:errored)
+      def activity_errored
+        add_activity_status(:errored)
       end
 
       def deactivate
-        add_event_status(:deactivated)
+        add_activity_status(:deactivated)
       end
 
-      def event_history
-        state[:event_history] ||= []
+      def activity_history
+        state[:activity_history] ||= []
       end
 
       def complete?
-        !!event_history.find { |e| e[:name] == :workflow_complete }
+        !!activity_history.find { |e| e[:name] == :workflow_complete }
       end
 
       def complete
-        event_history << { name: :workflow_complete }
+        activity_history << { name: :workflow_complete }
       end
 
       def signal_workflow(action, fires_at = nil)
@@ -48,8 +48,8 @@ module Backbeat
       def run_activity(action, mode, fires_at = nil)
         action_hash = action.to_hash
         action_name = action_hash[:name]
-        event_history << { name: action_name, action: action_hash }
-        new_node = current_node.merge(event_name: action_name)
+        activity_history << { name: action_name, action: action_hash }
+        new_node = current_node.merge(activity_name: action_name)
         new_action = jsonify_action(action, mode, fires_at)
         new_action.run(Local.new(new_node, state))
       end
@@ -67,30 +67,30 @@ module Backbeat
         )
       end
 
-      def event_name
-        current_node[:event_name]
+      def activity_name
+        current_node[:activity_name]
       end
 
-      def event_record
-        @event_record ||= get_current_event_record
+      def activity_record
+        @activity_record ||= get_current_activity_record
       end
 
-      def get_current_event_record
-        if event = event_history.find { |event| event[:name] == event_name }
-          event
+      def get_current_activity_record
+        if activity = activity_history.find { |activity| activity[:name] == activity_name }
+          activity
         else
-          new_event = { name: event_name }
-          event_history << new_event
-          new_event
+          new_activity = { name: activity_name }
+          activity_history << new_activity
+          new_activity
         end
       end
 
-      def add_event_status(status)
-        event_record[:statuses] ||= []
+      def add_activity_status(status)
+        activity_record[:statuses] ||= []
         if status == :deactivated
-          event_history.each { |event| event[:statuses] << :deactivated }
+          activity_history.each { |activity| activity[:statuses] << :deactivated }
         else
-          event_record[:statuses] << status
+          activity_record[:statuses] << status
         end
       end
     end

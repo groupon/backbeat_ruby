@@ -19,10 +19,10 @@ describe Backbeat::Workflow do
 
       workflow = Backbeat::Workflow.new({ name: "New Workflow", id: 1, workflow_id: 2 })
 
-      workflow.event_processing
+      workflow.activity_processing
 
       expect(workflow).to be_a(Backbeat::Workflow::Remote)
-      expect(Backbeat.config.api.find_event_by_id(1)[:status]).to eq(:processing)
+      expect(Backbeat.config.api.find_activity_by_id(1)[:status]).to eq(:processing)
     end
   end
 
