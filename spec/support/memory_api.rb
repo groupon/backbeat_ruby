@@ -27,22 +27,22 @@ module Backbeat
       workflow.last.merge(id: workflow.first) if workflow
     end
 
-    def find_event_by_id(id)
-      events[id]
+    def find_activity_by_id(id)
+      activities[id]
     end
 
-    def update_event_status(event_id, status)
-      events[event_id] ||= {}
-      events[event_id][:status] = status
+    def update_activity_status(activity_id, status)
+      activities[activity_id] ||= {}
+      activities[activity_id][:status] = status
       if status == :deactivated
-        events.each do |event_id, event_data|
-          event_data[:status] = :deactivated
+        activities.each do |activity_id, activity_data|
+          activity_data[:status] = :deactivated
         end
       end
     end
 
-    def find_all_workflow_events(workflow_id)
-      workflows[workflow_id][:events]
+    def find_all_workflow_activities(workflow_id)
+      workflows[workflow_id][:activities]
     end
 
     def complete_workflow(workflow_id)
@@ -50,18 +50,18 @@ module Backbeat
       workflows[workflow_id][:complete] = true
     end
 
-    def add_child_event(event_id, data)
-      child_event = data.merge(new_event)
-      events[child_event[:id]] = child_event
-      events[event_id][:child_events] ||= []
-      events[event_id][:child_events] << child_event[:id]
+    def add_child_activity(activity_id, data)
+      child_activity = data.merge(new_activity)
+      activities[child_activity[:id]] = child_activity
+      activities[activity_id][:child_activities] ||= []
+      activities[activity_id][:child_activities] << child_activity[:id]
     end
 
     def signal_workflow(id, name, data)
-      child_event = data.merge(new_event)
-      events[child_event[:id]] = child_event
+      child_activity = data.merge(new_activity)
+      activities[child_activity[:id]] = child_activity
       workflows[id][:signals] ||= {}
-      workflows[id][:signals][name] = child_event
+      workflows[id][:signals][name] = child_activity
     end
 
     def find_all_workflow_children(id)
@@ -73,36 +73,36 @@ module Backbeat
     def get_printable_workflow_tree(id)
     end
 
-    def restart_event(id)
+    def restart_activity(id)
     end
 
-    def reset_event(event_id)
-      events[event_id] ||= {}
-      events[event_id][:reset] = true
+    def reset_activity(activity_id)
+      activities[activity_id] ||= {}
+      activities[activity_id][:reset] = true
     end
 
-    def add_child_events(id, data)
+    def add_child_activities(id, data)
     end
 
     private
 
     attr_reader :seeds
 
-    def new_event
-      { id: next_event_id }
+    def new_activity
+      { id: next_activity_id }
     end
 
-    def next_event_id
-      last_id = events.keys.sort.last || 0
+    def next_activity_id
+      last_id = activities.keys.sort.last || 0
       last_id + 1
     end
 
     def next_workflow_id
     end
 
-    def events
-      seeds[:events] ||= {}
-      seeds[:events]
+    def activities
+      seeds[:activities] ||= {}
+      seeds[:activities]
     end
 
     def workflows

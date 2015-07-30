@@ -43,8 +43,8 @@ Backbeat.local do |workflow|
   puts "Testing in a local context"
   result = AddSomething.in_context(workflow).add_3(1, 2, 3, 50)
   puts "Result: #{result}"
-  puts "Event History:"
-  PP.pp workflow.event_history
+  puts "Activity History:"
+  PP.pp workflow.activity_history
 end
 
 ############################
@@ -65,20 +65,20 @@ end
 
 # Send a signal
 
-puts "\nSimulating signalling the workflow"
+puts "\nStarting the workflow"
 
 workflow = AddSomething.start_context("The workflow subject goes here").add_3(1, 2, 3, 50)
 
 puts "Remote workflow state:"
 PP.pp api.find_workflow_by_id(1)
 
-# Receive the decision data
+# Receive the activity data
 
-decision_data = api.find_workflow_by_id(1)[:signals]["AddSomething#add_3"]
+activity_data = api.find_workflow_by_id(1)[:signals]["AddSomething#add_3"]
 
 # Run the activity by continuing the workflow
 
-Backbeat::Workflow.continue(decision_data)
+Backbeat::Workflow.continue(activity_data)
 
 ############################
 # Using a local context
@@ -98,4 +98,4 @@ deal = Deal.new(5)
 workflow = AddSomething.start_context(deal).add_3(1, 2, 3, 50)
 
 puts "Local workflow history:"
-PP.pp workflow.event_history
+PP.pp workflow.activity_history

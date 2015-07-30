@@ -183,9 +183,9 @@ describe Backbeat::Api do
       end
     end
 
-    context "#find_all_workflow_events" do
-      it "gets the workflow event history" do
-        event_data = [{
+    context "#find_all_workflow_activities" do
+      it "gets the workflow activity history" do
+        activity_data = [{
           id: 5,
           workflow_id: 5,
           parentId: nil,
@@ -197,11 +197,11 @@ describe Backbeat::Api do
 
         expect(client).to receive(:get).with("/v2/workflows/3/events", {
           headers: { "Accept" => "application/json"}
-        }).and_return({ status: 200, body: MultiJson.dump(event_data) })
+        }).and_return({ status: 200, body: MultiJson.dump(activity_data) })
 
-        events = api.find_all_workflow_events(3)
+       activities = api.find_all_workflow_activities(3)
 
-        expect(events).to eq(Backbeat::Packer.underscore_keys(event_data))
+        expect(activities).to eq(Backbeat::Packer.underscore_keys(activity_data))
       end
     end
 
@@ -234,8 +234,8 @@ describe Backbeat::Api do
     end
   end
 
-  context "events" do
-    let(:event_data) {{
+  context "activities" do
+    let(:activity_data) {{
       id: 5,
       workflow_id: 5,
       parent_id: nil,
@@ -248,20 +248,20 @@ describe Backbeat::Api do
       user_id: "123"
     }}
 
-    context "#find_event_by_id" do
-      it "finds an event by id" do
+    context "#find_activity_by_id" do
+      it "finds an activity by id" do
         expect(client).to receive(:get).with("/v2/events/25", {
           headers: { "Accept" => "application/json"}
-        }).and_return({ status: 200, body: MultiJson.dump(event_data) })
+        }).and_return({ status: 200, body: MultiJson.dump(activity_data) })
 
-        event = api.find_event_by_id(25)
+        activity = api.find_activity_by_id(25)
 
-        expect(event).to eq(event_data)
+        expect(activity).to eq(activity_data)
       end
     end
 
-    context "#update_event_status" do
-      it "sends a request to update the event status" do
+    context "#update_activity_status" do
+      it "sends a request to update the activity status" do
         expect(client).to receive(:put).with("/v2/events/25/status/errored", MultiJson.dump({}), {
           headers: {
             "Content-Type" => "application/json",
@@ -269,12 +269,12 @@ describe Backbeat::Api do
           }
         }).and_return({ status: 200 })
 
-        api.update_event_status(25, :errored)
+        api.update_activity_status(25, :errored)
       end
     end
 
-    context "#restart_event" do
-      it "sends a request to restart the event" do
+    context "#restart_activity" do
+      it "sends a request to restart the activity" do
         expect(client).to receive(:put).with("/v2/events/25/restart", MultiJson.dump({}), {
           headers: {
             "Content-Type" => "application/json",
@@ -282,11 +282,11 @@ describe Backbeat::Api do
           }
         }).and_return({ status: 200 })
 
-        api.restart_event(25)
+        api.restart_activity(25)
       end
     end
 
-    context "#reset_event" do
+    context "#reset_activity" do
       it "sends a request to reset the node" do
         expect(client).to receive(:put).with("/v2/events/30/reset", MultiJson.dump({}), {
           headers: {
@@ -295,33 +295,33 @@ describe Backbeat::Api do
           }
         }).and_return({ status: 200 })
 
-        api.reset_event(30)
+        api.reset_activity(30)
       end
     end
 
-    context "#add_child_events" do
-      it "creates new child events on the event" do
-        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [event_data] }}), {
+    context "#add_child_activities" do
+      it "creates new child activities on the activity" do
+        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [activity_data] }}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           }
         }).and_return({ status: 201 })
 
-        api.add_child_events(12, [event_data])
+        api.add_child_activities(12, [activity_data])
       end
     end
 
-    context "#add_child_event" do
-      it "creates a new child event on the event" do
-        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [event_data] }}), {
+    context "#add_child_activity" do
+      it "creates a new child activity on the activity" do
+        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [activity_data] }}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           }
         }).and_return({ status: 201 })
 
-        api.add_child_event(12, event_data)
+        api.add_child_activity(12, activity_data)
       end
     end
   end

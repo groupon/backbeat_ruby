@@ -23,7 +23,7 @@ describe Backbeat::Action do
     end
   end
 
-  let(:workflow) { Backbeat::Workflow::Local.new({ event_name: "Maths" }) }
+  let(:workflow) { Backbeat::Workflow::Local.new({ activity_name: "Maths" }) }
   let(:serializer) {
     Backbeat::Serializer::Activity.new({
       name: "An Action",
@@ -42,18 +42,18 @@ describe Backbeat::Action do
 
     it "sends a processing message to the workflow" do
       action.run(workflow)
-      event = workflow.event_history.first
+      activity = workflow.activity_history.first
 
-      expect(event[:name]).to eq("Maths")
-      expect(event[:statuses].first).to eq(:processing)
+      expect(activity[:name]).to eq("Maths")
+      expect(activity[:statuses].first).to eq(:processing)
     end
 
     it "sends a complete message to the workflow" do
       action.run(workflow)
-      event = workflow.event_history.first
+      activity = workflow.activity_history.first
 
-      expect(event[:name]).to eq("Maths")
-      expect(event[:statuses].last).to eq(:completed)
+      expect(activity[:name]).to eq("Maths")
+      expect(activity[:statuses].last).to eq(:completed)
     end
 
     it "sends an error message to the workflow on error" do
@@ -66,10 +66,10 @@ describe Backbeat::Action do
 
       expect { action.run(workflow) }.to raise_error
 
-      event = workflow.event_history.last
+      activity = workflow.activity_history.last
 
-      expect(event[:name]).to eq("Maths")
-      expect(event[:statuses].last).to eq(:errored)
+      expect(activity[:name]).to eq("Maths")
+      expect(activity[:statuses].last).to eq(:errored)
     end
   end
 

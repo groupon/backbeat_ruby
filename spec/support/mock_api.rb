@@ -25,7 +25,7 @@ module Backbeat
     define(:find_all_workflow_children) do |id|
     end
 
-    define(:find_all_workflow_events) do |id|
+    define(:find_all_workflow_activities) do |id|
     end
 
     define(:get_workflow_tree) do |id|
@@ -34,22 +34,22 @@ module Backbeat
     define(:get_printable_workflow_tree) do |id|
     end
 
-    define(:find_event_by_id) do |id|
+    define(:find_activity_by_id) do |id|
     end
 
-    define(:update_event_status) do |id, status|
+    define(:update_activity_status) do |id, status|
     end
 
-    define(:restart_event) do |id|
+    define(:restart_activity) do |id|
     end
 
-    define(:reset_event) do |id|
+    define(:reset_activity) do |id|
     end
 
-    define(:add_child_event) do |id, data|
+    define(:add_child_activity) do |id, data|
     end
 
-    define(:add_child_events) do |id, data|
+    define(:add_child_activities) do |id, data|
     end
   end
 end

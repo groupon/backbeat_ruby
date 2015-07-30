@@ -2,28 +2,28 @@ require "backbeat/api/json_api_client"
 
 module Backbeat
   class Api
-    class Events
+    class Activities
       def initialize(http_client)
         @http_client = JsonApiClient.new(http_client)
       end
 
-      def find_event_by_id(id)
+      def find_activity_by_id(id)
         http_client.get("/v2/events/#{id}")
       end
 
-      def update_event_status(id, status)
+      def update_activity_status(id, status)
         http_client.put("/v2/events/#{id}/status/#{status}", {})
       end
 
-      def restart_event(id)
+      def restart_activity(id)
         http_client.put("/v2/events/#{id}/restart", {})
       end
 
-      def reset_event(id)
+      def reset_activity(id)
         http_client.put("/v2/events/#{id}/reset", {})
       end
 
-      def add_child_events(id, data)
+      def add_child_activities(id, data)
         http_client.post("/v2/events/#{id}/decisions", data)
       end
 

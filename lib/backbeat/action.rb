@@ -21,13 +21,13 @@ module Backbeat
     def run(workflow)
       ret_value = nil
       workflowable.with_context(workflow) do
-        workflow.event_processing
+        workflow.activity_processing
         ret_value = workflowable.send(method, *args)
-        workflow.event_completed
+        workflow.activity_completed
       end
       ret_value
     rescue => e
-      workflow.event_errored
+      workflow.activity_errored
       raise
     end
 
