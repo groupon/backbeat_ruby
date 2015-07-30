@@ -35,23 +35,24 @@ Create some workflowable classes:
 class MyActivities
   include Backbeat::Workflowable
 
-  def activity_one(order, customer)
-    DoSomething.call(order)
-    MyOtherActivities.in_context(workflow, :non_blocking).send_notification(customer)
-    MyOtherActivities.in_context(workflow, :blocking, Time.now + 1.day).complete_order(order)
-    MyOtherActivities.in_context(workflow, :fire_and_forget).mark_complete(order)
+  def activity_one(order_id, customer_id)
+    DoSomething.call(order_id)
+    MyOtherActivities.in_context(workflow, :non_blocking).send_notification(customer_id)
+    MyOtherActivities.in_context(workflow, :blocking, Time.now + 1.day).complete_order(order_id)
+    MyOtherActivities.in_context(workflow, :fire_and_forget).mark_complete(order_id)
   end
 end
 
 class MyDecider
   include Backbeat::Workflowable
 
-  def the_first_activity(subject)
-    customer = FindCustomer.call(subject)
-    if subject[:type] == :one
-      MyActivities.in_context(workflow).activity_one(subject, customer)
+  def the_first_activity(order_id)
+    order = Order.find(order_id)
+    customer = FindCustomer.call(order)
+    if customer.type == :one
+      MyActivities.in_context(workflow).activity_one(order_id, customer.id)
     else
-      MyActivities.in_context(workflow).activity_two(subject, customer)
+      MyActivities.in_context(workflow).activity_two(order_id, customer.id)
     end
   end
 end
@@ -61,7 +62,7 @@ Signal the workflow:
 
 ```ruby
 order = Order.last
-MyDecider.start_context(order).the_first_activity(subject)
+MyDecider.start_context(order).my_decision(order.id)
 ```
 
 Continue the workflow from your app's activity endpoint. This should match the endpoint
@@ -83,7 +84,7 @@ Backbeat.configure do |config|
 end
 
 order = Order.last
-MyDecider.start_context(order).my_decision(subject)
+MyDecider.start_context(order).my_decision(order.id)
 ```
 
 Or:
@@ -91,6 +92,6 @@ Or:
 ```ruby
 Backbeat.local do |workflow|
   order = Order.last
-  MyDecider.start_context(order).my_decision(subject)
+  MyDecider.start_context(order).my_decision(order.id)
 end
 ```
