@@ -11,8 +11,9 @@ module Backbeat
         http_client.get("/v2/events/#{id}")
       end
 
-      def update_activity_status(id, status)
-        http_client.put("/v2/events/#{id}/status/#{status}", {})
+      def update_activity_status(id, status, result = nil)
+        body = result ? { result: result } : {}
+        http_client.put("/v2/events/#{id}/status/#{status}", body)
       end
 
       def restart_activity(id)
@@ -24,7 +25,7 @@ module Backbeat
       end
 
       def add_child_activities(id, data)
-        http_client.post("/v2/events/#{id}/decisions", data)
+        http_client.post("/v2/events/#{id}/decisions", { decisions: data })
       end
 
       private

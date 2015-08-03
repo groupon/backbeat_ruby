@@ -47,8 +47,8 @@ module Backbeat
       activities_api.find_activity_by_id(id)
     end
 
-    def update_activity_status(id, status)
-      activities_api.update_activity_status(id, status)
+    def update_activity_status(id, status, result = nil)
+      activities_api.update_activity_status(id, status, result)
     end
 
     def restart_activity(id)
@@ -64,7 +64,7 @@ module Backbeat
     end
 
     def add_child_activities(id, data)
-      activities_api.add_child_activities(id, { decisions: data })
+      activities_api.add_child_activities(id, data)
     end
 
     private

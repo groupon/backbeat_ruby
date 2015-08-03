@@ -15,8 +15,8 @@ module Backbeat
         api.update_activity_status(activity_id, :processing)
       end
 
-      def activity_completed
-        api.update_activity_status(activity_id, :completed)
+      def activity_completed(result = nil)
+        api.update_activity_status(activity_id, :completed, result)
       end
 
       def activity_errored

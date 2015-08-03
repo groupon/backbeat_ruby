@@ -33,6 +33,14 @@ describe Backbeat::Workflow::Local do
       activity = workflow.activity_history.first
       expect(activity[:statuses]).to eq([:completed])
     end
+
+    it "saves the result" do
+      workflow = described_class.new({ activity_name: "First activity" })
+      workflow.activity_completed(100)
+
+      activity = workflow.activity_history.first
+      expect(activity[:result]).to eq(100)
+    end
   end
 
   context "#activity_errored" do

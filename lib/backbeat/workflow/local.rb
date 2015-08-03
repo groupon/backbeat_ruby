@@ -17,8 +17,8 @@ module Backbeat
         add_activity_status(:processing)
       end
 
-      def activity_completed
-        add_activity_status(:completed)
+      def activity_completed(status = nil)
+        add_activity_status(:completed, status)
       end
 
       def activity_errored
@@ -85,13 +85,14 @@ module Backbeat
         end
       end
 
-      def add_activity_status(status)
+      def add_activity_status(status, result = nil)
         activity_record[:statuses] ||= []
         if status == :deactivated
           activity_history.each { |activity| activity[:statuses] << :deactivated }
         else
           activity_record[:statuses] << status
         end
+        activity_record[:result] = result
       end
     end
   end

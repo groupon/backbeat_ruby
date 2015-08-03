@@ -48,12 +48,13 @@ describe Backbeat::Action do
       expect(activity[:statuses].first).to eq(:processing)
     end
 
-    it "sends a complete message to the workflow" do
+    it "sends a complete message with the result to the workflow" do
       action.run(workflow)
       activity = workflow.activity_history.first
 
       expect(activity[:name]).to eq("Maths")
       expect(activity[:statuses].last).to eq(:completed)
+      expect(activity[:result]).to eq(6)
     end
 
     it "sends an error message to the workflow on error" do

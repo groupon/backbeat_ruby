@@ -37,7 +37,7 @@ module Backbeat
     define(:find_activity_by_id) do |id|
     end
 
-    define(:update_activity_status) do |id, status|
+    define(:update_activity_status) do |id, status, result = nil|
     end
 
     define(:restart_activity) do |id|

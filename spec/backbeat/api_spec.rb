@@ -271,6 +271,17 @@ describe Backbeat::Api do
 
         api.update_activity_status(25, :errored)
       end
+
+      it "sends a result" do
+        expect(client).to receive(:put).with("/v2/events/10/status/complete", MultiJson.dump({ result: 5 }), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 200 })
+
+        api.update_activity_status(10, :complete, 5)
+      end
     end
 
     context "#restart_activity" do

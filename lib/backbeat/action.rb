@@ -23,7 +23,7 @@ module Backbeat
       workflowable.with_context(workflow) do
         workflow.activity_processing
         ret_value = workflowable.send(method, *args)
-        workflow.activity_completed
+        workflow.activity_completed(ret_value)
       end
       ret_value
     rescue => e

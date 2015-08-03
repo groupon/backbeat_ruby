@@ -31,9 +31,10 @@ module Backbeat
       activities[id]
     end
 
-    def update_activity_status(activity_id, status)
+    def update_activity_status(activity_id, status, result = nil)
       activities[activity_id] ||= {}
       activities[activity_id][:status] = status
+      activities[activity_id][:result] = result
       if status == :deactivated
         activities.each do |activity_id, activity_data|
           activity_data[:status] = :deactivated
