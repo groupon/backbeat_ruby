@@ -64,7 +64,7 @@ module Backbeat
     end
 
     def add_child_activities(id, data)
-      activities_api.add_child_activities(id, { args: { decisions: data }})
+      activities_api.add_child_activities(id, { decisions: data })
     end
 
     private

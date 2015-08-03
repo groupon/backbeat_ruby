@@ -301,7 +301,7 @@ describe Backbeat::Api do
 
     context "#add_child_activities" do
       it "creates new child activities on the activity" do
-        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [activity_data] }}), {
+        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ decisions: [activity_data] }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -314,7 +314,7 @@ describe Backbeat::Api do
 
     context "#add_child_activity" do
       it "creates a new child activity on the activity" do
-        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ args: { decisions: [activity_data] }}), {
+        expect(client).to receive(:post).with("/v2/events/12/decisions", MultiJson.dump({ decisions: [activity_data] }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
