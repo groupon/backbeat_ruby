@@ -11,5 +11,8 @@ module Backbeat
 
     class AuthenticationError < StandardError
     end
+
+    class InvalidStatusChangeError < StandardError
+    end
   end
 end

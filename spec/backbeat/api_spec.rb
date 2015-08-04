@@ -282,6 +282,17 @@ describe Backbeat::Api do
 
         api.update_activity_status(10, :complete, 5)
       end
+
+      it "raises a status change error" do
+        expect(client).to receive(:put).with("/v2/events/10/status/processing", MultiJson.dump({}), {
+          headers: {
+            "Content-Type" => "application/json",
+            "Accept" => "application/json"
+          }
+        }).and_return({ status: 409 })
+
+        expect { api.update_activity_status(10, :processing) }.to raise_error(Backbeat::Api::InvalidStatusChangeError)
+      end
     end
 
     context "#restart_activity" do

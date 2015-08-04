@@ -56,16 +56,16 @@ module Backbeat
           handler.call(response)
         else
           case status
-          when 200
+          when 200, 201
             parse_body(response)
-          when 201
-            parse_body(response)
+          when 400, 422
+            raise ValidationError, parse_body(response)
           when 401
             raise AuthenticationError, parse_body(response)
           when 404
             raise NotFoundError, parse_body(response)
-          when 422
-            raise ValidationError, parse_body(response)
+          when 409
+            raise InvalidStatusChangeError, parse_body(response)
           else
             raise ApiError, parse_body(response)
           end
