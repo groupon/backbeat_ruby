@@ -30,25 +30,23 @@ describe Backbeat::Workflow::Remote do
   context "#activity_completed" do
     it "marks an activity as completed" do
       workflow = described_class.new({ activity_id: 6 }, api)
-      workflow.activity_completed
-
-      expect(api.find_activity_by_id(6)[:status]).to eq(:completed)
-    end
-
-    it "sends the result" do
-      workflow = described_class.new({ activity_id: 6 }, api)
       workflow.activity_completed(:done)
 
-      expect(api.find_activity_by_id(6)[:result]).to eq(:done)
+      activity = api.find_activity_by_id(6)
+      expect(activity[:status]).to eq(:completed)
+      expect(activity[:response][:result]).to eq(:done)
     end
   end
 
   context "#activity_errored" do
     it "marks an activity as errored" do
       workflow = described_class.new({ activity_id: 6 }, api)
-      workflow.activity_errored
+      error = StandardError.new("Failed")
+      workflow.activity_errored(error)
 
-      expect(api.find_activity_by_id(6)[:status]).to eq(:errored)
+      activity = api.find_activity_by_id(6)
+      expect(activity[:status]).to eq(:errored)
+      expect(activity[:response][:error][:message]).to eq("Failed")
     end
   end
 

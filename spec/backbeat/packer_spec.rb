@@ -24,9 +24,7 @@ describe Backbeat::Packer do
         mode: :blocking,
         type: :none,
         fires_at: now,
-        client_data: {
-          action: action_hash
-        }
+        client_data: action_hash
       })
     end
   end
@@ -39,13 +37,11 @@ describe Backbeat::Packer do
     it "returns the action object specified in the action type with the action data" do
       unpacked_action = Backbeat::Packer.unpack_action({
         client_data: {
-          action: {
-            name: "Action name",
-            serializer: "Backbeat::Serializer::Activity",
-            class: "Array",
-            method: :method,
-            args: []
-          }
+          name: "Action name",
+          serializer: "Backbeat::Serializer::Activity",
+          class: "Array",
+          method: :method,
+          params: []
         }
       })
 
@@ -55,13 +51,11 @@ describe Backbeat::Packer do
     it "resolves the class name of the action" do
       unpacked_action = Backbeat::Packer.unpack_action({
         client_data: {
-          action: {
-            name: "Action name",
-            serializer: "Backbeat::Serializer::Activity",
-            class: "Array",
-            method: :method,
-            args: []
-          }
+          name: "Action name",
+          serializer: "Backbeat::Serializer::Activity",
+          class: "Array",
+          method: :method,
+          params: []
         }
       })
 
@@ -71,17 +65,44 @@ describe Backbeat::Packer do
     it "symbolizes the method name" do
       unpacked_action = Backbeat::Packer.unpack_action({
         client_data: {
-          action: {
-            name: "Action name",
-            serializer: "Backbeat::Serializer::Activity",
-            class: "Array",
-            method: "method",
-            args: []
-          }
+          name: "Action name",
+          serializer: "Backbeat::Serializer::Activity",
+          class: "Array",
+          method: "method",
+          params: []
         }
       })
 
       expect(unpacked_action.to_hash).to eq(serializer.to_hash)
+    end
+  end
+
+  context ".success_response" do
+    it "builds a json-rpc compliant response with a result" do
+      expect(Backbeat::Packer.success_response({ id: 1, name: "Lemon" })).to eq(
+        {
+          result: { id: 1, name: "Lemon" },
+          error: nil,
+          id: nil
+        }
+      )
+    end
+  end
+
+  context ".error_response" do
+    it "builds a json-rpc compliant response with an error" do
+      begin
+        raise "A test error"
+      rescue => e
+        error = e
+      end
+
+      response = Backbeat::Packer.error_response(error)
+
+      expect(response[:result]).to be_nil
+      expect(response[:id]).to be_nil
+      expect(response[:error][:message]).to eq("A test error")
+      expect(response[:error][:data].count).to eq(5)
     end
   end
 

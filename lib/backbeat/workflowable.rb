@@ -47,8 +47,8 @@ module Backbeat
         @fires_at = options[:fires_at]
       end
 
-      def method_missing(method, *args)
-        action = Action.build(build_serializer(method, args))
+      def method_missing(method, *params)
+        action = Action.build(build_serializer(method, params))
         if mode == :signal
           workflow.signal_workflow(action, fires_at)
         else
@@ -61,12 +61,12 @@ module Backbeat
 
       attr_reader :workflowable, :workflow, :mode, :fires_at
 
-      def build_serializer(method, args)
+      def build_serializer(method, params)
         workflowable.serializer.build(
           build_name(method),
           workflowable,
           method,
-          args
+          params
         )
       end
 

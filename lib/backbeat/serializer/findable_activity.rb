@@ -1,24 +1,24 @@
 module Backbeat
   module Serializer
     class FindableActivity
-      def self.build(name, workflowable, method, args)
+      def self.build(name, workflowable, method, params)
         new({
           name: name,
           class: workflowable.class,
           id: workflowable.id,
           method: method,
-          args: args
+          params: params
         })
       end
 
-      attr_reader :name, :method, :args
+      attr_reader :name, :method, :params
 
       def initialize(action_data)
         @name = action_data[:name]
         @klass = action_data[:class]
         @id = action_data[:id]
         @method = action_data[:method]
-        @args = action_data[:args]
+        @params = action_data[:params]
       end
 
       def to_hash
@@ -28,7 +28,7 @@ module Backbeat
           class: klass.to_s,
           id: id,
           method: method,
-          args: args
+          params: params
         }
       end
 

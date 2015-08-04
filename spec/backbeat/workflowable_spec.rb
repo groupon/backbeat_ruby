@@ -39,13 +39,11 @@ describe Backbeat::Workflowable do
           type: :none,
           fires_at: now,
           client_data: {
-            action: {
-              serializer: "Backbeat::Serializer::Activity",
-              name: "Decider#decision_one",
-              class: "Decider",
-              method: :decision_one,
-              args: [:one, :two, :three]
-            }
+            serializer: "Backbeat::Serializer::Activity",
+            name: "Decider#decision_one",
+            class: "Decider",
+            method: :decision_one,
+            params: [:one, :two, :three]
           }
         }
       )
@@ -148,14 +146,12 @@ describe Backbeat::Workflowable do
           type: :none,
           fires_at: nil,
           client_data: {
-            action: {
-              serializer: "Backbeat::Serializer::FindableActivity",
-              name: "WorkflowableModel#update_attributes",
-              class: "WorkflowableModel",
-              id: 10,
-              method: :update_attributes,
-              args: [{ name: "Lemon" }]
-            }
+            serializer: "Backbeat::Serializer::FindableActivity",
+            name: "WorkflowableModel#update_attributes",
+            class: "WorkflowableModel",
+            id: 10,
+            method: :update_attributes,
+            params: [{ name: "Lemon" }]
           }
         }
       )

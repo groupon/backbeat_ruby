@@ -28,28 +28,23 @@ describe Backbeat::Workflow::Local do
   context "#activity_completed" do
     it "marks an activity as completed" do
       workflow = described_class.new({ activity_name: "First activity" })
-      workflow.activity_completed
-
-      activity = workflow.activity_history.first
-      expect(activity[:statuses]).to eq([:completed])
-    end
-
-    it "saves the result" do
-      workflow = described_class.new({ activity_name: "First activity" })
       workflow.activity_completed(100)
 
       activity = workflow.activity_history.first
-      expect(activity[:result]).to eq(100)
+      expect(activity[:statuses]).to eq([:completed])
+      expect(activity[:response][:result]).to eq(100)
     end
   end
 
   context "#activity_errored" do
     it "marks an activity as errored" do
       workflow = described_class.new({ activity_name: "First activity" })
-      workflow.activity_errored
+      error = StandardError.new("Boom")
+      workflow.activity_errored(error)
 
       activity = workflow.activity_history.first
       expect(activity[:statuses]).to eq([:errored])
+      expect(activity[:response][:error]).to eq("Boom")
     end
   end
 

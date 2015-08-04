@@ -7,7 +7,7 @@ require "active_support/inflector"
 module Backbeat
   class Packer
     def self.unpack_action(data)
-      action_data = data[:client_data][:action]
+      action_data = data[:client_data]
       action_data[:class] = Inflector.constantize(action_data[:class])
       action_data[:method] = action_data[:method].to_sym
       serializer = Inflector.constantize(action_data[:serializer])
@@ -21,9 +21,29 @@ module Backbeat
         mode: mode,
         type: :none,
         fires_at: fires_at,
-        client_data: {
-          action: action_hash
-        }
+        client_data: action_hash
+      }
+    end
+
+    def self.success_response(result)
+      {
+        result: result,
+        error: nil,
+        id: nil
+      }
+    end
+
+    GENERIC_RPC_ERROR_CODE = -32000
+
+    def self.error_response(error)
+      {
+        result: nil,
+        error: {
+          code: GENERIC_RPC_ERROR_CODE,
+          message: error.message,
+          data: (error.backtrace.take(5) if error.backtrace)
+        },
+        id: nil
       }
     end
 

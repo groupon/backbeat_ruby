@@ -15,20 +15,20 @@ module Backbeat
       @serializer = serializer
       @workflowable = serializer.workflowable
       @method = serializer.method
-      @args = serializer.args
+      @params = serializer.params
     end
 
     def run(workflow)
       ret_value = nil
       workflowable.with_context(workflow) do
         workflow.activity_processing
-        ret_value = workflowable.send(method, *args)
+        ret_value = workflowable.send(method, *params)
         workflow.activity_completed(ret_value)
       end
       ret_value
     rescue => e
-      workflow.activity_errored
-      raise
+      workflow.activity_errored(e)
+      raise e
     end
 
     def to_hash
@@ -37,6 +37,7 @@ module Backbeat
 
     private
 
-    attr_reader :serializer, :workflowable, :method, :args
+    attr_reader :serializer, :workflowable, :method, :params
+
   end
 end

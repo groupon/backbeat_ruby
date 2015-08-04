@@ -15,12 +15,14 @@ module Backbeat
         api.update_activity_status(activity_id, :processing)
       end
 
-      def activity_completed(result = nil)
-        api.update_activity_status(activity_id, :completed, result)
+      def activity_completed(result)
+        response = Packer.success_response(result)
+        api.update_activity_status(activity_id, :completed, response)
       end
 
-      def activity_errored
-        api.update_activity_status(activity_id, :errored)
+      def activity_errored(error)
+        response = Packer.error_response(error)
+        api.update_activity_status(activity_id, :errored, response)
       end
 
       def deactivate

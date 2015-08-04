@@ -24,7 +24,7 @@ describe Backbeat::Serializer::Activity do
       name: "Blue",
       class: "MyActivity",
       method: :perform,
-      args: [1, 2, 3]
+      params: [1, 2, 3]
     })
   end
 
@@ -36,7 +36,7 @@ describe Backbeat::Serializer::Activity do
     expect(activity.method).to eq(:perform)
   end
 
-  it "returns the args" do
-    expect(activity.args).to eq([1, 2, 3])
+  it "returns the params" do
+    expect(activity.params).to eq([1, 2, 3])
   end
 end

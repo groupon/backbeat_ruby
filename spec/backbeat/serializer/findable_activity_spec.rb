@@ -36,7 +36,7 @@ describe Backbeat::Serializer::FindableActivity do
       class: "MyModel",
       id: 4,
       method: :update_attributes,
-      args: [{ name: "New name" }]
+      params: [{ name: "New name" }]
     })
   end
 
@@ -49,7 +49,7 @@ describe Backbeat::Serializer::FindableActivity do
     expect(activity.method).to eq(:update_attributes)
   end
 
-  it "returns the args" do
-    expect(activity.args).to eq([{ name: "New name" }])
+  it "returns the params" do
+    expect(activity.params).to eq([{ name: "New name" }])
   end
 end

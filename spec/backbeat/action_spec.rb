@@ -29,7 +29,7 @@ describe Backbeat::Action do
       name: "An Action",
       class: MyWorkflowable,
       method: :perform,
-      args: [1, 2, 3]
+      params: [1, 2, 3]
     })
   }
 
@@ -54,14 +54,14 @@ describe Backbeat::Action do
 
       expect(activity[:name]).to eq("Maths")
       expect(activity[:statuses].last).to eq(:completed)
-      expect(activity[:result]).to eq(6)
+      expect(activity[:response][:result]).to eq(6)
     end
 
     it "sends an error message to the workflow on error" do
       serializer = Backbeat::Serializer::Activity.new({
         class: MyWorkflowable,
         method: :boom,
-        args: []
+        params: []
       })
       action = described_class.new(serializer)
 
@@ -87,7 +87,7 @@ describe Backbeat::Action do
         name: "An Other Action",
         class: MyWorkflowable,
         method: :perform,
-        args: [10, 11, 12]
+        params: [10, 11, 12]
       })
     }
 
