@@ -1,6 +1,6 @@
 # Backbeat Ruby Client
 
-Ruby client for [Backbeat](https://github.groupondev.com/finance-engineering/backbeat) workflow service.
+Ruby client for [Backbeat](https://github.groupondev.com/backbeat/backbeat_server) workflow service.
 
 ## Running the specs
 
