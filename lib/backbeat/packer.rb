@@ -26,25 +26,28 @@ module Backbeat
     end
 
     def self.success_response(result)
-      {
-        result: result,
-        error: nil,
-        id: nil
-      }
+      rpc_response({ result: result })
     end
 
     GENERIC_RPC_ERROR_CODE = -32000
 
     def self.error_response(error)
-      {
-        result: nil,
+      rpc_response({
         error: {
           code: GENERIC_RPC_ERROR_CODE,
           message: error.message,
           data: (error.backtrace.take(5) if error.backtrace)
-        },
+        }
+      })
+    end
+
+    def self.rpc_response(params)
+      {
+        jsonrpc: "2.0",
+        result: nil,
+        error: nil,
         id: nil
-      }
+      }.merge(params)
     end
 
     def self.subject_to_string(subject)

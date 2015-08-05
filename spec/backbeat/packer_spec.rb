@@ -81,6 +81,7 @@ describe Backbeat::Packer do
     it "builds a json-rpc compliant response with a result" do
       expect(Backbeat::Packer.success_response({ id: 1, name: "Lemon" })).to eq(
         {
+          jsonrpc: "2.0",
           result: { id: 1, name: "Lemon" },
           error: nil,
           id: nil
