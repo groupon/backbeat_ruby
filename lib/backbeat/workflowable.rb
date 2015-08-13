@@ -27,7 +27,7 @@ module Backbeat
     end
 
     def workflow
-      @workflow
+      @workflow ||= Workflow::Local.new({})
     end
 
     def with_context(current_workflow)
