@@ -14,6 +14,10 @@ module Backbeat
       def run_activities?
         @run_activities.nil? || @run_activities == true
       end
+
+      def activity_history
+        Thread.current[:backbeat_activity_history] || []
+      end
     end
   end
 end

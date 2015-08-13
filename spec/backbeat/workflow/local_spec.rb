@@ -112,6 +112,7 @@ describe Backbeat::Workflow::Local do
       expect(activity[:name]).to eq("Adding")
       expect(activity[:action]).to eq(action.to_hash)
       expect(activity[:statuses].last).to eq(:completed)
+      expect(Backbeat::Testing.activity_history.last[:name]).to eq("Adding")
     end
 
     it "runs the workflow locally on signal_workflow" do
@@ -146,6 +147,14 @@ describe Backbeat::Workflow::Local do
       ensure
         Backbeat::Testing.enable_activities!
       end
+    end
+
+    it "adds the activity to the testing event history" do
+      action = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
+
+      workflow.run_activity(action, :blocking)
+
+      expect(Backbeat::Testing.activity_history.last[:name]).to eq("Adding")
     end
   end
 end
