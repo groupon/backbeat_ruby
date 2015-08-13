@@ -133,5 +133,19 @@ describe Backbeat::Workflow::Local do
 
       expect(value).to eq("orange")
     end
+
+    it "does not run the activity if disabled" do
+      action = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
+
+      begin
+        Backbeat::Testing.disable_activities!
+        result = workflow.run_activity(action, :blocking)
+
+        expect(result).to eq(nil)
+
+      ensure
+        Backbeat::Testing.enable_activities!
+      end
+    end
   end
 end

@@ -2,6 +2,7 @@ require "backbeat/api"
 require "backbeat/api/http_client"
 require "backbeat/workflowable"
 require "backbeat/workflow"
+require "backbeat/testing"
 
 module Backbeat
   class Config
