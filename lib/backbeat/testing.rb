@@ -7,6 +7,10 @@ module Backbeat
         @activity_history ||= []
       end
 
+      def clear!
+        self.activity_history = []
+      end
+
       def disable_activities!
         @run_activities = false
       end

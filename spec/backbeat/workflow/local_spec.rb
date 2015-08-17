@@ -150,6 +150,8 @@ describe Backbeat::Workflow::Local do
     end
 
     it "adds the activity to the testing event history" do
+      Backbeat::Testing.clear!
+
       action = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
       workflow.run_activity(action, :blocking)
