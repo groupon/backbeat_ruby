@@ -12,7 +12,7 @@ module Backbeat
         @state = state
         @id = current_node[:workflow_id] ||= SecureRandom.uuid
         state[:activity_history] ||= []
-        Thread.current[:backbeat_activity_history] = state[:activity_history]
+        Testing.activity_history = state[:activity_history]
       end
 
       def activity_processing

@@ -1,7 +1,11 @@
 module Backbeat
   class Testing
     class << self
-      attr_accessor :run_activities
+      attr_writer :activity_history
+
+      def activity_history
+        @activity_history ||= []
+      end
 
       def disable_activities!
         @run_activities = false
@@ -13,10 +17,6 @@ module Backbeat
 
       def run_activities?
         @run_activities.nil? || @run_activities == true
-      end
-
-      def activity_history
-        Thread.current[:backbeat_activity_history] || []
       end
     end
   end
