@@ -43,27 +43,27 @@ module Backbeat
         activity_history << { name: :workflow_complete }
       end
 
-      def signal_workflow(action, fires_at = nil)
-        run_activity(action, :blocking, fires_at)
+      def signal_workflow(activity, fires_at = nil)
+        run_activity(activity, :blocking, fires_at)
       end
 
-      def run_activity(action, mode, fires_at = nil)
-        action_hash = action.to_hash
-        action_name = action_hash[:name]
-        activity_history << { name: action_name, action: action_hash }
-        new_node = current_node.merge(activity_name: action_name)
-        new_action = jsonify_action(action, mode, fires_at)
-        new_action.run(Local.new(new_node, state)) if Testing.run_activities?
+      def run_activity(activity, mode, fires_at = nil)
+        activity_hash = activity.to_hash
+        activity_name = activity_hash[:name]
+        activity_history << { name: activity_name, activity: activity_hash }
+        new_node = current_node.merge(activity_name: activity_name)
+        new_activity = jsonify_activity(activity, mode, fires_at)
+        new_activity.run(Local.new(new_node, state)) if Testing.run_activities?
       end
 
       private
 
       attr_reader :current_node, :state
 
-      def jsonify_action(action, mode, fires_at)
-        Packer.unpack_action(
+      def jsonify_activity(activity, mode, fires_at)
+        Packer.unpack_activity(
           MultiJson.load(
-            MultiJson.dump(Packer.pack_action(action, mode, fires_at)),
+            MultiJson.dump(Packer.pack_activity(activity, mode, fires_at)),
             symbolize_keys: true
           )
         )

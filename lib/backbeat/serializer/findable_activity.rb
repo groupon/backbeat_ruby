@@ -13,12 +13,12 @@ module Backbeat
 
       attr_reader :name, :method, :params
 
-      def initialize(action_data)
-        @name = action_data[:name]
-        @klass = action_data[:class]
-        @id = action_data[:id]
-        @method = action_data[:method]
-        @params = action_data[:params]
+      def initialize(activity_data)
+        @name = activity_data[:name]
+        @klass = activity_data[:class]
+        @id = activity_data[:id]
+        @method = activity_data[:method]
+        @params = activity_data[:params]
       end
 
       def to_hash

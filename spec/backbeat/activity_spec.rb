@@ -1,11 +1,11 @@
 require "spec_helper"
-require "backbeat/action"
+require "backbeat/activity"
 require "backbeat/serializer/activity"
 require "backbeat/workflowable"
 require "backbeat/workflow/local"
 require "support/mock_logger"
 
-describe Backbeat::Action do
+describe Backbeat::Activity do
 
   class MyWorkflowable
     include Backbeat::Workflowable
@@ -26,22 +26,22 @@ describe Backbeat::Action do
   let(:workflow) { Backbeat::Workflow::Local.new({ activity_name: "Maths" }) }
   let(:serializer) {
     Backbeat::Serializer::Activity.new({
-      name: "An Action",
+      name: "An activity",
       class: MyWorkflowable,
       method: :perform,
       params: [1, 2, 3]
     })
   }
 
-  let(:action) { described_class.new(serializer) }
+  let(:activity) { described_class.new(serializer) }
 
   context "#run" do
     it "calls the method on the workflowable object with the arguments" do
-      expect(action.run(workflow)).to eq(6)
+      expect(activity.run(workflow)).to eq(6)
     end
 
     it "sends a processing message to the workflow" do
-      action.run(workflow)
+      activity.run(workflow)
       activity = workflow.activity_history.first
 
       expect(activity[:name]).to eq("Maths")
@@ -49,7 +49,7 @@ describe Backbeat::Action do
     end
 
     it "sends a complete message with the result to the workflow" do
-      action.run(workflow)
+      activity.run(workflow)
       activity = workflow.activity_history.first
 
       expect(activity[:name]).to eq("Maths")
@@ -63,9 +63,9 @@ describe Backbeat::Action do
         method: :boom,
         params: []
       })
-      action = described_class.new(serializer)
+      activity = described_class.new(serializer)
 
-      expect { action.run(workflow) }.to raise_error
+      expect { activity.run(workflow) }.to raise_error
 
       activity = workflow.activity_history.last
 
@@ -76,15 +76,15 @@ describe Backbeat::Action do
 
   context "#to_hash" do
     it "returns the serializer as a hash" do
-      action = described_class.new(serializer)
-      expect(action.to_hash).to eq(serializer.to_hash)
+      activity = described_class.new(serializer)
+      expect(activity.to_hash).to eq(serializer.to_hash)
     end
   end
 
   context ".build" do
     let(:serializer) {
       Backbeat::Serializer::Activity.new({
-        name: "An Other Action",
+        name: "An Other activity",
         class: MyWorkflowable,
         method: :perform,
         params: [10, 11, 12]
@@ -94,18 +94,18 @@ describe Backbeat::Action do
     it "returns a log decorator if a logger is configured" do
       logger = Backbeat::MockLogger.new
       Backbeat.config.logger = logger
-      action = described_class.build(serializer)
+      activity = described_class.build(serializer)
 
-      action.run(workflow)
+      activity.run(workflow)
 
       expect(logger.msgs[:info].count).to eq(2)
     end
 
-    it "returns the action without the decorator if a logger is not configured" do
+    it "returns the activity without the decorator if a logger is not configured" do
       Backbeat.config.logger = nil
-      action = described_class.build(serializer)
+      activity = described_class.build(serializer)
 
-      expect(action).to be_a(Backbeat::Action)
+      expect(activity).to be_a(Backbeat::Activity)
     end
   end
 end

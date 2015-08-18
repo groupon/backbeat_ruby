@@ -8,8 +8,8 @@ module Backbeat
       data = Packer.underscore_keys(workflow_data)
       data = data[:activity] || data[:decision] || data
       workflow = new(data)
-      action = Packer.unpack_action(data)
-      action.run(workflow)
+      activity = Packer.unpack_activity(data)
+      activity.run(workflow)
     end
 
     def self.new(workflow_data)

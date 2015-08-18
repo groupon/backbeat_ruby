@@ -73,7 +73,7 @@ describe Backbeat::Workflowable do
       expect(activity[:mode]).to eq(:fire_and_forget)
     end
 
-    it "signals the workflow with an action" do
+    it "signals the workflow with an activity" do
       Decider.in_context(remote_workflow, :signal).decision_one(:one, :two, :three)
       signal = api.find_workflow_by_id(1)[:signals]["Decider#decision_one"]
 

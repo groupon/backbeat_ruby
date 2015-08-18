@@ -41,13 +41,13 @@ module Backbeat
         api.complete_workflow(id)
       end
 
-      def signal_workflow(action, fires_at = nil)
-        activity_data = Packer.pack_action(action, :blocking, fires_at)
+      def signal_workflow(activity, fires_at = nil)
+        activity_data = Packer.pack_activity(activity, :blocking, fires_at)
         api.signal_workflow(id, activity_data[:name], activity_data)
       end
 
-      def run_activity(action, mode, fires_at = nil)
-        activity_data = Packer.pack_action(action, mode, fires_at)
+      def run_activity(activity, mode, fires_at = nil)
+        activity_data = Packer.pack_activity(activity, mode, fires_at)
         api.add_child_activity(activity_id, activity_data)
       end
 

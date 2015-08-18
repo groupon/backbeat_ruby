@@ -2,7 +2,7 @@ require "spec_helper"
 require "backbeat/workflow"
 require "backbeat/packer"
 require "backbeat/workflowable"
-require "backbeat/action"
+require "backbeat/activity"
 require "backbeat/serializer/activity"
 require "support/memory_api"
 
@@ -42,14 +42,14 @@ describe Backbeat::Workflow do
       end
     end
 
-    def build_action(name, workflowable, method, args)
-      Backbeat::Action.new(Backbeat::Serializer::Activity.build(name, workflowable, method, args))
+    def build_activity(name, workflowable, method, args)
+      Backbeat::Activity.new(Backbeat::Serializer::Activity.build(name, workflowable, method, args))
     end
 
     it "continues the workflow from the workflow data" do
-      action = build_action("Action", MyArray, :build, [5])
-      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget)
-      decision_data = action_data.merge(workflow_id: 1, id: 2)
+      activity = build_activity("activity", MyArray, :build, [5])
+      activity_data = Backbeat::Packer.pack_activity(activity, :fire_and_forget)
+      decision_data = activity_data.merge(workflow_id: 1, id: 2)
 
       result = Backbeat::Workflow.continue(decision_data)
 
@@ -57,9 +57,9 @@ describe Backbeat::Workflow do
     end
 
     it "handles workflow data returned as a decision" do
-      action = build_action("Action", MyArray, :build, [6])
-      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget)
-      decision_data = action_data.merge(workflow_id: 1, id: 2)
+      activity = build_activity("activity", MyArray, :build, [6])
+      activity_data = Backbeat::Packer.pack_activity(activity, :fire_and_forget)
+      decision_data = activity_data.merge(workflow_id: 1, id: 2)
 
       result = Backbeat::Workflow.continue({ "decision" => decision_data })
 
@@ -67,9 +67,9 @@ describe Backbeat::Workflow do
     end
 
     it "handles workflow data returned as an activity" do
-      action = build_action("Action", MyArray, :build, [7])
-      action_data = Backbeat::Packer.pack_action(action, :fire_and_forget)
-      decision_data = action_data.merge(workflow_id: 1, id: 2)
+      activity = build_activity("activity", MyArray, :build, [7])
+      activity_data = Backbeat::Packer.pack_activity(activity, :fire_and_forget)
+      decision_data = activity_data.merge(workflow_id: 1, id: 2)
 
       result = Backbeat::Workflow.continue({ "activity" => decision_data })
 

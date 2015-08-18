@@ -103,44 +103,48 @@ describe Backbeat::Workflow::Local do
     let(:now) { Time.now }
 
     it "runs a workflow locally" do
-      action = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
+      activity = Backbeat::Activity.new(
+        Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
+      )
 
-      value, new_workflow = workflow.run_activity(action, :blocking)
-      activity = workflow.activity_history.last
+      value, new_workflow = workflow.run_activity(activity, :blocking)
+      activity_data = workflow.activity_history.last
 
       expect(value).to eq(33)
-      expect(activity[:name]).to eq("Adding")
-      expect(activity[:action]).to eq(action.to_hash)
-      expect(activity[:statuses].last).to eq(:completed)
+      expect(activity_data[:name]).to eq("Adding")
+      expect(activity_data[:activity]).to eq(activity.to_hash)
+      expect(activity_data[:statuses].last).to eq(:completed)
       expect(Backbeat::Testing.activity_history.last[:name]).to eq("Adding")
     end
 
     it "runs the workflow locally on signal_workflow" do
-      action = Backbeat::Serializer::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
+      activity = Backbeat::Activity.new(
+        Backbeat::Serializer::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
+      )
 
-      value, new_workflow = workflow.signal_workflow(action, now)
-      activity = workflow.activity_history.last
+      value, new_workflow = workflow.signal_workflow(activity, now)
+      activity_data = workflow.activity_history.last
 
       expect(value).to eq(6)
-      expect(activity[:name]).to eq("MATH")
-      expect(activity[:action]).to eq(action.to_hash)
-      expect(activity[:statuses].last).to eq(:completed)
+      expect(activity_data[:name]).to eq("MATH")
+      expect(activity_data[:activity]).to eq(activity.to_hash)
+      expect(activity_data[:statuses].last).to eq(:completed)
     end
 
-    it "json parses the action arguments to ensure proper expectations during testing" do
-      action = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
+    it "json parses the activity arguments to ensure proper expectations during testing" do
+      activity = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
 
-      value, new_workflow = workflow.run_activity(action, :blocking)
+      value, new_workflow = workflow.run_activity(activity, :blocking)
 
       expect(value).to eq("orange")
     end
 
     it "does not run the activity if disabled" do
-      action = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
+      activity = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
 
       begin
         Backbeat::Testing.disable_activities!
-        result = workflow.run_activity(action, :blocking)
+        result = workflow.run_activity(activity, :blocking)
 
         expect(result).to eq(nil)
 
@@ -152,9 +156,9 @@ describe Backbeat::Workflow::Local do
     it "adds the activity to the testing event history" do
       Backbeat::Testing.clear!
 
-      action = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
+      activity = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
-      workflow.run_activity(action, :blocking)
+      workflow.run_activity(activity, :blocking)
 
       expect(Backbeat::Testing.activity_history.last[:name]).to eq("Adding")
     end

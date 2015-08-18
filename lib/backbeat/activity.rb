@@ -1,13 +1,13 @@
-require "backbeat/action/log_decorator"
+require "backbeat/activity/log_decorator"
 
 module Backbeat
-  class Action
+  class Activity
     def self.build(serializer)
-      action = new(serializer)
+      activity = new(serializer)
       if logger = Backbeat.config.logger
-        LogDecorator.new(action, logger)
+        LogDecorator.new(activity, logger)
       else
-        action
+        activity
       end
     end
 

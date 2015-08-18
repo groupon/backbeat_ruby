@@ -1,27 +1,27 @@
 require "backbeat"
-require "backbeat/action"
+require "backbeat/activity"
 require "backbeat/serializer/activity"
 require "backbeat/serializer/findable_activity"
 require "active_support/inflector"
 
 module Backbeat
   class Packer
-    def self.unpack_action(data)
-      action_data = data[:client_data]
-      action_data[:class] = Inflector.constantize(action_data[:class])
-      action_data[:method] = action_data[:method].to_sym
-      serializer = Inflector.constantize(action_data[:serializer])
-      Action.build(serializer.new(action_data))
+    def self.unpack_activity(data)
+      activity_data = data[:client_data]
+      activity_data[:class] = Inflector.constantize(activity_data[:class])
+      activity_data[:method] = activity_data[:method].to_sym
+      serializer = Inflector.constantize(activity_data[:serializer])
+      Activity.build(serializer.new(activity_data))
     end
 
-    def self.pack_action(action, mode, fires_at = nil)
-      action_hash = action.to_hash
+    def self.pack_activity(activity, mode, fires_at = nil)
+      activity_hash = activity.to_hash
       {
-        name: action_hash[:name],
+        name: activity_hash[:name],
         mode: mode,
         type: :none,
         fires_at: fires_at,
-        client_data: action_hash
+        client_data: activity_hash
       }
     end
 
