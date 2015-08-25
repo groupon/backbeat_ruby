@@ -9,10 +9,11 @@ module Backbeat
       end
 
       def start_context(subject, fires_at = nil)
+        name = self.is_a?(Class) ? self.to_s : self.class.to_s
         workflow = Workflow.new({
           subject: Packer.subject_to_string(subject),
-          decider: self,
-          name: self
+          decider: name,
+          name: name
         })
         in_context(workflow, :signal, fires_at)
       end
