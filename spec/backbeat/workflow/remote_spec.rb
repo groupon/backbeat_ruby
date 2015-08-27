@@ -121,25 +121,34 @@ describe Backbeat::Workflow::Remote do
       workflow_type: "Workflow"
     }}
 
-    let(:activity) { Backbeat::Activity.new(Backbeat::Serializer::Activity.new(name: "Fake activity", class: String)) }
+    let(:activity) {
+      Backbeat::Activity.new(
+        Backbeat::Serializer::Activity.new({
+          name: "Fake activity",
+          class: String
+        })
+      )
+    }
     let(:now) { Time.now }
 
     it "raises an error if there is not an activity id when running an activity" do
       workflow = described_class.new(workflow_data, api)
 
-      expect { workflow.run_activity(activity, :blocking, now) }.to raise_error Backbeat::Workflow::Remote::WorkflowError
+      expect {
+        workflow.run_activity(activity, { mode: :blocking, fires_at: now })
+      }.to raise_error Backbeat::Workflow::Remote::WorkflowError
     end
 
     it "registers a child node if there is an activity_id in the workflow data" do
       workflow = described_class.new({ activity_id: 10 }, api)
 
-      workflow.run_activity(activity, :non_blocking, now)
+      workflow.run_activity(activity, { mode: :non_blocking, fires_at: now })
 
       activity_id = api.find_activity_by_id(10)[:child_activities].first
       activity_data = api.find_activity_by_id(activity_id)
 
       expect(activity_data).to eq(
-        Backbeat::Packer.pack_activity(activity, :non_blocking, now).merge(id: 12)
+        Backbeat::Packer.pack_activity(activity, { mode: :non_blocking, fires_at: now }).merge(id: 12)
       )
     end
 
@@ -150,17 +159,17 @@ describe Backbeat::Workflow::Remote do
       workflow.signal_workflow(activity)
 
       expect(api.find_workflow_by_id(6)[:signals]["Fake activity"]).to eq(
-        Backbeat::Packer.pack_activity(activity, :blocking, nil).merge(id: 12)
+        Backbeat::Packer.pack_activity(activity, { mode: :blocking }).merge(id: 12)
       )
     end
 
     it "signals the workflow with the activity when signalling" do
       workflow = described_class.new(workflow_data, api)
 
-      workflow.signal_workflow(activity, now)
+      workflow.signal_workflow(activity, { fires_at: now })
 
       expect(api.find_workflow_by_id(5)[:signals]["Fake activity"]).to eq(
-        Backbeat::Packer.pack_activity(activity, :blocking, now).merge(id: 12)
+        Backbeat::Packer.pack_activity(activity, { mode: :blocking, fires_at: now }).merge(id: 12)
       )
     end
   end

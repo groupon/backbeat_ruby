@@ -8,14 +8,21 @@ module Backbeat
         ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
       end
 
-      def start_context(subject, fires_at = nil)
+      def start_context(subject)
         name = self.is_a?(Class) ? self.to_s : self.class.to_s
         workflow = Workflow.new({
-          subject: Packer.subject_to_string(subject),
+          subject: subject,
           decider: name,
           name: name
         })
-        in_context(workflow, :signal, fires_at)
+        ContextProxy.new(self, workflow, { mode: :signal })
+      end
+
+      def link_context(workflow, subject)
+        other_workflow = Workflow.new({ subject: subject })
+        link_id = workflow.activity_id
+        options = { mode: :signal, link_id: link_id }
+        ContextProxy.new(self, other_workflow, options)
       end
 
       def serializer
@@ -44,23 +51,22 @@ module Backbeat
       def initialize(workflowable, workflow, options)
         @workflowable = workflowable
         @workflow = workflow
-        @mode = options[:mode]
-        @fires_at = options[:fires_at]
+        @options = options
       end
 
       def method_missing(method, *params)
         activity = Activity.build(build_serializer(method, params))
-        if mode == :signal
-          workflow.signal_workflow(activity, fires_at)
+        if options[:mode] == :signal
+          workflow.signal_workflow(activity, options)
         else
-          workflow.run_activity(activity, mode, fires_at)
+          workflow.run_activity(activity, options)
         end
         workflow
       end
 
       private
 
-      attr_reader :workflowable, :workflow, :mode, :fires_at
+      attr_reader :workflowable, :workflow, :options
 
       def build_serializer(method, params)
         workflowable.serializer.build(

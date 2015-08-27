@@ -25,6 +25,13 @@ describe Backbeat::Workflowable do
   let(:remote_workflow) { Backbeat::Workflow::Remote.new({ activity_id: 1 }, api) }
   let(:now) { Time.now }
 
+  before do
+    Backbeat.configure do |config|
+      config.context = :remote
+      config.api = api
+    end
+  end
+
   context ".in_context" do
     it "runs an activity in the set workflow" do
       Decider.in_context(remote_workflow, :blocking, now).decision_one(:one, :two, :three)
@@ -36,7 +43,6 @@ describe Backbeat::Workflowable do
           id: 2,
           name: "Decider#decision_one",
           mode: :blocking,
-          type: :none,
           fires_at: now,
           client_data: {
             serializer: "Backbeat::Serializer::Activity",
@@ -83,13 +89,6 @@ describe Backbeat::Workflowable do
   end
 
   context ".start_context" do
-    before do
-      Backbeat.configure do |config|
-        config.context = :remote
-        config.api = api
-      end
-    end
-
     it "runs the activity on a new workflow for the subject" do
       subject = { id: 1, class: Array }
 
@@ -103,7 +102,21 @@ describe Backbeat::Workflowable do
     end
   end
 
-  context "worklflowable model" do
+  context ".link_context" do
+    it "creates a signal activity with the current node linked" do
+      subject = { id: 1, class: Array }
+
+      Decider.link_context(remote_workflow, subject).decision_one(:a, :b, :c)
+
+      other_workflow = api.find_workflow_by_id(2)
+      signal = other_workflow[:signals]["Decider#decision_one"]
+
+      expect(other_workflow[:subject]).to eq(subject.to_json)
+      expect(signal[:link_id]).to eq(remote_workflow.activity_id)
+    end
+  end
+
+  context "WorkflowableModel" do
 
     class WorkflowableModel
       include Backbeat::WorkflowableModel
@@ -143,7 +156,6 @@ describe Backbeat::Workflowable do
           id: 2,
           name: "WorkflowableModel#update_attributes",
           mode: :blocking,
-          type: :none,
           fires_at: nil,
           client_data: {
             serializer: "Backbeat::Serializer::FindableActivity",
