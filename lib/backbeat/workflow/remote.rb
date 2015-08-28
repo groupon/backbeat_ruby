@@ -41,13 +41,13 @@ module Backbeat
         api.complete_workflow(id)
       end
 
-      def signal_workflow(activity, fires_at = nil)
-        activity_data = Packer.pack_activity(activity, :blocking, fires_at)
+      def signal_workflow(activity, options = {})
+        activity_data = Packer.pack_activity(activity, options.merge({ mode: :blocking }))
         api.signal_workflow(id, activity_data[:name], activity_data)
       end
 
-      def run_activity(activity, mode, fires_at = nil)
-        activity_data = Packer.pack_activity(activity, mode, fires_at)
+      def run_activity(activity, options)
+        activity_data = Packer.pack_activity(activity, options)
         api.add_child_activity(activity_id, activity_data)
       end
 
@@ -55,16 +55,19 @@ module Backbeat
         api.reset_activity(activity_id)
       end
 
-      private
-
-      attr_reader :api, :current_node
-
       def activity_id
         current_node[:activity_id] || workflow_error("No activity id present in current workflow data")
       end
 
+      private
+
+      attr_reader :api, :current_node
+
       def get_workflow_for_subject
-        api.find_workflow_by_subject(current_node) || api.create_workflow(current_node)
+        workflow_data = current_node.merge({
+          subject: Packer.subject_to_string(current_node[:subject])
+        })
+        api.find_workflow_by_subject(workflow_data) || api.create_workflow(workflow_data)
       end
 
       class WorkflowError < StandardError; end

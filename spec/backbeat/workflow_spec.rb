@@ -48,7 +48,7 @@ describe Backbeat::Workflow do
 
     it "continues the workflow from the workflow data" do
       activity = build_activity("activity", MyArray, :build, [5])
-      activity_data = Backbeat::Packer.pack_activity(activity, :fire_and_forget)
+      activity_data = Backbeat::Packer.pack_activity(activity, { mode: :fire_and_forget })
       decision_data = activity_data.merge(workflow_id: 1, id: 2)
 
       result = Backbeat::Workflow.continue(decision_data)
@@ -58,7 +58,7 @@ describe Backbeat::Workflow do
 
     it "handles workflow data returned as a decision" do
       activity = build_activity("activity", MyArray, :build, [6])
-      activity_data = Backbeat::Packer.pack_activity(activity, :fire_and_forget)
+      activity_data = Backbeat::Packer.pack_activity(activity, { mode: :fire_and_forget })
       decision_data = activity_data.merge(workflow_id: 1, id: 2)
 
       result = Backbeat::Workflow.continue({ "decision" => decision_data })
@@ -68,7 +68,7 @@ describe Backbeat::Workflow do
 
     it "handles workflow data returned as an activity" do
       activity = build_activity("activity", MyArray, :build, [7])
-      activity_data = Backbeat::Packer.pack_activity(activity, :fire_and_forget)
+      activity_data = Backbeat::Packer.pack_activity(activity, { mode: :fire_and_forget })
       decision_data = activity_data.merge(workflow_id: 1, id: 2)
 
       result = Backbeat::Workflow.continue({ "activity" => decision_data })

@@ -3,26 +3,6 @@ require "backbeat/serializer/findable_activity"
 
 module Backbeat
   module Workflowable
-    module InContext
-      def in_context(workflow, mode = :blocking, fires_at = nil)
-        ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
-      end
-
-      def start_context(subject, fires_at = nil)
-        name = self.is_a?(Class) ? self.to_s : self.class.to_s
-        workflow = Workflow.new({
-          subject: Packer.subject_to_string(subject),
-          decider: name,
-          name: name
-        })
-        in_context(workflow, :signal, fires_at)
-      end
-
-      def serializer
-        Serializer::Activity
-      end
-    end
-
     def self.included(klass)
       klass.extend(InContext)
     end
@@ -38,29 +18,59 @@ module Backbeat
       @workflow = nil
     end
 
-    private
+    module InContext
+      def in_context(workflow, mode = :blocking, fires_at = nil)
+        ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
+      end
+
+      def start_context(subject)
+        workflow = new_workflow(subject)
+        ContextProxy.new(self, workflow, { mode: :signal })
+      end
+
+      def link_context(link_workflow, subject)
+        workflow = new_workflow(subject)
+        link_id = link_workflow.activity_id
+        options = { mode: :signal, parent_link_id: link_id }
+        ContextProxy.new(self, workflow, options)
+      end
+
+      def serializer
+        Serializer::Activity
+      end
+
+      private
+
+      def new_workflow(subject)
+        name = self.is_a?(Class) ? self.to_s : self.class.to_s
+        Workflow.new({
+          subject: subject,
+          decider: name,
+          name: name
+        })
+      end
+    end
 
     class ContextProxy
       def initialize(workflowable, workflow, options)
         @workflowable = workflowable
         @workflow = workflow
-        @mode = options[:mode]
-        @fires_at = options[:fires_at]
+        @options = options
       end
 
       def method_missing(method, *params)
         activity = Activity.build(build_serializer(method, params))
-        if mode == :signal
-          workflow.signal_workflow(activity, fires_at)
+        if options[:mode] == :signal
+          workflow.signal_workflow(activity, options)
         else
-          workflow.run_activity(activity, mode, fires_at)
+          workflow.run_activity(activity, options)
         end
         workflow
       end
 
       private
 
-      attr_reader :workflowable, :workflow, :mode, :fires_at
+      attr_reader :workflowable, :workflow, :options
 
       def build_serializer(method, params)
         workflowable.serializer.build(

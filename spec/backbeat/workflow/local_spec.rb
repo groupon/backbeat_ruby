@@ -107,7 +107,7 @@ describe Backbeat::Workflow::Local do
         Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
       )
 
-      value, new_workflow = workflow.run_activity(activity, :blocking)
+      value, new_workflow = workflow.run_activity(activity, { mode: :blocking })
       activity_data = workflow.activity_history.last
 
       expect(value).to eq(33)
@@ -122,7 +122,7 @@ describe Backbeat::Workflow::Local do
         Backbeat::Serializer::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
       )
 
-      value, new_workflow = workflow.signal_workflow(activity, now)
+      value, new_workflow = workflow.signal_workflow(activity, { fires_at: now })
       activity_data = workflow.activity_history.last
 
       expect(value).to eq(6)
@@ -134,7 +134,7 @@ describe Backbeat::Workflow::Local do
     it "json parses the activity arguments to ensure proper expectations during testing" do
       activity = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
 
-      value, new_workflow = workflow.run_activity(activity, :blocking)
+      value, new_workflow = workflow.run_activity(activity, { mode: :blocking })
 
       expect(value).to eq("orange")
     end
@@ -144,7 +144,7 @@ describe Backbeat::Workflow::Local do
 
       begin
         Backbeat::Testing.disable_activities!
-        result = workflow.run_activity(activity, :blocking)
+        result = workflow.run_activity(activity, { mode: :blocking })
 
         expect(result).to eq(nil)
 
@@ -158,7 +158,7 @@ describe Backbeat::Workflow::Local do
 
       activity = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
-      workflow.run_activity(activity, :blocking)
+      workflow.run_activity(activity, { mode: :blocking })
 
       expect(Backbeat::Testing.activity_history.last[:name]).to eq("Adding")
     end

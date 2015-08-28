@@ -14,15 +14,12 @@ module Backbeat
       Activity.build(serializer.new(activity_data))
     end
 
-    def self.pack_activity(activity, mode, fires_at = nil)
+    def self.pack_activity(activity, options)
       activity_hash = activity.to_hash
       {
         name: activity_hash[:name],
-        mode: mode,
-        type: :none,
-        fires_at: fires_at,
         client_data: activity_hash
-      }
+      }.merge(options)
     end
 
     def self.success_response(result)

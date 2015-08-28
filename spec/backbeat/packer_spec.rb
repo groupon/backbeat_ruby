@@ -18,11 +18,11 @@ describe Backbeat::Packer do
     it "returns a the api representation of node data" do
       activity = Backbeat::Serializer::Activity.build("activity", "Klass", :method, [])
       activity_hash = activity.to_hash
+      options = { mode: :blocking, fires_at: now }
 
-      expect(Backbeat::Packer.pack_activity(activity, :blocking, now)).to eq({
+      expect(Backbeat::Packer.pack_activity(activity, options)).to eq({
         name: activity_hash[:name],
         mode: :blocking,
-        type: :none,
         fires_at: now,
         client_data: activity_hash
       })
