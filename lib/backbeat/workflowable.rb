@@ -3,33 +3,6 @@ require "backbeat/serializer/findable_activity"
 
 module Backbeat
   module Workflowable
-    module InContext
-      def in_context(workflow, mode = :blocking, fires_at = nil)
-        ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
-      end
-
-      def start_context(subject)
-        name = self.is_a?(Class) ? self.to_s : self.class.to_s
-        workflow = Workflow.new({
-          subject: subject,
-          decider: name,
-          name: name
-        })
-        ContextProxy.new(self, workflow, { mode: :signal })
-      end
-
-      def link_context(workflow, subject)
-        other_workflow = Workflow.new({ subject: subject })
-        link_id = workflow.activity_id
-        options = { mode: :signal, link_id: link_id }
-        ContextProxy.new(self, other_workflow, options)
-      end
-
-      def serializer
-        Serializer::Activity
-      end
-    end
-
     def self.included(klass)
       klass.extend(InContext)
     end
@@ -45,7 +18,38 @@ module Backbeat
       @workflow = nil
     end
 
-    private
+    module InContext
+      def in_context(workflow, mode = :blocking, fires_at = nil)
+        ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
+      end
+
+      def start_context(subject)
+        workflow = new_workflow(subject)
+        ContextProxy.new(self, workflow, { mode: :signal })
+      end
+
+      def link_context(link_workflow, subject)
+        workflow = new_workflow(subject)
+        link_id = link_workflow.activity_id
+        options = { mode: :signal, parent_link_id: link_id }
+        ContextProxy.new(self, workflow, options)
+      end
+
+      def serializer
+        Serializer::Activity
+      end
+
+      private
+
+      def new_workflow(subject)
+        name = self.is_a?(Class) ? self.to_s : self.class.to_s
+        Workflow.new({
+          subject: subject,
+          decider: name,
+          name: name
+        })
+      end
+    end
 
     class ContextProxy
       def initialize(workflowable, workflow, options)

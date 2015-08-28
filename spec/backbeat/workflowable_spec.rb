@@ -112,7 +112,7 @@ describe Backbeat::Workflowable do
       signal = other_workflow[:signals]["Decider#decision_one"]
 
       expect(other_workflow[:subject]).to eq(subject.to_json)
-      expect(signal[:link_id]).to eq(remote_workflow.activity_id)
+      expect(signal[:parent_link_id]).to eq(remote_workflow.activity_id)
     end
   end
 
