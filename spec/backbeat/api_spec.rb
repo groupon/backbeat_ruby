@@ -124,7 +124,7 @@ describe Backbeat::Api do
       let(:signal_data) {{ client_data: { arguments: [1, 2, 3] }}}
 
       it "signals the workflow with the id, name, and client data" do
-        expect(client).to receive(:post).with("/v2/workflows/10/signal/my_signal", MultiJson.dump(signal_data), {
+        expect(client).to receive(:post).with("/v2/workflows/10/signal", MultiJson.dump(signal_data), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -137,7 +137,7 @@ describe Backbeat::Api do
       end
 
       it "raises a validation error if the signal data is not valid" do
-        expect(client).to receive(:post).with("/v2/workflows/10/signal/my_signal", MultiJson.dump(signal_data), {
+        expect(client).to receive(:post).with("/v2/workflows/10/signal", MultiJson.dump(signal_data), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
