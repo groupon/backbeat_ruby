@@ -7,11 +7,12 @@ module Backbeat
     class Local
       attr_reader :id
 
-      def initialize(current_node, state = {})
-        @current_node = current_node
+      def initialize(current_activity, state = {})
+        @id = SecureRandom.uuid
+        @current_activity = current_activity
         @state = state
-        @id = current_node[:workflow_id] ||= SecureRandom.uuid
         state[:activity_history] ||= []
+        state[:activity_history] << current_activity
         Testing.activity_history = state[:activity_history]
       end
 
@@ -50,19 +51,24 @@ module Backbeat
       def run_activity(activity, options)
         activity_hash = activity.to_hash
         activity_name = activity_hash[:name]
-        activity_history << { name: activity_name, activity: activity_hash }
-        new_node = current_node.merge({ activity_name: activity_name, activity_id: SecureRandom.uuid })
-        new_activity = jsonify_activity(activity, options)
-        new_activity.run(Local.new(new_node, state)) if Testing.run_activities?
+        new_activity = current_activity.merge({
+          id: SecureRandom.uuid,
+          name: activity_name,
+          activity: activity_hash,
+          statuses: [],
+        })
+        activity_runner = jsonify_activity(activity, options)
+        activity_runner.run(Local.new(new_activity, state)) if Testing.run_activities?
+        new_activity
       end
 
       def activity_id
-        current_node[:activity_id]
+        current_activity[:id]
       end
 
       private
 
-      attr_reader :current_node, :state
+      attr_reader :current_activity, :state
 
       def jsonify_activity(activity, options)
         Packer.unpack_activity(
@@ -74,31 +80,17 @@ module Backbeat
       end
 
       def activity_name
-        current_node[:activity_name]
-      end
-
-      def activity_record
-        @activity_record ||= get_current_activity_record
-      end
-
-      def get_current_activity_record
-        if activity = activity_history.find { |activity| activity[:name] == activity_name }
-          activity
-        else
-          new_activity = { name: activity_name }
-          activity_history << new_activity
-          new_activity
-        end
+        current_activity[:name]
       end
 
       def add_activity_status(status, response = nil)
-        activity_record[:statuses] ||= []
+        current_activity[:statuses] ||= []
         if status == :deactivated
           activity_history.each { |activity| activity[:statuses] << :deactivated }
         else
-          activity_record[:statuses] << status
+          current_activity[:statuses] << status
         end
-        activity_record[:response] = response
+        current_activity[:response] = response
       end
     end
   end

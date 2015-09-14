@@ -95,7 +95,7 @@ puts "\nRunning the workflow locally"
 Deal = Struct.new(:id)
 deal = Deal.new(5)
 
-workflow = AddSomething.start_context(deal).add_3(1, 2, 3, 50)
+activity = AddSomething.start_context(deal).add_3(1, 2, 3, 50)
 
 puts "Local workflow history:"
-PP.pp workflow.activity_history
+PP.pp activity

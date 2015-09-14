@@ -65,7 +65,6 @@ module Backbeat
         else
           workflow.run_activity(activity, options)
         end
-        workflow
       end
 
       private

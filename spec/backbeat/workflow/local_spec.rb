@@ -7,16 +7,16 @@ describe Backbeat::Workflow::Local do
 
   context "#activity_history" do
     it "returns the workflow activity history" do
-      workflow = described_class.new({ activity_name: "First activity" }, { activity_history: [:one] })
+      workflow = described_class.new({ name: "First activity" }, { activity_history: [:one] })
       history = workflow.activity_history
 
-      expect(history).to eq([:one])
+      expect(history).to eq([:one, { name: "First activity" }])
     end
   end
 
   context "#activity_processing" do
     it "marks an activity as processing" do
-      workflow = described_class.new({ activity_name: "First activity" })
+      workflow = described_class.new({ name: "First activity" })
       workflow.activity_processing
 
       activity = workflow.activity_history.first
@@ -27,7 +27,7 @@ describe Backbeat::Workflow::Local do
 
   context "#activity_completed" do
     it "marks an activity as completed" do
-      workflow = described_class.new({ activity_name: "First activity" })
+      workflow = described_class.new({ name: "First activity" })
       workflow.activity_completed(100)
 
       activity = workflow.activity_history.first
@@ -38,7 +38,7 @@ describe Backbeat::Workflow::Local do
 
   context "#activity_errored" do
     it "marks an activity as errored" do
-      workflow = described_class.new({ activity_name: "First activity" })
+      workflow = described_class.new({ name: "First activity" })
       error = StandardError.new("Boom")
       workflow.activity_errored(error)
 
@@ -51,7 +51,7 @@ describe Backbeat::Workflow::Local do
   context "#deactivate" do
     it "marks an activity and previous activities as deactivated" do
       workflow = described_class.new(
-        { activity_name: "Second activity" },
+        { name: "Second activity" },
         { activity_history: [{ name: "First activity", statuses: [] }] }
       )
       workflow.deactivate
@@ -64,7 +64,7 @@ describe Backbeat::Workflow::Local do
 
   context "#complete" do
     it "completes a workflow" do
-      workflow = described_class.new({ activity_name: "First activity" })
+      workflow = described_class.new({ name: "First activity" })
       workflow.complete
 
       expect(workflow.activity_history.last[:name]).to eq(:workflow_complete)
@@ -72,7 +72,7 @@ describe Backbeat::Workflow::Local do
   end
 
   context "#complete?" do
-    let(:workflow) { described_class.new({ activity_name: "An activity" }) }
+    let(:workflow) { described_class.new({ name: "An activity" }) }
 
     it "returns false if the workflow is not complete" do
       expect(workflow.complete?).to eq(false)
@@ -90,7 +90,7 @@ describe Backbeat::Workflow::Local do
 
     def do_some_addition(a, b, c)
       answer = a + b + c
-      [answer, workflow]
+      answer
     end
 
     def return_the_arg(arg)
@@ -99,7 +99,7 @@ describe Backbeat::Workflow::Local do
   end
 
   context "running activities" do
-    let(:workflow) { described_class.new({ activity_name: "First activity", workflow_id: 2 }) }
+    let(:workflow) { described_class.new({ name: "First activity" }) }
     let(:now) { Time.now }
 
     it "runs a workflow locally" do
@@ -107,10 +107,9 @@ describe Backbeat::Workflow::Local do
         Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
       )
 
-      value, new_workflow = workflow.run_activity(activity, { mode: :blocking })
-      activity_data = workflow.activity_history.last
+      activity_data = workflow.run_activity(activity, { mode: :blocking })
 
-      expect(value).to eq(33)
+      expect(activity_data[:response][:result]).to eq(33)
       expect(activity_data[:name]).to eq("Adding")
       expect(activity_data[:activity]).to eq(activity.to_hash)
       expect(activity_data[:statuses].last).to eq(:completed)
@@ -122,10 +121,9 @@ describe Backbeat::Workflow::Local do
         Backbeat::Serializer::Activity.build("MATH", TheActivity, :do_some_addition, [3, 2, 1])
       )
 
-      value, new_workflow = workflow.signal_workflow(activity, { fires_at: now })
-      activity_data = workflow.activity_history.last
+      activity_data = workflow.signal_workflow(activity, { fires_at: now })
 
-      expect(value).to eq(6)
+      expect(activity_data[:response][:result]).to eq(6)
       expect(activity_data[:name]).to eq("MATH")
       expect(activity_data[:activity]).to eq(activity.to_hash)
       expect(activity_data[:statuses].last).to eq(:completed)
@@ -134,9 +132,9 @@ describe Backbeat::Workflow::Local do
     it "json parses the activity arguments to ensure proper expectations during testing" do
       activity = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
 
-      value, new_workflow = workflow.run_activity(activity, { mode: :blocking })
+      activity_data = workflow.run_activity(activity, { mode: :blocking })
 
-      expect(value).to eq("orange")
+      expect(activity_data[:response][:result]).to eq("orange")
     end
 
     it "does not run the activity if disabled" do
@@ -144,10 +142,9 @@ describe Backbeat::Workflow::Local do
 
       begin
         Backbeat::Testing.disable_activities!
-        result = workflow.run_activity(activity, { mode: :blocking })
+        activity_data = workflow.run_activity(activity, { mode: :blocking })
 
-        expect(result).to eq(nil)
-
+        expect(activity_data[:response]).to eq(nil)
       ensure
         Backbeat::Testing.enable_activities!
       end
