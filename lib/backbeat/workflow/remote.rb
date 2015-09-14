@@ -5,10 +5,10 @@ module Backbeat
     class Remote
       attr_reader :id
 
-      def initialize(current_node, api)
-        @current_node = current_node
+      def initialize(current_activity, api)
+        @current_activity = current_activity
         @api = api
-        @id = current_node[:workflow_id] || get_workflow_for_subject[:id]
+        @id = current_activity[:workflow_id] || get_workflow_for_subject[:id]
       end
 
       def activity_processing
@@ -56,16 +56,16 @@ module Backbeat
       end
 
       def activity_id
-        current_node[:activity_id] || workflow_error("No activity id present in current workflow data")
+        current_activity[:activity_id] || workflow_error("No activity id present in current workflow data")
       end
 
       private
 
-      attr_reader :api, :current_node
+      attr_reader :api, :current_activity
 
       def get_workflow_for_subject
-        workflow_data = current_node.merge({
-          subject: Packer.subject_to_string(current_node[:subject])
+        workflow_data = current_activity.merge({
+          subject: Packer.subject_to_string(current_activity[:subject])
         })
         api.find_workflow_by_subject(workflow_data) || api.create_workflow(workflow_data)
       end

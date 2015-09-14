@@ -23,7 +23,7 @@ describe Backbeat::Activity do
     end
   end
 
-  let(:workflow) { Backbeat::Workflow::Local.new({ activity_name: "Maths" }) }
+  let(:workflow) { Backbeat::Workflow::Local.new({ name: "Maths" }) }
   let(:serializer) {
     Backbeat::Serializer::Activity.new({
       name: "An activity",

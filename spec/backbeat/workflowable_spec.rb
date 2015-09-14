@@ -171,10 +171,10 @@ describe Backbeat::Workflowable do
 
     it "can run in a local context" do
       Backbeat.local do |workflow|
-        workflow = object.in_context(workflow).update_attributes({ name: "Orange" })
+        activity = object.in_context(workflow).update_attributes({ name: "Orange" })
 
         expect(WorkflowableModel.find(10).name).to eq("Orange")
-        expect(workflow.activity_history.last[:name]).to eq("WorkflowableModel#update_attributes")
+        expect(activity[:name]).to eq("WorkflowableModel#update_attributes")
       end
     end
   end
