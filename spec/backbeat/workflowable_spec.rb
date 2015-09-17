@@ -22,7 +22,7 @@ describe Backbeat::Workflowable do
   end
 
   let(:api) { Backbeat::MemoryApi.new({ activities: { 1 => {} } }) }
-  let(:remote_workflow) { Backbeat::Workflow::Remote.new({ activity_id: 1 }, api) }
+  let(:remote_workflow) { Backbeat::Workflow::Remote.new({ id: 1 }, api) }
   let(:now) { Time.now }
 
   before do

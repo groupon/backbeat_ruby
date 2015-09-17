@@ -20,7 +20,7 @@ describe Backbeat::Workflow::Remote do
 
   context "#activity_processing" do
     it "marks an activity as processing" do
-      workflow = described_class.new({ activity_id: 5 }, api)
+      workflow = described_class.new({ id: 5 }, api)
       workflow.activity_processing
 
       expect(api.find_activity_by_id(5)[:status]).to eq(:processing)
@@ -29,7 +29,7 @@ describe Backbeat::Workflow::Remote do
 
   context "#activity_completed" do
     it "marks an activity as completed" do
-      workflow = described_class.new({ activity_id: 6 }, api)
+      workflow = described_class.new({ id: 6 }, api)
       workflow.activity_completed(:done)
 
       activity = api.find_activity_by_id(6)
@@ -40,7 +40,7 @@ describe Backbeat::Workflow::Remote do
 
   context "#activity_errored" do
     it "marks an activity as errored" do
-      workflow = described_class.new({ activity_id: 6 }, api)
+      workflow = described_class.new({ id: 6 }, api)
       error = StandardError.new("Failed")
       workflow.activity_errored(error)
 
@@ -52,7 +52,7 @@ describe Backbeat::Workflow::Remote do
 
   context "#deactivate" do
     it "marks an activity and previous activities as deactivated" do
-      workflow = described_class.new({ activity_id: 6 }, api)
+      workflow = described_class.new({ id: 6 }, api)
       workflow.deactivate
 
       expect(api.find_activity_by_id(5)[:status]).to eq(:deactivated)
@@ -62,7 +62,7 @@ describe Backbeat::Workflow::Remote do
 
   context "#activity_history" do
     it "returns the workflow activity history" do
-      workflow = described_class.new({ activity_id: 6, workflow_id: 1 }, api)
+      workflow = described_class.new({ id: 6, workflow_id: 1 }, api)
       history = workflow.activity_history
 
       expect(history).to eq([:activity_1, :activity_2, :activity_3])
@@ -71,7 +71,7 @@ describe Backbeat::Workflow::Remote do
 
   context "#complete" do
     it "completes a workflow" do
-      workflow = described_class.new({ activity_id: 6, workflow_id: 2 }, api)
+      workflow = described_class.new({ id: 6, workflow_id: 2 }, api)
       workflow.complete
 
       expect(api.find_workflow_by_id(2)[:complete]).to eq(true)
@@ -79,7 +79,7 @@ describe Backbeat::Workflow::Remote do
   end
 
   context "#complete?" do
-    let(:workflow) { described_class.new({ activity_id: 6, workflow_id: 2 }, api) }
+    let(:workflow) { described_class.new({ id: 6, workflow_id: 2 }, api) }
     it "returns false if the workflow is not complete" do
       expect(workflow.complete?).to eq(false)
     end
@@ -93,7 +93,7 @@ describe Backbeat::Workflow::Remote do
 
   context "#reset_activity" do
     it "resets the current node" do
-      workflow = described_class.new({ activity_id: 6, workflow_id: 2 }, api)
+      workflow = described_class.new({ id: 6, workflow_id: 2 }, api)
 
       workflow.reset_activity
 
@@ -139,13 +139,13 @@ describe Backbeat::Workflow::Remote do
       }.to raise_error Backbeat::Workflow::Remote::WorkflowError
     end
 
-    it "registers a child node if there is an activity_id in the workflow data" do
-      workflow = described_class.new({ activity_id: 10 }, api)
+    it "registers a child node if there is an id in the workflow data" do
+      workflow = described_class.new({ id: 10 }, api)
 
       workflow.run_activity(activity, { mode: :non_blocking, fires_at: now })
 
-      activity_id = api.find_activity_by_id(10)[:child_activities].first
-      activity_data = api.find_activity_by_id(activity_id)
+      id = api.find_activity_by_id(10)[:child_activities].first
+      activity_data = api.find_activity_by_id(id)
 
       expect(activity_data).to eq(
         Backbeat::Packer.pack_activity(activity, { mode: :non_blocking, fires_at: now }).merge(id: 12)

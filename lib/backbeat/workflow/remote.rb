@@ -56,7 +56,7 @@ module Backbeat
       end
 
       def activity_id
-        current_activity[:activity_id] || workflow_error("No activity id present in current workflow data")
+        current_activity[:id] || workflow_error("No activity id present in current workflow data")
       end
 
       private
