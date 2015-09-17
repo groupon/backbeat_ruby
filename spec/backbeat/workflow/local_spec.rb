@@ -140,24 +140,21 @@ describe Backbeat::Workflow::Local do
     it "does not run the activity if disabled" do
       activity = Backbeat::Serializer::Activity.build("Compare symbols", TheActivity, :return_the_arg, [:orange])
 
-      begin
-        Backbeat::Testing.disable_activities!
+      Backbeat::Testing.disabled do
         activity_data = workflow.run_activity(activity, { mode: :blocking })
 
         expect(activity_data[:response]).to eq(nil)
-      ensure
-        Backbeat::Testing.enable_activities!
       end
     end
 
     it "adds the activity to the testing event history" do
-      Backbeat::Testing.clear!
+      Backbeat::Testing.disabled do
+        activity = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
 
-      activity = Backbeat::Serializer::Activity.build("Adding", TheActivity, :do_some_addition, [10, 11, 12])
+        workflow.run_activity(activity, { mode: :blocking })
 
-      workflow.run_activity(activity, { mode: :blocking })
-
-      expect(Backbeat::Testing.activity_history.last[:name]).to eq("Adding")
+        expect(Backbeat::Testing.activity_history.last[:name]).to eq("Adding")
+      end
     end
   end
 end

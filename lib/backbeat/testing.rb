@@ -12,15 +12,22 @@ module Backbeat
       end
 
       def disable_activities!
-        @run_activities = false
+        @activities_disabled = true
+      end
+
+      def disabled
+        disable_activities!
+        yield
+      ensure
+        enable_activities!
       end
 
       def enable_activities!
-        @run_activities = true
+        @activities_disabled = false
       end
 
       def run_activities?
-        @run_activities.nil? || @run_activities == true
+        !@activities_disabled
       end
     end
   end

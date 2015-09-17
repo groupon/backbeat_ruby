@@ -58,7 +58,8 @@ module Backbeat
           statuses: [],
         })
         activity_runner = jsonify_activity(activity, options)
-        activity_runner.run(Local.new(new_activity, state)) if Testing.run_activities?
+        new_workflow = Local.new(new_activity, state)
+        activity_runner.run(new_workflow) if Testing.run_activities?
         new_activity
       end
 
