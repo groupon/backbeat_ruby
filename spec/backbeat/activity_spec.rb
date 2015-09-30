@@ -11,7 +11,7 @@ describe Backbeat::Activity do
     include Backbeat::Workflowable
 
     def boom
-      raise
+      raise "Failed"
     end
 
     def perform(a, b, c)
@@ -65,7 +65,7 @@ describe Backbeat::Activity do
       })
       activity = described_class.new(serializer)
 
-      expect { activity.run(workflow) }.to raise_error
+      expect { activity.run(workflow) }.to raise_error RuntimeError, "Failed"
 
       activity = workflow.activity_history.last
 

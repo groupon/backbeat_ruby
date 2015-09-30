@@ -48,7 +48,7 @@ describe Backbeat::Activity::LogDecorator do
     activity = MockActivity.new { raise "Error" }
     decorator = described_class.new(activity, logger)
 
-    expect { decorator.run(:workflow) }.to raise_error
+    expect { decorator.run(:workflow) }.to raise_error RuntimeError, "Error"
 
     expect(logger.msgs[:info].count).to eq(1)
     expect(logger.msgs[:info].first[:name]).to eq(:activity_started)
