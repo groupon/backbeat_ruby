@@ -42,7 +42,7 @@ module Backbeat
       end
 
       def update_activity_status(id, status, response = nil)
-        http_client.put("/v2/events/#{id}/status/#{status}", { result: response })
+        http_client.put("/v2/events/#{id}/status/#{status}", { response: response })
       end
 
       def restart_activity(id)

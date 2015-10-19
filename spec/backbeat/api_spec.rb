@@ -262,7 +262,7 @@ describe Backbeat::Api do
 
     context "#update_activity_status" do
       it "sends a request to update the activity status" do
-        expect(client).to receive(:put).with("/v2/events/25/status/errored", MultiJson.dump({ result: nil }), {
+        expect(client).to receive(:put).with("/v2/events/25/status/errored", MultiJson.dump({ response: nil }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -273,7 +273,7 @@ describe Backbeat::Api do
       end
 
       it "sends a result" do
-        expect(client).to receive(:put).with("/v2/events/10/status/completed", MultiJson.dump({ result: { result: 5, error: nil }}), {
+        expect(client).to receive(:put).with("/v2/events/10/status/completed", MultiJson.dump({ response: { result: 5, error: nil }}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -284,7 +284,7 @@ describe Backbeat::Api do
       end
 
       it "raises a status change error" do
-        expect(client).to receive(:put).with("/v2/events/10/status/processing", MultiJson.dump({ result: nil }), {
+        expect(client).to receive(:put).with("/v2/events/10/status/processing", MultiJson.dump({ response: nil }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
