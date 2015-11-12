@@ -22,7 +22,8 @@ Configure:
 require 'backbeat'
 
 Backbeat.configure do |config|
-  config.host      = "your_backbeat_hostname"
+  config.host      = "your_backbeat_server_host"
+  config.port      = "your_backbeat_server_port"
   config.client_id = "your_backbeat_user_id"
   config.context   = :remote
   config.logger    = MyLogger.new("log/mylogs.log")

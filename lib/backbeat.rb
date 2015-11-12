@@ -41,6 +41,7 @@ module Backbeat
 
     attr_accessor :context
     attr_accessor :host
+    attr_accessor :port
     attr_accessor :client_id
     attr_accessor :logger
 
@@ -56,7 +57,7 @@ module Backbeat
       @store ||= (
         case context
         when :remote
-          API.new(API::HttpClient.new(host, client_id))
+          API.new(API::HttpClient.new(host, client_id, port))
         when :local
           MemoryStore.new({})
         else

@@ -33,9 +33,10 @@ require "httparty"
 module Backbeat
   class API
     class HttpClient
-      def initialize(host, client_id)
+      def initialize(host, client_id, port = 80)
         @host = host
         @client_id = client_id
+        @port = port
       end
 
       def get(path, options = {})
@@ -55,7 +56,7 @@ module Backbeat
 
       private
 
-      attr_reader :host, :client_id
+      attr_reader :host, :port, :client_id
 
       def response_to_hash(response)
         {
@@ -81,7 +82,7 @@ module Backbeat
       end
 
       def url(path)
-        "http://#{host}#{path}"
+        "http://#{host}:#{port}#{path}"
       end
     end
   end
