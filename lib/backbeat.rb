@@ -30,9 +30,10 @@
 
 require "backbeat/api"
 require "backbeat/api/http_client"
-require "backbeat/workflowable"
+require "backbeat/memory_store"
 require "backbeat/workflow"
-require "backbeat/testing"
+require "backbeat/activity"
+require "backbeat/workflowable"
 
 module Backbeat
   class Config
@@ -50,18 +51,22 @@ module Backbeat
       )
     end
 
-    attr_writer :api
-    def api
-      @api ||= (
+    attr_writer :store
+    def store
+      @store ||= (
         case context
         when :remote
-          Api.new(Api::HttpClient.new(host, client_id))
+          API.new(API::HttpClient.new(host, client_id))
         when :local
-          {}
+          MemoryStore.new({})
         else
           raise ConfigurationError.new("Unknown default api for context #{context}")
         end
       )
+    end
+
+    def local?
+      context == :local
     end
   end
 
@@ -75,7 +80,15 @@ module Backbeat
     @config ||= Config.new
   end
 
+  def self.local_config
+    @local_config ||= (
+      config = Config.new
+      config.context = :local
+      config
+    )
+  end
+
   def self.local
-    yield Workflow::Local.new({})
+    yield Workflow.new({ config: local_config })
   end
 end

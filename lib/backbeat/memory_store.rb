@@ -1,5 +1,5 @@
 module Backbeat
-  class MemoryApi
+  class MemoryStore
     def initialize(seeds = {})
       @seeds = seeds
     end
@@ -33,13 +33,19 @@ module Backbeat
 
     def update_activity_status(activity_id, status, response = {})
       activities[activity_id] ||= {}
-      activities[activity_id][:status] = status
+      activities[activity_id][:statuses] ||= []
+      activities[activity_id][:statuses] << status
       activities[activity_id][:response] = response
       if status == :deactivated
         activities.each do |activity_id, activity_data|
-          activity_data[:status] = :deactivated
+          activity_data[:statuses] ||= []
+          activity_data[:statuses] << :deactivated
         end
       end
+    end
+
+    def get_activity_response(id)
+      activities[id][:response] ||= {}
     end
 
     def find_all_workflow_activities(workflow_id)
@@ -56,6 +62,7 @@ module Backbeat
       activities[child_activity[:id]] = child_activity
       activities[activity_id][:child_activities] ||= []
       activities[activity_id][:child_activities] << child_activity[:id]
+      child_activity[:id]
     end
 
     def signal_workflow(id, name, data)
@@ -63,6 +70,7 @@ module Backbeat
       activities[child_activity[:id]] = child_activity
       workflows[id][:signals] ||= {}
       workflows[id][:signals][name] = child_activity
+      child_activity[:id]
     end
 
     def find_all_workflow_children(id)

@@ -28,28 +28,34 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require "backbeat"
 require "backbeat/activity"
-require "backbeat/serializer/activity"
-require "backbeat/serializer/findable_activity"
+require "backbeat/workflow"
 require "active_support/inflector"
 
 module Backbeat
   class Packer
     def self.unpack_activity(data)
-      activity_data = data[:client_data]
-      activity_data[:class] = Inflector.constantize(activity_data[:class])
-      activity_data[:method] = activity_data[:method].to_sym
-      serializer = Inflector.constantize(activity_data[:serializer])
-      Activity.build(serializer.new(activity_data))
+      data = underscore_keys(data)
+      data = data[:decision] || data[:activity] || data
+      client_data = data[:client_data]
+      klass = Inflector.constantize(client_data[:class_name] || client_data[:class])
+      new_client_data = client_data.merge({ class: klass })
+      activity_data = data.merge({ client_data: new_client_data })
+      Activity.new({ activity_data: activity_data })
     end
 
-    def self.pack_activity(activity, options)
-      activity_hash = activity.to_hash
-      {
-        name: activity_hash[:name],
-        client_data: activity_hash
-      }.merge(options)
+    def self.unpack_workflow(data)
+      activity = unpack_activity(data)
+      workflow_data = {
+        id: data[:workflow_id],
+        subject: data[:subject],
+        decider: data[:decider],
+        name: data[:workflow_name]
+      }
+      Workflow.new({
+        workflow_data: workflow_data,
+        current_activity: activity
+      })
     end
 
     def self.success_response(result)

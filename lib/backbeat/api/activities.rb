@@ -31,10 +31,10 @@
 require "backbeat/api/json_api_client"
 
 module Backbeat
-  class Api
+  class API
     class Activities
       def initialize(http_client)
-        @http_client = JsonApiClient.new(http_client)
+        @http_client = JsonAPIClient.new(http_client)
       end
 
       def find_activity_by_id(id)
@@ -55,6 +55,10 @@ module Backbeat
 
       def add_child_activities(id, data)
         http_client.post("/v2/events/#{id}/decisions", { decisions: data })
+      end
+
+      def get_activity_response(id)
+        http_client.get("/v2/events/#{id}/response")
       end
 
       private

@@ -27,12 +27,12 @@ describe Backbeat do
     expect(Backbeat.config.client_id).to eq("123")
   end
 
-  it "allows the backbeat api to be configured" do
+  it "allows the backbeat store to be configured" do
     Backbeat.configure do |config|
-      config.api = { activities: [1, 2] }
+      config.store = { activities: [1, 2] }
     end
 
-    expect(Backbeat.config.api).to eq({ activities: [1, 2] })
+    expect(Backbeat.config.store).to eq({ activities: [1, 2] })
   end
 
   require "logger"
@@ -53,15 +53,15 @@ describe Backbeat do
       config.context = :remote
     end
 
-    expect(Backbeat.config.api).to be_a(Backbeat::Api)
+    expect(Backbeat.config.store).to be_a(Backbeat::API)
   end
 
-  it "defaults to an empty hash in a local context" do
+  it "defaults to a memory store in a local context" do
     Backbeat.configure do |config|
       config.context = :local
     end
 
-    expect(Backbeat.config.api).to eq({})
+    expect(Backbeat.config.store).to be_a(Backbeat::MemoryStore)
   end
 
   it "raises an error if the context is unknown" do
@@ -69,7 +69,7 @@ describe Backbeat do
       config.context = :foo
     end
 
-    expect { Backbeat.config.api }.to raise_error Backbeat::Config::ConfigurationError
+    expect { Backbeat.config.store }.to raise_error Backbeat::Config::ConfigurationError
   end
 
   it "raises an error if the context is not configured" do
@@ -88,7 +88,7 @@ describe Backbeat do
     Backbeat.local do |workflow|
       workflow.complete
 
-      expect(workflow.activity_history.last[:name]).to eq(:workflow_complete)
+      expect(workflow.complete?).to eq(true)
     end
   end
 end

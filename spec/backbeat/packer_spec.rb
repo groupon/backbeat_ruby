@@ -1,79 +1,74 @@
 require "spec_helper"
+require "backbeat"
 require "backbeat/packer"
-require "backbeat/serializer/activity"
-require "support/memory_api"
 
 describe Backbeat::Packer do
   let(:now) { Time.now }
-  let(:api) { Backbeat::MemoryApi.new }
+  let(:memory_store) { Backbeat::MemoryStore.new }
 
   before do
     Backbeat.configure do |config|
       config.context = :remote
-      config.api = api
-    end
-  end
-
-  context ".pack_activity" do
-    it "returns a the api representation of node data" do
-      activity = Backbeat::Serializer::Activity.build("activity", "Klass", :method, [])
-      activity_hash = activity.to_hash
-      options = { mode: :blocking, fires_at: now }
-
-      expect(Backbeat::Packer.pack_activity(activity, options)).to eq({
-        name: activity_hash[:name],
-        mode: :blocking,
-        fires_at: now,
-        client_data: activity_hash
-      })
+      config.store = memory_store
     end
   end
 
   context ".unpack_activity" do
-    let(:serializer) {
-      Backbeat::Serializer::Activity.build("activity name", Array, :method, [])
-    }
+    let(:activity_data) {{
+      id: 1,
+      client_data: {
+        name: "activity name",
+        class_name: "Array",
+        method: "method",
+        params: []
+      }
+    }}
 
-    it "returns the activity object specified in the activity type with the activity data" do
-      unpacked_activity = Backbeat::Packer.unpack_activity({
-        client_data: {
-          name: "activity name",
-          serializer: "Backbeat::Serializer::Activity",
-          class: "Array",
-          method: :method,
-          params: []
-        }
-      })
+    it "returns an activity object" do
+      activity = Backbeat::Packer.unpack_activity(activity_data)
 
-      expect(unpacked_activity.to_hash).to eq(serializer.to_hash)
+      expect(activity.id).to eq(activity_data[:id])
     end
 
     it "resolves the class name of the activity" do
-      unpacked_activity = Backbeat::Packer.unpack_activity({
-        client_data: {
-          name: "activity name",
-          serializer: "Backbeat::Serializer::Activity",
-          class: "Array",
-          method: :method,
-          params: []
-        }
-      })
+      activity = Backbeat::Packer.unpack_activity(activity_data)
 
-      expect(unpacked_activity.to_hash).to eq(serializer.to_hash)
+      expect(activity.to_hash[:client_data][:class]).to eq(Array)
+    end
+  end
+
+  context ".unpack_workflow" do
+    let(:activity_data) {{
+      id: 1,
+      workflow_name: "A workflow",
+      workflow_id: 2,
+      subject: "Subject",
+      decider: "Decider",
+      client_data: {
+        name: "activity name",
+        class_name: "Array",
+        method: "method",
+        params: []
+      }
+    }}
+
+    it "returns a workflow object" do
+      workflow = Backbeat::Packer.unpack_workflow(activity_data)
+
+      expect(workflow.id).to eq(2)
     end
 
-    it "symbolizes the method name" do
-      unpacked_activity = Backbeat::Packer.unpack_activity({
-        client_data: {
-          name: "activity name",
-          serializer: "Backbeat::Serializer::Activity",
-          class: "Array",
-          method: "method",
-          params: []
-        }
-      })
+    it "builds the current activity with the workflow" do
+      workflow = Backbeat::Packer.unpack_workflow(activity_data)
 
-      expect(unpacked_activity.to_hash).to eq(serializer.to_hash)
+      expect(workflow.current_activity.id).to eq(1)
+    end
+
+    it "underscores keys" do
+      camelized_data = activity_data.merge({ "clientData" => activity_data[:client_data] })
+      workflow = Backbeat::Packer.unpack_workflow(camelized_data)
+
+      expect(workflow.current_activity.id).to eq(1)
     end
   end
 

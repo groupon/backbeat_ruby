@@ -6,7 +6,7 @@ require "backbeat/api/http_client"
 describe Backbeat::MockHttpClient do
 
   it "implements the backbeat http client interface" do
-    expect(Backbeat::MockHttpClient).to substitute_for(Backbeat::Api::HttpClient)
+    expect(Backbeat::MockHttpClient).to substitute_for(Backbeat::API::HttpClient)
   end
 
 end

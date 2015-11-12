@@ -1,7 +1,7 @@
 require "surrogate"
 
 module Backbeat
-  class MockApi
+  class MockAPI
     Surrogate.endow self
 
     define(:create_workflow) do |data|
@@ -50,6 +50,9 @@ module Backbeat
     end
 
     define(:add_child_activities) do |id, data|
+    end
+
+    define(:get_activity_response) do |id|
     end
   end
 end

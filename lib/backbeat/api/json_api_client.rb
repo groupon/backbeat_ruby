@@ -33,8 +33,8 @@ require "backbeat/api/errors"
 require "backbeat/packer"
 
 module Backbeat
-  class Api
-    class JsonApiClient
+  class API
+    class JsonAPIClient
       def initialize(http_client)
         @http_client = http_client
       end

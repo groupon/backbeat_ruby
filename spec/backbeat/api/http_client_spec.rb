@@ -2,8 +2,8 @@ require "spec_helper"
 require "webmock/rspec"
 require "backbeat/api/http_client"
 
-describe Backbeat::Api::HttpClient do
-  let(:client) { Backbeat::Api::HttpClient.new("backbeat.com", "987") }
+describe Backbeat::API::HttpClient do
+  let(:client) { Backbeat::API::HttpClient.new("backbeat.com", "987") }
 
   context "#get" do
     it "makes a get request to the backbeat host with the client id" do

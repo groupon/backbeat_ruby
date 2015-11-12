@@ -31,7 +31,7 @@
 require "httparty"
 
 module Backbeat
-  class Api
+  class API
     class HttpClient
       def initialize(host, client_id)
         @host = host
