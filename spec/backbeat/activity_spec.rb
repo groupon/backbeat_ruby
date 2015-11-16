@@ -91,15 +91,13 @@ describe Backbeat::Activity do
     }
   }
   let(:activity) {
-    Backbeat::Activity.new({
-      activity_data: activity_data,
-      config: config
-    })
+    Backbeat::Activity.new(activity_data.merge({ config: config }))
   }
 
   let(:workflow) {
     Backbeat::Workflow.new({
-      workflow_data: { id: 1, name: "MyWorkflow" },
+      id: 1,
+      name: "MyWorkflow",
       current_activity: activity,
       config: config
     })
@@ -165,14 +163,12 @@ describe Backbeat::Activity do
   context "#register_child" do
     let(:new_activity) {
       Backbeat::Activity.new({
-        activity_data: {
-          name: "SubActivity",
-          mode: "blocking",
-          client_data: {
-            class: MyWorkflowable,
-            method: "perform",
-            params: [10, 10, 10]
-          }
+        name: "SubActivity",
+        mode: "blocking",
+        client_data: {
+          class: MyWorkflowable,
+          method: "perform",
+          params: [10, 10, 10]
         },
         config: config
       })

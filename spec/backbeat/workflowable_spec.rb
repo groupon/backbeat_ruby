@@ -59,11 +59,11 @@ describe Backbeat::Workflowable do
     })
   }
   let(:activity) {
-    Backbeat::Activity.new({ activity_data: { id: 1 } })
+    Backbeat::Activity.new({ id: 1 })
   }
   let(:workflow) {
     Backbeat::Workflow.new({
-      workflow_data: { id: 5 },
+      id: 5,
       current_activity: activity
     })
   }

@@ -37,14 +37,15 @@ module Backbeat
       workflow = Packer.unpack_workflow(data)
       activity = workflow.current_activity
       workflow.run(activity)
+      workflow
     end
 
     attr_reader :current_activity, :config
 
     def initialize(options = {})
-      @workflow_data = options[:workflow_data] || {}
+      @config = options.delete(:config) || Backbeat.config
       @current_activity = options[:current_activity]
-      @config = options[:config] || Backbeat.config
+      @options = options
     end
 
     def deactivate
@@ -75,12 +76,6 @@ module Backbeat
       run(activity) if config.local?
     end
 
-    def id
-      @id ||= (
-        workflow_data[:id] || get_workflow_for_subject[:id]
-      )
-    end
-
     def run(activity)
       if logger = config.logger
         runner = Activity::LogDecorator.new(activity, logger)
@@ -89,32 +84,58 @@ module Backbeat
       end
       runner.run(
         Workflow.new({
-          workflow_data: workflow_data,
+          name: name,
+          subject: subject,
+          decider: decider,
           current_activity: activity,
           config: config
         })
       )
     end
 
+    def name
+      options[:name]
+    end
+
+    def subject
+      options[:subject] ||= {}
+    end
+
+    def decider
+      options[:decider]
+    end
+
+    def id
+      options[:id] ||= find_id
+    end
+
     private
 
-    attr_reader :workflow_data
+    attr_reader :options
 
     def store
       config.store
     end
 
-    def subject
-      workflow_data[:subject] || {}
+    def find_id
+      workflow = find || create
+      workflow[:id]
     end
 
-    def get_workflow_for_subject
-      subject_string = Packer.subject_to_string(subject)
+    def find
+      store.find_workflow_by_subject(workflow_params)
+    end
 
-      workflow_params = workflow_data.merge({ subject: subject_string })
+    def create
+      store.create_workflow(workflow_params)
+    end
 
-      store.find_workflow_by_subject(workflow_params) ||
-        store.create_workflow(workflow_params)
+    def workflow_params
+      @workflow_params ||= {
+        name: name,
+        subject: Packer.subject_to_string(subject),
+        decider: decider
+      }
     end
   end
 end

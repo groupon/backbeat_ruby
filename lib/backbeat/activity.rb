@@ -31,8 +31,8 @@
 module Backbeat
   class Activity
     def initialize(options = {})
-      @activity_data = options[:activity_data] || {}
-      @config = options[:config] || Backbeat.config
+      @config  = options.delete(:config) || Backbeat.config
+      @options = options
     end
 
     def run(workflow)
@@ -41,7 +41,6 @@ module Backbeat
         ret_value = object.send(method, *params)
         complete(ret_value)
       end
-      workflow
     rescue => e
       errored(e)
       raise e
@@ -80,37 +79,39 @@ module Backbeat
     end
 
     def to_hash
-      activity_data
+      options
     end
 
     def id
-      activity_data[:id]
+      options[:id]
     end
 
     def id=(new_id)
-      activity_data[:id] = new_id
+      options[:id] = new_id
     end
 
     def name
-      activity_data[:name]
-    end
-
-    def params
-      client_data[:params]
+      options[:name]
     end
 
     def method
       client_data[:method]
     end
 
+    def params
+      client_data[:params]
+    end
+
     private
+
+    attr_reader :config, :options
 
     def store
       config.store
     end
 
     def client_data
-      activity_data[:client_data]
+      options[:client_data]
     end
 
     def object
@@ -122,7 +123,5 @@ module Backbeat
         end
       )
     end
-
-    attr_reader :activity_data, :config
   end
 end

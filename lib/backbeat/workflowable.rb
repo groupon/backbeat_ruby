@@ -71,7 +71,9 @@ module Backbeat
       def new_workflow(subject)
         name = self.is_a?(Class) ? self.to_s : self.class.to_s
         Workflow.new({
-          workflow_data: { subject: subject, decider: name, name: name }
+          subject: subject,
+          decider: name,
+          name: name
         })
       end
     end
@@ -102,10 +104,9 @@ module Backbeat
 
       def method_missing(method, *params)
         activity_data = serializer.serialize(method, params, options)
-        activity = Activity.new({
-          activity_data: activity_data,
-          config: workflow.config
-        })
+
+        activity = Activity.new(activity_data.merge({ config: workflow.config }))
+
         if options[:mode] == :signal || !workflow.current_activity
           workflow.signal(activity)
         else

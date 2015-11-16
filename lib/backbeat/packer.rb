@@ -41,19 +41,16 @@ module Backbeat
       klass = Inflector.constantize(client_data[:class_name] || client_data[:class])
       new_client_data = client_data.merge({ class: klass })
       activity_data = data.merge({ client_data: new_client_data })
-      Activity.new({ activity_data: activity_data })
+      Activity.new(activity_data)
     end
 
     def self.unpack_workflow(data)
       activity = unpack_activity(data)
-      workflow_data = {
+      Workflow.new({
         id: data[:workflow_id],
         subject: data[:subject],
         decider: data[:decider],
-        name: data[:workflow_name]
-      }
-      Workflow.new({
-        workflow_data: workflow_data,
+        name: data[:workflow_name],
         current_activity: activity
       })
     end
