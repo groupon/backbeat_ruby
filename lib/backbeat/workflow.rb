@@ -35,8 +35,7 @@ module Backbeat
   class Workflow
     def self.continue(data)
       workflow = Packer.unpack_workflow(data)
-      activity = workflow.current_activity
-      workflow.run(activity)
+      workflow.run_current
       workflow
     end
 
@@ -77,20 +76,23 @@ module Backbeat
     end
 
     def run(activity)
-      if logger = config.logger
-        runner = Activity::LogDecorator.new(activity, logger)
-      else
-        runner = activity
+      log(activity) do |activity|
+        activity.run(
+          Workflow.new({
+            name: name,
+            subject: subject,
+            decider: decider,
+            current_activity: activity,
+            config: config
+          })
+        )
       end
-      runner.run(
-        Workflow.new({
-          name: name,
-          subject: subject,
-          decider: decider,
-          current_activity: activity,
-          config: config
-        })
-      )
+    end
+
+    def run_current
+      log(current_activity) do |activity|
+        activity.run(self)
+      end
     end
 
     def name
@@ -112,6 +114,15 @@ module Backbeat
     private
 
     attr_reader :options
+
+    def log(activity)
+      if logger = config.logger
+        runner = Activity::LogDecorator.new(activity, logger)
+      else
+        runner = activity
+      end
+      yield(runner)
+    end
 
     def store
       config.store
