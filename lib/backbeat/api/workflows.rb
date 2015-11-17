@@ -31,10 +31,10 @@
 require "backbeat/api/json_api_client"
 
 module Backbeat
-  class Api
+  class API
     class Workflows
       def initialize(http_client)
-        @http_client = JsonApiClient.new(http_client)
+        @http_client = JsonAPIClient.new(http_client)
       end
 
       def create_workflow(data)

@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Backbeat
-  class Api
+  class API
     class ValidationError < StandardError
     end
 

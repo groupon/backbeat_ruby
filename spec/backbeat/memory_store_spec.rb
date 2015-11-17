@@ -28,47 +28,17 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-module Backbeat
-  module Serializer
-    class FindableActivity
-      def self.build(name, workflowable, method, params)
-        new({
-          name: name,
-          class: workflowable.class,
-          id: workflowable.id,
-          method: method,
-          params: params
-        })
-      end
+require "spec_helper"
+require "surrogate/rspec"
+require "support/mock_api"
+require "backbeat/api"
+require "backbeat/memory_store"
 
-      attr_reader :name, :method, :params
+describe Backbeat::MemoryStore do
 
-      def initialize(activity_data)
-        @name = activity_data[:name]
-        @klass = activity_data[:class]
-        @id = activity_data[:id]
-        @method = activity_data[:method]
-        @params = activity_data[:params]
-      end
-
-      def to_hash
-        {
-          serializer: self.class.to_s,
-          name: name,
-          class: klass.to_s,
-          id: id,
-          method: method,
-          params: params
-        }
-      end
-
-      def workflowable
-        klass.find(id)
-      end
-
-      private
-
-      attr_reader :klass, :id
-    end
+  it "implements the backbeat api interface" do
+    expect(Backbeat::MockAPI).to substitute_for(Backbeat::API)
+    expect(Backbeat::MemoryStore).to substitute_for(Backbeat::MockAPI)
   end
+
 end

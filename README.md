@@ -22,7 +22,8 @@ Configure:
 require 'backbeat'
 
 Backbeat.configure do |config|
-  config.host      = "your_backbeat_hostname"
+  config.host      = "your_backbeat_server_host"
+  config.port      = "your_backbeat_server_port"
   config.client_id = "your_backbeat_user_id"
   config.context   = :remote
   config.logger    = MyLogger.new("log/mylogs.log")
@@ -94,4 +95,26 @@ Backbeat.local do |workflow|
   order = Order.last
   MyDecider.start_context(order).my_decision(order.id)
 end
+```
+
+Make assertions prior to running activities using `Backbeat::Testing`
+
+```ruby
+Backbeat.configure do |config|
+  config.context = :local
+end
+
+Backbeat::Testing.enable!
+
+order = Order.last
+MyDecider.start_context(order).my_decision(order.id)
+
+activity = Backbeat::Testing.activities.first
+
+expect(activity.name).to eq("MyDecider#my_decision")
+expect(activity.params).to eq([order.id])
+
+Backbeat::Testing.run # Runs all queued activities
+
+Backbeat::Testing.disable!
 ```

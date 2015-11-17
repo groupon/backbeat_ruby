@@ -2,7 +2,8 @@ require 'grape'
 require 'backbeat'
 
 Backbeat.configure do |config|
-  config.host      = "http://192.168.59.103:9292"
+  config.host      = "http://192.168.59.103"
+  config.port      = 9292
   config.client_id = "9ab09c2f-68d5-4e0e-8844-3637eea44254"
   config.context   = :remote
 end

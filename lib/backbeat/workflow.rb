@@ -29,27 +29,124 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require "backbeat/packer"
-require "backbeat/workflow/local"
-require "backbeat/workflow/remote"
+require "backbeat/activity/log_decorator"
 
 module Backbeat
-  module Workflow
-    def self.continue(workflow_data)
-      data = Packer.underscore_keys(workflow_data)
-      data = data[:activity] || data[:decision] || data
-      workflow = new(data)
-      activity = Packer.unpack_activity(data)
-      activity.run(workflow)
+  class Workflow
+    def self.continue(data)
+      workflow = Packer.unpack_workflow(data)
+      workflow.run_current
+      workflow
     end
 
-    def self.new(workflow_data)
-      data = workflow_data.merge({ workflow_type: workflow_data[:name] })
-      case Backbeat.config.context
-      when :remote
-        Workflow::Remote.new(data, Backbeat.config.api)
-      when :local
-        Workflow::Local.new(data, {})
+    attr_reader :current_activity, :config
+
+    def initialize(options = {})
+      @config = options.delete(:config) || Backbeat.config
+      @current_activity = options[:current_activity]
+      @options = options
+    end
+
+    def deactivate
+      store.update_activity_status(current_activity.id, :deactivated)
+    end
+
+    def activity_history
+      store.find_all_workflow_activities(id)
+    end
+
+    def complete?
+      !!store.find_workflow_by_id(id)[:complete]
+    end
+
+    def complete
+      store.complete_workflow(id)
+    end
+
+    def signal(activity)
+      activity_data = activity.to_hash
+      new_id = store.signal_workflow(id, activity_data[:name], activity_data)
+      activity.id = new_id
+      run(activity) if config.local?
+    end
+
+    def register(activity)
+      current_activity.register_child(activity)
+      run(activity) if config.local?
+    end
+
+    def run(activity)
+      log(activity) do |activity|
+        activity.run(
+          Workflow.new({
+            name: name,
+            subject: subject,
+            decider: decider,
+            current_activity: activity,
+            config: config
+          })
+        )
       end
+    end
+
+    def run_current
+      log(current_activity) do |activity|
+        activity.run(self)
+      end
+    end
+
+    def name
+      options[:name]
+    end
+
+    def subject
+      options[:subject] ||= {}
+    end
+
+    def decider
+      options[:decider]
+    end
+
+    def id
+      options[:id] ||= find_id
+    end
+
+    private
+
+    attr_reader :options
+
+    def log(activity)
+      if logger = config.logger
+        runner = Activity::LogDecorator.new(activity, logger)
+      else
+        runner = activity
+      end
+      yield(runner)
+    end
+
+    def store
+      config.store
+    end
+
+    def find_id
+      workflow = find || create
+      workflow[:id]
+    end
+
+    def find
+      store.find_workflow_by_subject(workflow_params)
+    end
+
+    def create
+      store.create_workflow(workflow_params)
+    end
+
+    def workflow_params
+      @workflow_params ||= {
+        name: name,
+        subject: Packer.subject_to_string(subject),
+        decider: decider
+      }
     end
   end
 end

@@ -30,34 +30,58 @@
 
 module Backbeat
   class Testing
-    class << self
-      attr_writer :activity_history
+    def self.activities
+      jobs.map(&:first)
+    end
 
-      def activity_history
-        @activity_history ||= []
+    def self.jobs
+      @jobs ||= []
+    end
+
+    def self.clear
+      @jobs = []
+    end
+
+    def self.run
+      while job = jobs.shift
+        activity, workflow = job
+        activity.run_real(workflow)
       end
+    end
 
-      def clear!
-        self.activity_history = []
+    def self.set!(testing)
+      current = @testing
+      @testing = testing
+      if block_given?
+        begin
+          yield
+        ensure
+          @testing = testing
+        end
       end
+    end
 
-      def disable_activities!
-        @activities_disabled = true
-      end
+    def self.enable!(&block)
+      set!(true, &block)
+    end
 
-      def disabled
-        disable_activities!
-        yield
-      ensure
-        enable_activities!
-      end
+    def self.disable!(&block)
+      set!(false, &block)
+    end
 
-      def enable_activities!
-        @activities_disabled = false
-      end
+    def self.enabled?
+      @testing
+    end
+  end
 
-      def run_activities?
-        !@activities_disabled
+  class Activity
+    alias_method :run_real, :run
+
+    def run(workflow)
+      if Testing.enabled?
+        Backbeat::Testing.jobs << [self, workflow]
+      else
+        run_real(workflow)
       end
     end
   end

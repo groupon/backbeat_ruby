@@ -32,7 +32,7 @@ require "backbeat/api/workflows"
 require "backbeat/api/activities"
 
 module Backbeat
-  class Api
+  class API
     def initialize(http_client)
       @http_client = http_client
     end
@@ -50,7 +50,7 @@ module Backbeat
     end
 
     def signal_workflow(id, name, data)
-      workflows_api.signal_workflow(id, name, data)
+      workflows_api.signal_workflow(id, name, data)[:id]
     end
 
     def complete_workflow(id)
@@ -90,21 +90,25 @@ module Backbeat
     end
 
     def add_child_activity(id, data)
-      add_child_activities(id, [data])
+      add_child_activities(id, [data]).first
     end
 
     def add_child_activities(id, data)
       activities_api.add_child_activities(id, data)
     end
 
+    def get_activity_response(id)
+      activities_api.get_activity_response(id, data)
+    end
+
     private
 
     def workflows_api
-      @workflows_api ||= Workflows.new(@http_client)
+      @workflows_api ||= API::Workflows.new(@http_client)
     end
 
     def activities_api
-      @activities_api ||= Activities.new(@http_client)
+      @activities_api ||= API::Activities.new(@http_client)
     end
   end
 end

@@ -1,11 +1,41 @@
+# Copyright (c) 2015, Groupon, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
+#
+# Neither the name of GROUPON nor the names of its contributors may be
+# used to endorse or promote products derived from this software without
+# specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+# IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 require "spec_helper"
 require "backbeat/api"
 require "backbeat/api/errors"
 require "support/mock_http_client"
 
-describe Backbeat::Api do
+describe Backbeat::API do
   let(:client) { Backbeat::MockHttpClient.new }
-  let(:api) { Backbeat::Api.new(client) }
+  let(:api) { Backbeat::API.new(client) }
 
   context "workflows" do
     context "#create_workflow" do
@@ -38,7 +68,7 @@ describe Backbeat::Api do
           }
         }).and_return({ status: 422 })
 
-        expect { api.create_workflow(workflow_data) }.to raise_error Backbeat::Api::ValidationError
+        expect { api.create_workflow(workflow_data) }.to raise_error Backbeat::API::ValidationError
       end
 
       it "raises an authentication error if the request is not authenticated" do
@@ -49,7 +79,7 @@ describe Backbeat::Api do
           }
         }).and_return({ status: 401, body: "Unauthorized" })
 
-        expect { api.create_workflow({}) }.to raise_error Backbeat::Api::AuthenticationError, "Unauthorized"
+        expect { api.create_workflow({}) }.to raise_error Backbeat::API::AuthenticationError, "Unauthorized"
       end
     end
 
@@ -79,7 +109,7 @@ describe Backbeat::Api do
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 404, body: MultiJson.dump({ error: "Record not found" })})
 
-        expect { api.find_workflow_by_id(5) }.to raise_error Backbeat::Api::NotFoundError, { error: "Record not found" }.to_s
+        expect { api.find_workflow_by_id(5) }.to raise_error Backbeat::API::NotFoundError, { error: "Record not found" }.to_s
       end
     end
 
@@ -129,7 +159,7 @@ describe Backbeat::Api do
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           }
-        }).and_return({ status: 201, body: "11" })
+        }).and_return({ status: 201, body: { id: 11 }.to_json })
 
         response = api.signal_workflow(10, :my_signal, signal_data)
 
@@ -144,7 +174,7 @@ describe Backbeat::Api do
           }
         }).and_return({ status: 422, body: MultiJson.dump({ error: "Invalid" })})
 
-        expect { api.signal_workflow(10, :my_signal, signal_data) }.to raise_error Backbeat::Api::ValidationError, { error: "Invalid" }.to_s
+        expect { api.signal_workflow(10, :my_signal, signal_data) }.to raise_error Backbeat::API::ValidationError, { error: "Invalid" }.to_s
       end
     end
 
@@ -291,7 +321,7 @@ describe Backbeat::Api do
           }
         }).and_return({ status: 409 })
 
-        expect { api.update_activity_status(10, :processing) }.to raise_error(Backbeat::Api::InvalidStatusChangeError)
+        expect { api.update_activity_status(10, :processing) }.to raise_error(Backbeat::API::InvalidStatusChangeError)
       end
     end
 
@@ -341,9 +371,9 @@ describe Backbeat::Api do
             "Content-Type" => "application/json",
             "Accept" => "application/json"
           }
-        }).and_return({ status: 201 })
+        }).and_return({ status: 201, body: [13].to_json })
 
-        api.add_child_activity(12, activity_data)
+        expect(api.add_child_activity(12, activity_data)).to eq(13)
       end
     end
   end

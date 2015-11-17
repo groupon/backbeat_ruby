@@ -28,46 +28,103 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require "backbeat/activity/log_decorator"
-
 module Backbeat
   class Activity
-    def self.build(serializer)
-      activity = new(serializer)
-      if logger = Backbeat.config.logger
-        LogDecorator.new(activity, logger)
-      else
-        activity
-      end
-    end
-
-    def initialize(serializer)
-      @serializer = serializer
-      @workflowable = serializer.workflowable
-      @method = serializer.method
-      @params = serializer.params
+    def initialize(options = {})
+      @config  = options.delete(:config) || Backbeat.config
+      @options = options
     end
 
     def run(workflow)
-      ret_value = nil
-      workflowable.with_context(workflow) do
-        workflow.activity_processing
-        ret_value = workflowable.send(method, *params)
-        workflow.activity_completed(ret_value)
+      object.with_context(workflow) do
+        processing
+        ret_value = object.send(method, *params)
+        complete(ret_value)
       end
-      ret_value
     rescue => e
-      workflow.activity_errored(e)
-      raise e
+      errored(e)
+    end
+
+    def register_child(activity)
+      new_id = store.add_child_activity(id, activity.to_hash)
+      activity.id = new_id
+      activity
+    end
+
+    def result
+      store.get_activity_response(id)[:result]
+    end
+
+    def error
+      store.get_activity_response(id)[:error]
+    end
+
+    def reset
+      store.reset_activity(id)
+    end
+
+    def complete(ret_val)
+      response = Packer.success_response(ret_val)
+      store.update_activity_status(id, :completed, response)
+    end
+
+    def complete?
+      store.find_activity_by_id(id)[:current_server_status] == :completed
+    end
+
+    def errored(error)
+      response = Packer.error_response(error)
+      store.update_activity_status(id, :errored, response)
+    end
+
+    def processing
+      store.update_activity_status(id, :processing)
     end
 
     def to_hash
-      serializer.to_hash
+      options
+    end
+
+    def id
+      options[:id]
+    end
+
+    def id=(new_id)
+      options[:id] = new_id
+    end
+
+    def name
+      options[:name]
+    end
+
+    def method
+      client_data[:method]
+    end
+
+    def params
+      client_data[:params]
     end
 
     private
 
-    attr_reader :serializer, :workflowable, :method, :params
+    attr_reader :config, :options
 
+    def store
+      config.store
+    end
+
+    def client_data
+      options[:client_data]
+    end
+
+    def object
+      @object ||= (
+        if id = client_data[:id]
+          client_data[:class].find(id)
+        else
+          client_data[:class].new
+        end
+      )
+    end
   end
 end

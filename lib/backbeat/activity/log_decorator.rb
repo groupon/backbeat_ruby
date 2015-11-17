@@ -46,10 +46,6 @@ module Backbeat
         raise
       end
 
-      def to_hash
-        activity.to_hash
-      end
-
       private
 
       attr_reader :activity, :logger

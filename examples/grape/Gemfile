@@ -1,4 +1,4 @@
 source 'http://rubygems/'
 
 gem 'grape'
-gem 'backbeat'
+gem 'backbeat', path: '../../'

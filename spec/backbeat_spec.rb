@@ -1,3 +1,33 @@
+# Copyright (c) 2015, Groupon, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
+#
+# Neither the name of GROUPON nor the names of its contributors may be
+# used to endorse or promote products derived from this software without
+# specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+# IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 require "spec_helper"
 require "backbeat"
 
@@ -27,12 +57,12 @@ describe Backbeat do
     expect(Backbeat.config.client_id).to eq("123")
   end
 
-  it "allows the backbeat api to be configured" do
+  it "allows the backbeat store to be configured" do
     Backbeat.configure do |config|
-      config.api = { activities: [1, 2] }
+      config.store = { activities: [1, 2] }
     end
 
-    expect(Backbeat.config.api).to eq({ activities: [1, 2] })
+    expect(Backbeat.config.store).to eq({ activities: [1, 2] })
   end
 
   require "logger"
@@ -53,15 +83,15 @@ describe Backbeat do
       config.context = :remote
     end
 
-    expect(Backbeat.config.api).to be_a(Backbeat::Api)
+    expect(Backbeat.config.store).to be_a(Backbeat::API)
   end
 
-  it "defaults to an empty hash in a local context" do
+  it "defaults to a memory store in a local context" do
     Backbeat.configure do |config|
       config.context = :local
     end
 
-    expect(Backbeat.config.api).to eq({})
+    expect(Backbeat.config.store).to be_a(Backbeat::MemoryStore)
   end
 
   it "raises an error if the context is unknown" do
@@ -69,7 +99,7 @@ describe Backbeat do
       config.context = :foo
     end
 
-    expect { Backbeat.config.api }.to raise_error Backbeat::Config::ConfigurationError
+    expect { Backbeat.config.store }.to raise_error Backbeat::Config::ConfigurationError
   end
 
   it "raises an error if the context is not configured" do
@@ -88,7 +118,7 @@ describe Backbeat do
     Backbeat.local do |workflow|
       workflow.complete
 
-      expect(workflow.activity_history.last[:name]).to eq(:workflow_complete)
+      expect(workflow.complete?).to eq(true)
     end
   end
 end
