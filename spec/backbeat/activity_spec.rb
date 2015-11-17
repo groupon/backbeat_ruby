@@ -195,4 +195,24 @@ describe Backbeat::Activity do
       expect(activity.to_hash).to eq(activity_data)
     end
   end
+
+  context "#complte?" do
+    it "returns false if the activity is not complete" do
+      expect(activity.complete?).to eq(false)
+    end
+
+    it "returns true if the activity is complete" do
+      activity.run(workflow)
+
+      expect(activity.complete?).to eq(true)
+    end
+
+    it "returns false if the activity errored" do
+      activity_data[:client_data][:method] = :boom
+
+      expect { activity.run(workflow) }.to raise_error RuntimeError, "Failed"
+
+      expect(activity.complete?).to eq(false)
+    end
+  end
 end

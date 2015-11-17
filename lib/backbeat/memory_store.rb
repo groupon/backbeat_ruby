@@ -62,14 +62,16 @@ module Backbeat
     end
 
     def update_activity_status(activity_id, status, response = {})
-      activities[activity_id] ||= {}
-      activities[activity_id][:statuses] ||= []
-      activities[activity_id][:statuses] << status
-      activities[activity_id][:response] = response
+      activity = activities[activity_id] ||= {}
+      statuses = activity[:statuses] ||= []
+      statuses << status
+      activity[:current_client_status] = status
+      activity[:current_server_status] = status
+      activity[:response] = response
       if status == :deactivated
         activities.each do |activity_id, activity_data|
-          activity_data[:statuses] ||= []
-          activity_data[:statuses] << :deactivated
+          statuses = activity_data[:statuses] ||= []
+          statuses << :deactivated
         end
       end
     end
@@ -83,15 +85,16 @@ module Backbeat
     end
 
     def complete_workflow(workflow_id)
-      workflows[workflow_id] ||= {}
-      workflows[workflow_id][:complete] = true
+      workflow = workflows[workflow_id] ||= {}
+      workflow[:complete] = true
     end
 
     def add_child_activity(activity_id, data)
       child_activity = data.merge(new_activity)
       activities[child_activity[:id]] = child_activity
-      activities[activity_id][:child_activities] ||= []
-      activities[activity_id][:child_activities] << child_activity[:id]
+      activity = activities[activity_id]
+      activity[:child_activities] ||= []
+      activity[:child_activities] << child_activity[:id]
       child_activity[:id]
     end
 

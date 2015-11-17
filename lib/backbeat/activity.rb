@@ -69,6 +69,10 @@ module Backbeat
       store.update_activity_status(id, :completed, response)
     end
 
+    def complete?
+      store.find_activity_by_id(id)[:current_server_status] == :completed
+    end
+
     def errored(error)
       response = Packer.error_response(error)
       store.update_activity_status(id, :errored, response)
