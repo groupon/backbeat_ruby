@@ -139,7 +139,7 @@ describe Backbeat::Activity do
     it "sends an error message to the workflow on error" do
       activity_data[:client_data][:method] = :boom
 
-      expect { activity.run(workflow) }.to raise_error RuntimeError, "Failed"
+      activity.run(workflow)
 
       activity_record = store.find_activity_by_id(activity.id)
 
@@ -210,7 +210,7 @@ describe Backbeat::Activity do
     it "returns false if the activity errored" do
       activity_data[:client_data][:method] = :boom
 
-      expect { activity.run(workflow) }.to raise_error RuntimeError, "Failed"
+      activity.run(workflow)
 
       expect(activity.complete?).to eq(false)
     end

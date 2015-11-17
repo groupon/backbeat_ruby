@@ -43,7 +43,6 @@ module Backbeat
       end
     rescue => e
       errored(e)
-      raise e
     end
 
     def register_child(activity)
