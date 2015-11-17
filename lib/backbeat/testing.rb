@@ -56,7 +56,7 @@ module Backbeat
         begin
           yield
         ensure
-          @testing = testing
+          @testing = current
         end
       end
     end

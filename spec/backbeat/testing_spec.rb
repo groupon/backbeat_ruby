@@ -82,6 +82,18 @@ describe Backbeat::Testing do
     expect(activity[:response][:result]).to eq("Imported")
   end
 
+  it "sets the testing mode for the provided block" do
+    activity_1 = nil
+    Backbeat::Testing.disable! do
+      activity_1 = ImportWorkflow.start_context({ id: 5 }).import("File")
+    end
+
+    activity_2 = ImportWorkflow.start_context({ id: 6 }).finish("Done")
+
+    expect(activity_1.complete?).to eq(true)
+    expect(activity_2.complete?).to eq(false)
+  end
+
   it "can run without starting a context" do
     ImportWorkflow.new.import("File")
 
