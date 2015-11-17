@@ -49,12 +49,24 @@ module Backbeat
       end
     end
 
-    def self.enable!
-      @testing = true
+    def self.set!(testing)
+      current = @testing
+      @testing = testing
+      if block_given?
+        begin
+          yield
+        ensure
+          @testing = testing
+        end
+      end
     end
 
-    def self.disable!
-      @testing = false
+    def self.enable!(&block)
+      set!(true, &block)
+    end
+
+    def self.disable!(&block)
+      set!(false, &block)
     end
 
     def self.enabled?
