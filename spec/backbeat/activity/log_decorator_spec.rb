@@ -41,6 +41,14 @@ describe Backbeat::Activity::LogDecorator do
     def run(workflow)
       @run.call(workflow)
     end
+
+    def params
+      [1]
+    end
+
+    def name
+      "Activity"
+    end
   end
 
   let(:logger) { Backbeat::MockLogger.new }

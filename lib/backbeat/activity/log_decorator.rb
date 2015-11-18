@@ -37,18 +37,22 @@ module Backbeat
       end
 
       def run(workflow)
-        logger.info({ name: :activity_started, node: workflow })
+        logger.info(event(:activity_started))
         ret_val = activity.run(workflow)
-        logger.info({ name: :activity_complete, node: workflow })
+        logger.info(event(:activity_complete))
         ret_val
       rescue => e
-        logger.error({ name: :activity_errored, error: e, node: workflow })
+        logger.error(event(:activity_errored))
         raise
       end
 
       private
 
       attr_reader :activity, :logger
+
+      def event(name)
+        { name: name, activity: activity.name, params: activity.params }
+      end
     end
   end
 end
