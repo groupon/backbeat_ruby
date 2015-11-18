@@ -100,6 +100,20 @@ describe Backbeat::Packer do
 
       expect(workflow.current_activity.id).to eq(1)
     end
+
+    it "handles data sent as a decision" do
+      workflow = Backbeat::Packer.unpack_workflow({ "decision" => activity_data })
+
+      expect(workflow.subject).to eq("Subject")
+      expect(workflow.current_activity.id).to eq(1)
+    end
+
+    it "handles data sent as an activity" do
+      workflow = Backbeat::Packer.unpack_workflow({ "activity" => activity_data })
+
+      expect(workflow.subject).to eq("Subject")
+      expect(workflow.current_activity.id).to eq(1)
+    end
   end
 
   context ".success_response" do

@@ -97,24 +97,6 @@ describe Backbeat::Workflow do
 
       expect(workflow.current_activity.result).to eq(Array.new(5))
     end
-
-    it "handles workflow data returned as a decision" do
-      activity_data[:client_data][:params] = [6]
-      workflow_data = activity_data.merge({ workflow_id: 1, id: 2 })
-
-      workflow = Backbeat::Workflow.continue({ "decision" => workflow_data })
-
-      expect(workflow.current_activity.result).to eq(Array.new(6))
-    end
-
-    it "handles workflow data returned as an activity" do
-      activity_data[:client_data][:params] = [7]
-      workflow_data = activity_data.merge({ workflow_id: 1, id: 2 })
-
-      workflow = Backbeat::Workflow.continue({ "activity" => workflow_data })
-
-      expect(workflow.current_activity.result).to eq(Array.new(7))
-    end
   end
 
   let(:config) {

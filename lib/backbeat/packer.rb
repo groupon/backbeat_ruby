@@ -34,17 +34,9 @@ require "active_support/inflector"
 
 module Backbeat
   class Packer
-    def self.unpack_activity(data)
+    def self.unpack_workflow(data)
       data = underscore_keys(data)
       data = data[:decision] || data[:activity] || data
-      client_data = data[:client_data]
-      klass = Inflector.constantize(client_data[:class_name] || client_data[:class])
-      new_client_data = client_data.merge({ class: klass })
-      activity_data = data.merge({ client_data: new_client_data })
-      Activity.new(activity_data)
-    end
-
-    def self.unpack_workflow(data)
       activity = unpack_activity(data)
       Workflow.new({
         id: data[:workflow_id],
@@ -53,6 +45,14 @@ module Backbeat
         name: data[:workflow_name],
         current_activity: activity
       })
+    end
+
+    def self.unpack_activity(data)
+      client_data = data[:client_data]
+      klass = Inflector.constantize(client_data[:class_name] || client_data[:class])
+      new_client_data = client_data.merge({ class: klass })
+      activity_data = data.merge({ client_data: new_client_data })
+      Activity.new(activity_data)
     end
 
     def self.success_response(result)
