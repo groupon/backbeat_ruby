@@ -62,6 +62,7 @@ module Backbeat
     end
 
     def update_activity_status(activity_id, status, response = {})
+      status = :complete if status == :completed # The server handles the completed event by marking status as complete
       activity = activities[activity_id] ||= {}
       statuses = activity[:statuses] ||= []
       statuses << status

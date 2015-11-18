@@ -77,8 +77,8 @@ describe Backbeat::Testing do
     signal = workflow[:signals]["ImportWorkflow#import"]
     activity = store.find_activity_by_id(2)
 
-    expect(signal[:statuses].last).to eq(:completed)
-    expect(activity[:statuses].last).to eq(:completed)
+    expect(signal[:statuses].last).to eq(:complete)
+    expect(activity[:statuses].last).to eq(:complete)
     expect(activity[:response][:result]).to eq("Imported")
   end
 
@@ -105,7 +105,7 @@ describe Backbeat::Testing do
     store = Backbeat.config.store
     activity = store.find_activity_by_id(1)
 
-    expect(activity[:statuses].last).to eq(:completed)
+    expect(activity[:statuses].last).to eq(:complete)
     expect(activity[:response][:result]).to eq("Imported")
   end
 end

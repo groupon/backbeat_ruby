@@ -231,7 +231,7 @@ describe Backbeat::Workflow do
 
       workflow.signal(new_activity)
 
-      expect(store.find_activity_by_id(new_activity.id)[:statuses].last).to eq(:completed)
+      expect(store.find_activity_by_id(new_activity.id)[:statuses].last).to eq(:complete)
     end
   end
 
@@ -264,7 +264,7 @@ describe Backbeat::Workflow do
 
       workflow.register(new_activity)
 
-      expect(store.find_activity_by_id(new_activity.id)[:statuses].last).to eq(:completed)
+      expect(store.find_activity_by_id(new_activity.id)[:statuses].last).to eq(:complete)
     end
   end
 

@@ -132,7 +132,7 @@ describe Backbeat::Activity do
 
       activity_record = store.find_activity_by_id(activity.id)
 
-      expect(activity_record[:statuses].last).to eq(:completed)
+      expect(activity_record[:statuses].last).to eq(:complete)
       expect(activity.result).to eq(6)
     end
 
@@ -155,7 +155,7 @@ describe Backbeat::Activity do
       activity.run(workflow)
       activity_record = store.find_activity_by_id(activity.id)
 
-      expect(activity_record[:statuses].last).to eq(:completed)
+      expect(activity_record[:statuses].last).to eq(:complete)
       expect(activity.result).to eq(5)
     end
   end

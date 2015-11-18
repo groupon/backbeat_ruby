@@ -69,7 +69,7 @@ module Backbeat
     end
 
     def complete?
-      store.find_activity_by_id(id)[:current_server_status] == :completed
+      current_status == :complete
     end
 
     def errored(error)
@@ -108,6 +108,11 @@ module Backbeat
     private
 
     attr_reader :config, :options
+
+    def current_status
+      status = store.find_activity_by_id(id)[:current_server_status]
+      status.to_sym if status
+    end
 
     def store
       config.store
