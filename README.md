@@ -59,7 +59,10 @@ class MyDecider
 end
 ```
 
-Signal the workflow:
+Signal the workflow. The signal is the first node in a workflow execution.
+Each signal will wait for previous signals for the provided
+subject (the argument to `start_context`) and decider (the class on which
+`start_context` is called) combination to finish before executing.
 
 ```ruby
 order = Order.last

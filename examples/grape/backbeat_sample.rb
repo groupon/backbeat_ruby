@@ -32,7 +32,8 @@ module BackbeatSample
     end
 
     def self.signal_workflow
-      # The following creates a workflow node with "a subject", and then starts the workflow with a signal
+      # The following starts a 'signal' to a new or existing workflow
+      # for the provided subject and decider.
       subject = { id: 1, name: "AdditionJob" }
       BackbeatModel::AddSomething.start_context(subject).add_3(1, 2, 3, 50)
     end
