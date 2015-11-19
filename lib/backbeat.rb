@@ -82,11 +82,9 @@ module Backbeat
   end
 
   def self.local_config
-    @local_config ||= (
-      config = Config.new
-      config.context = :local
-      config
-    )
+    config = Config.new
+    config.context = :local
+    config
   end
 
   def self.local

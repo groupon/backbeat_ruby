@@ -137,6 +137,10 @@ describe Backbeat::Workflowable do
         expect(activity.result).to eq(7)
       end
     end
+
+    it "defaults to a local workflow" do
+      Decider.new.decision_one(1, 2, 3)
+    end
   end
 
   context ".start_context" do

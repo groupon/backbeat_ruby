@@ -72,14 +72,23 @@ describe Backbeat::Testing do
 
     Backbeat::Testing.run
 
-    store = Backbeat.config.store
-    workflow = store.find_workflow_by_id(1)
-    signal = workflow[:signals]["ImportWorkflow#import"]
-    activity = store.find_activity_by_id(2)
+    signal = Backbeat::Testing.activities.first
+    activity = Backbeat::Testing.activities.last
 
-    expect(signal[:statuses].last).to eq(:complete)
-    expect(activity[:statuses].last).to eq(:complete)
-    expect(activity[:response][:result]).to eq("Imported")
+    expect(signal.name).to eq("ImportWorkflow#import")
+    expect(signal.complete?).to eq(true)
+    expect(activity.name).to eq("ImportWorkflow#finish")
+    expect(activity.complete?).to eq(true)
+    expect(activity.result).to eq("Imported")
+  end
+
+  it "does not run already ran activities" do
+    ImportWorkflow.start_context({ id: 5 }).import("File")
+
+    expect_any_instance_of(ImportWorkflow).to receive(:import).once
+
+    Backbeat::Testing.run
+    Backbeat::Testing.run
   end
 
   it "sets the testing mode for the provided block" do
@@ -97,15 +106,14 @@ describe Backbeat::Testing do
   it "can run without starting a context" do
     ImportWorkflow.new.import("File")
 
-    expect(Backbeat::Testing.activities.first.name).to eq("ImportWorkflow#finish")
-    expect(Backbeat::Testing.activities.first.params).to eq(["Imported"])
+    activity = Backbeat::Testing.activities.first
+
+    expect(activity.name).to eq("ImportWorkflow#finish")
+    expect(activity.params).to eq(["Imported"])
 
     Backbeat::Testing.run
 
-    store = Backbeat.config.store
-    activity = store.find_activity_by_id(1)
-
-    expect(activity[:statuses].last).to eq(:complete)
-    expect(activity[:response][:result]).to eq("Imported")
+    expect(activity.complete?).to eq(true)
+    expect(activity.result).to eq("Imported")
   end
 end

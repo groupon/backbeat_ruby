@@ -43,9 +43,10 @@ module Backbeat
     end
 
     def self.run
-      while job = jobs.shift
-        activity, workflow = job
-        activity.run_real(workflow)
+      jobs.each do |(activity, workflow)|
+        unless activity.complete? || activity.error
+          activity.run_real(workflow)
+        end
       end
     end
 
