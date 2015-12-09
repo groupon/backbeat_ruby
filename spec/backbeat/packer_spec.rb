@@ -96,9 +96,24 @@ describe Backbeat::Packer do
 
     it "underscores keys" do
       camelized_data = activity_data.merge({ "clientData" => activity_data[:client_data] })
+
       workflow = Backbeat::Packer.unpack_workflow(camelized_data)
 
       expect(workflow.current_activity.id).to eq(1)
+    end
+
+    it "does not change the casing of client data and metadata" do
+      camelized_data = activity_data.merge({
+        "clientData" => {
+          "class_name" => "Array",
+          "params" => [{ "numberOne" => 1 }],
+          "metadata" => { "numberTwo" => 2 }
+        }
+      })
+
+      workflow = Backbeat::Packer.unpack_workflow(camelized_data)
+
+      expect(workflow.current_activity.params).to eq([{ :numberOne => 1 }])
     end
 
     it "handles data sent as a decision" do

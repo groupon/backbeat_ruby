@@ -48,7 +48,7 @@ module Backbeat
     end
 
     def self.unpack_activity(data)
-      client_data = data[:client_data]
+      client_data = symbolize_keys(data[:client_data])
       klass = Inflector.constantize(client_data[:class_name] || client_data[:class])
       new_client_data = client_data.merge({ class: klass })
       activity_data = data.merge({ client_data: new_client_data })
@@ -95,15 +95,36 @@ module Backbeat
       end
     end
 
+    IGNORED_KEYS = [:client_data]
+
     def self.underscore_keys(data)
       case data
       when Array
         data.map { |v| underscore_keys(v) }
       when Hash
         underscored_data = data.map do |(k, v)|
-          [Inflector.underscore(k.to_s).to_sym, underscore_keys(v)]
+          new_key = Inflector.underscore(k.to_s).to_sym
+          if IGNORED_KEYS.include?(new_key)
+            [new_key, v]
+          else
+            [new_key, underscore_keys(v)]
+          end
         end
         Hash[underscored_data]
+      else
+        data
+      end
+    end
+
+    def self.symbolize_keys(data)
+      case data
+      when Array
+        data.map { |v| symbolize_keys(v) }
+      when Hash
+        symbolized_data = data.map do |(k, v)|
+          [k.to_sym, symbolize_keys(v)]
+        end
+        Hash[symbolized_data]
       else
         data
       end
