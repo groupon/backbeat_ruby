@@ -33,9 +33,10 @@ require "httparty"
 module Backbeat
   class API
     class HttpClient
-      def initialize(host, client_id, port = 80)
+      def initialize(host, client_id, auth_token, port = 80)
         @host = host
         @client_id = client_id
+        @auth_token = auth_token
         @port = port
       end
 
@@ -56,7 +57,7 @@ module Backbeat
 
       private
 
-      attr_reader :host, :port, :client_id
+      attr_reader :host, :port, :client_id, :auth_token
 
       def response_to_hash(response)
         {
@@ -74,10 +75,13 @@ module Backbeat
         options
       end
 
+      AUTHORIZATION = 'Authorization'.freeze
+      CLIENT_ID = 'Client-Id'.freeze
+
       def authorization_header
         {
-          "AUTHORIZATION" => "Backbeat #{client_id}",
-          "CLIENT-ID" => client_id
+          AUTHORIZATION => "Token token=\"#{auth_token}\"",
+          CLIENT_ID => client_id
         }
       end
 

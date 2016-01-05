@@ -57,6 +57,14 @@ describe Backbeat do
     expect(Backbeat.config.client_id).to eq("123")
   end
 
+  it "allows the auth token to be configured" do
+    Backbeat.configure do |config|
+      config.auth_token = "456"
+    end
+
+    expect(Backbeat.config.auth_token).to eq("456")
+  end
+
   it "allows the backbeat store to be configured" do
     Backbeat.configure do |config|
       config.store = { activities: [1, 2] }
@@ -69,6 +77,7 @@ describe Backbeat do
 
   it "allows the logger to be configured" do
     logger = Logger.new("/dev/null")
+
     Backbeat.configure do |config|
       config.logger = logger
       config.logger.level = Logger::WARN

@@ -33,12 +33,15 @@ require "webmock/rspec"
 require "backbeat/api/http_client"
 
 describe Backbeat::API::HttpClient do
-  let(:client) { Backbeat::API::HttpClient.new("backbeat.com", "987") }
+  let(:client) { Backbeat::API::HttpClient.new("backbeat.com", "987", "123") }
+  let(:auth_headers) {
+    { 'Authorization' => "Token token=\"123\"", "Client-Id" => '987' }
+  }
 
   context "#get" do
     it "makes a get request to the backbeat host with the client id" do
       request = WebMock.stub_request(:get, "http://backbeat.com/events").with(
-        headers: { "Authorization" => "Backbeat 987" }
+        headers: auth_headers
       ).to_return({ status: 200, body: "Event", headers: { "header" => "something"}})
 
       response = client.get("/events")
@@ -52,9 +55,8 @@ describe Backbeat::API::HttpClient do
     it "makes a get request with provided headers" do
       request = WebMock.stub_request(:get, "http://backbeat.com/events").with(
         headers: {
-          "Authorization" => "Backbeat 987",
           "Accept" => "application/json"
-        }
+        }.merge(auth_headers)
       )
 
       client.get("/events", headers: { "Accept" => "application/json"})
@@ -65,9 +67,8 @@ describe Backbeat::API::HttpClient do
     it "makes a get request with provided query params" do
       request = WebMock.stub_request(:get, "http://backbeat.com/events").with(
         headers: {
-          "Authorization" => "Backbeat 987",
           "Accept" => "application/json"
-        },
+        }.merge(auth_headers),
         query: { key: :value }
       )
 
@@ -83,7 +84,7 @@ describe Backbeat::API::HttpClient do
   context "#post" do
     it "makes a post request to the backbeat host with the client id" do
       request = WebMock.stub_request(:post, "http://backbeat.com/workflows").with(
-        headers: { "Authorization" => "Backbeat 987" },
+        headers: auth_headers,
         body: "Data"
       ).to_return({ status: 201 })
 
@@ -96,9 +97,8 @@ describe Backbeat::API::HttpClient do
     it "makes a post request with the provided headers" do
       request = WebMock.stub_request(:post, "http://backbeat.com/workflows").with(
         headers: {
-          "Authorization" => "Backbeat 987",
           "Content-Type" => "application/json"
-        },
+        }.merge(auth_headers),
         body: "Data"
       )
 
@@ -111,7 +111,7 @@ describe Backbeat::API::HttpClient do
   context "#put" do
     it "makes a put request to the backbeat host with the client id" do
       request = WebMock.stub_request(:put, "http://backbeat.com/workflows").with(
-        headers: { "Authorization" => "Backbeat 987" },
+        headers: auth_headers,
         body: "Data"
       ).to_return({ status: 200 })
 
@@ -124,9 +124,8 @@ describe Backbeat::API::HttpClient do
     it "makes a put request with the provided headers" do
       request = WebMock.stub_request(:put, "http://backbeat.com/workflows").with(
         headers: {
-          "Authorization" => "Backbeat 987",
           "Content-Type" => "application/json"
-        },
+        }.merge(auth_headers),
         body: "Data"
       )
 
