@@ -44,7 +44,7 @@ module Backbeat
     def initialize(options = {})
       @config = options.delete(:config) || Backbeat.config
       @current_activity = options[:current_activity]
-      @options = options
+      @workflow_data = options
     end
 
     def deactivate
@@ -96,24 +96,24 @@ module Backbeat
     end
 
     def name
-      options[:name]
+      workflow_data[:name]
     end
 
     def subject
-      options[:subject] ||= {}
+      workflow_data[:subject] ||= {}
     end
 
     def decider
-      options[:decider]
+      workflow_data[:decider]
     end
 
     def id
-      options[:id] ||= find_id
+      workflow_data[:id] ||= find_id
     end
 
     private
 
-    attr_reader :options
+    attr_reader :workflow_data
 
     def log(activity)
       if logger = config.logger

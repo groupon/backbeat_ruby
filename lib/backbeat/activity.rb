@@ -32,7 +32,7 @@ module Backbeat
   class Activity
     def initialize(options = {})
       @config  = options.delete(:config) || Backbeat.config
-      @options = options
+      @activity_data = options
     end
 
     def run(workflow)
@@ -82,19 +82,19 @@ module Backbeat
     end
 
     def to_hash
-      options
+      activity_data
     end
 
     def id
-      options[:id]
+      activity_data[:id]
     end
 
     def id=(new_id)
-      options[:id] = new_id
+      activity_data[:id] = new_id
     end
 
     def name
-      options[:name]
+      activity_data[:name]
     end
 
     def method
@@ -107,7 +107,7 @@ module Backbeat
 
     private
 
-    attr_reader :config, :options
+    attr_reader :config, :activity_data
 
     def current_status
       status = store.find_activity_by_id(id)[:current_server_status]
@@ -119,7 +119,7 @@ module Backbeat
     end
 
     def client_data
-      options[:client_data]
+      activity_data[:client_data]
     end
 
     def object
