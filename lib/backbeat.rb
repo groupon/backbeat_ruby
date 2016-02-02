@@ -33,7 +33,9 @@ require "backbeat/api/http_client"
 require "backbeat/memory_store"
 require "backbeat/workflow"
 require "backbeat/activity"
+require "backbeat/runner"
 require "backbeat/workflowable"
+require 'logger'
 
 module Backbeat
   class Config
@@ -44,7 +46,16 @@ module Backbeat
     attr_accessor :port
     attr_accessor :client_id
     attr_accessor :auth_token
-    attr_accessor :logger
+
+    class NullLogger < Logger
+      def initialize; end
+      def add(*args, &block); end
+    end
+
+    attr_writer :logger
+    def logger
+      @logger ||= NullLogger.new
+    end
 
     attr_writer :context
     def context

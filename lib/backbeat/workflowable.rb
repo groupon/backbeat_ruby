@@ -28,6 +28,8 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require "backbeat/runner"
+
 module Backbeat
   module Workflowable
     def self.included(klass)
@@ -129,4 +131,21 @@ module Backbeat
       Serializer.new({ class: self.class, id: id })
     end
   end
+
+  class ContextRunner
+    def initialize(chain, _)
+      @chain = chain
+    end
+
+    def call(activity, workflow)
+      if activity.object.is_a?(Workflowable)
+        activity.object.with_context(workflow) do
+          @chain.call(activity, workflow)
+        end
+      else
+        @chain.call(activity, workflow)
+      end
+    end
+  end
+  Backbeat::Runner.chain.add(ContextRunner)
 end

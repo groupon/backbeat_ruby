@@ -31,18 +31,25 @@
 require "spec_helper"
 require "backbeat"
 require "backbeat/activity"
-require "backbeat/workflowable"
 
 describe Backbeat::Activity do
 
-  class MyWorkflowable
-    include Backbeat::Workflowable
+  class MyWorkflow
 
     attr_accessor :id
+
     def self.find(id)
       x = new
       x.id = id
       x
+    end
+
+    def self.complete!
+      @complete = true
+    end
+
+    def self.complete?
+      @complete
     end
 
     def boom(*args)
@@ -54,7 +61,7 @@ describe Backbeat::Activity do
     end
 
     def finish
-      workflow.complete
+      MyWorkflow.complete!
     end
   end
 
@@ -84,7 +91,7 @@ describe Backbeat::Activity do
       name: "MyActivity",
       mode: "blocking",
       client_data: {
-        class: MyWorkflowable,
+        class: MyWorkflow,
         method: "perform",
         params: [1, 2, 3]
       }
@@ -94,33 +101,24 @@ describe Backbeat::Activity do
     Backbeat::Activity.new(activity_data.merge({ config: config }))
   }
 
-  let(:workflow) {
-    Backbeat::Workflow.new({
-      id: 1,
-      name: "MyWorkflow",
-      current_activity: activity,
-      config: config
-    })
-  }
-
   context "#run" do
     it "calls the method on the workflowable object with the arguments" do
-      expect_any_instance_of(MyWorkflowable).to receive(:perform).with(1, 2, 3)
+      expect_any_instance_of(MyWorkflow).to receive(:perform).with(1, 2, 3)
 
-      activity.run(workflow)
+      activity.run
     end
 
     it "sets the workflow context on the worflowable object" do
       activity_data[:client_data][:method] = :finish
       activity_data[:client_data][:params] = []
 
-      activity.run(workflow)
+      activity.run
 
-      expect(workflow.complete?).to eq(true)
+      expect(MyWorkflow.complete?).to eq(true)
     end
 
     it "sends a processing message to the activity" do
-      activity.run(workflow)
+      activity.run
 
       activity_record = store.find_activity_by_id(activity.id)
 
@@ -128,7 +126,7 @@ describe Backbeat::Activity do
     end
 
     it "sends a complete message with the result to the workflow" do
-      activity.run(workflow)
+      activity.run
 
       activity_record = store.find_activity_by_id(activity.id)
 
@@ -139,7 +137,7 @@ describe Backbeat::Activity do
     it "sends an error message to the workflow on error" do
       activity_data[:client_data][:method] = :boom
 
-      activity.run(workflow)
+      expect { activity.run }.to raise_error(RuntimeError, "Failed")
 
       activity_record = store.find_activity_by_id(activity.id)
 
@@ -152,7 +150,7 @@ describe Backbeat::Activity do
       activity_data[:client_data][:method] = :id
       activity_data[:client_data][:params] = []
 
-      activity.run(workflow)
+      activity.run
       activity_record = store.find_activity_by_id(activity.id)
 
       expect(activity_record[:statuses].last).to eq(:complete)
@@ -166,7 +164,7 @@ describe Backbeat::Activity do
         name: "SubActivity",
         mode: "blocking",
         client_data: {
-          class: MyWorkflowable,
+          class: MyWorkflow,
           method: "perform",
           params: [10, 10, 10]
         },
@@ -196,13 +194,13 @@ describe Backbeat::Activity do
     end
   end
 
-  context "#complte?" do
+  context "#complete?" do
     it "returns false if the activity is not complete" do
       expect(activity.complete?).to eq(false)
     end
 
     it "returns true if the activity is complete" do
-      activity.run(workflow)
+      activity.run
 
       expect(activity.complete?).to eq(true)
     end
@@ -210,7 +208,7 @@ describe Backbeat::Activity do
     it "returns false if the activity errored" do
       activity_data[:client_data][:method] = :boom
 
-      activity.run(workflow)
+      expect { activity.run }.to raise_error(RuntimeError, "Failed")
 
       expect(activity.complete?).to eq(false)
     end

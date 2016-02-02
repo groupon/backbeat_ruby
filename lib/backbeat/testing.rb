@@ -28,10 +28,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require "backbeat/runner"
+
 module Backbeat
   class Testing
     def self.activities
-      jobs.map(&:first)
+      jobs.map { |j| j[1] }
     end
 
     def self.jobs
@@ -43,9 +45,9 @@ module Backbeat
     end
 
     def self.run
-      jobs.each do |(activity, workflow)|
+      jobs.each do |(runner, activity, workflow)|
         unless activity.complete? || activity.error
-          activity.run_real(workflow)
+          runner.call(activity, workflow)
         end
       end
     end
@@ -73,17 +75,20 @@ module Backbeat
     def self.enabled?
       @testing
     end
-  end
 
-  class Activity
-    alias_method :run_real, :run
+    class TestRunner
+      def initialize(chain, _)
+        @chain = chain
+      end
 
-    def run(workflow)
-      if Testing.enabled?
-        Backbeat::Testing.jobs << [self, workflow]
-      else
-        run_real(workflow)
+      def call(activity, workflow)
+        if Testing.enabled?
+          Testing.jobs << [@chain, activity, workflow]
+        else
+          @chain.call(activity, workflow)
+        end
       end
     end
+    Backbeat::Runner.chain.add(TestRunner)
   end
 end

@@ -35,14 +35,13 @@ module Backbeat
       @activity_data = options
     end
 
-    def run(workflow)
-      object.with_context(workflow) do
-        processing
-        ret_value = object.send(method, *params)
-        complete(ret_value)
-      end
+    def run
+      processing
+      ret_value = object.send(method, *params)
+      complete(ret_value)
     rescue => e
       errored(e)
+      raise e
     end
 
     def register_child(activity)
@@ -97,6 +96,16 @@ module Backbeat
       activity_data[:name]
     end
 
+    def object
+      @object ||= (
+        if id = client_data[:id]
+          client_data[:class].find(id)
+        else
+          client_data[:class].new
+        end
+      )
+    end
+
     def method
       client_data[:method]
     end
@@ -120,16 +129,6 @@ module Backbeat
 
     def client_data
       activity_data[:client_data]
-    end
-
-    def object
-      @object ||= (
-        if id = client_data[:id]
-          client_data[:class].find(id)
-        else
-          client_data[:class].new
-        end
-      )
     end
   end
 end

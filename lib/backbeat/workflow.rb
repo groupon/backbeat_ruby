@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require "backbeat/packer"
-require "backbeat/activity/log_decorator"
+require "backbeat/runner"
 
 module Backbeat
   class Workflow
@@ -76,23 +76,20 @@ module Backbeat
     end
 
     def run(activity)
-      log(activity) do |activity|
-        activity.run(
-          Workflow.new({
-            name: name,
-            subject: subject,
-            decider: decider,
-            current_activity: activity,
-            config: config
-          })
-        )
-      end
+      Runner.new(config).call(
+        activity,
+        Workflow.new({
+          name: name,
+          subject: subject,
+          decider: decider,
+          current_activity: activity,
+          config: config
+        })
+      )
     end
 
     def run_current
-      log(current_activity) do |activity|
-        activity.run(self)
-      end
+      Runner.new(config).call(current_activity, self)
     end
 
     def name
@@ -114,15 +111,6 @@ module Backbeat
     private
 
     attr_reader :workflow_data
-
-    def log(activity)
-      if logger = config.logger
-        runner = Activity::LogDecorator.new(activity, logger)
-      else
-        runner = activity
-      end
-      yield(runner)
-    end
 
     def store
       config.store
