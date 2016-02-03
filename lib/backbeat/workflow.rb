@@ -68,11 +68,13 @@ module Backbeat
       new_id = store.signal_workflow(id, activity_data[:name], activity_data)
       activity.id = new_id
       run(activity) if config.local?
+      activity
     end
 
     def register(activity)
       current_activity.register_child(activity)
       run(activity) if config.local?
+      activity
     end
 
     def run(activity)

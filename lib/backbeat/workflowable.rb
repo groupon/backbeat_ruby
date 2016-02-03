@@ -114,7 +114,6 @@ module Backbeat
         else
           workflow.register(activity)
         end
-        activity
       end
 
       private
