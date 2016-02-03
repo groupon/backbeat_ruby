@@ -33,7 +33,6 @@ require "backbeat/api/http_client"
 require "backbeat/memory_store"
 require "backbeat/workflow"
 require "backbeat/activity"
-require "backbeat/runner"
 require "backbeat/workflowable"
 require 'logger'
 

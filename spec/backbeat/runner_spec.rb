@@ -1,5 +1,6 @@
 require "spec_helper"
 require "backbeat/runner"
+require "backbeat"
 require "support/mock_logger"
 
 describe Backbeat::Runner do
