@@ -89,6 +89,6 @@ module Backbeat
         end
       end
     end
-    Backbeat::Runner.chain.add(TestRunner)
+    Runner.chain.add(TestRunner)
   end
 end

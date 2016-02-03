@@ -78,20 +78,15 @@ module Backbeat
     end
 
     def run(activity)
-      Runner.new(config).call(
-        activity,
-        Workflow.new({
-          name: name,
-          subject: subject,
-          decider: decider,
-          current_activity: activity,
-          config: config
-        })
-      )
+      observer.with_workflow(set_current(activity)) do
+        activity.run
+      end
     end
 
     def run_current
-      Runner.new(config).call(current_activity, self)
+      observer.with_workflow(self) do
+        current_activity.run
+      end
     end
 
     def name
@@ -118,6 +113,10 @@ module Backbeat
       config.store
     end
 
+    def observer
+      config.run_chain
+    end
+
     def find_id
       workflow = find || create
       workflow[:id]
@@ -129,6 +128,16 @@ module Backbeat
 
     def create
       store.create_workflow(workflow_params)
+    end
+
+    def set_current(activity)
+      Workflow.new({
+        name: name,
+        subject: subject,
+        decider: decider,
+        current_activity: activity,
+        config: config
+      })
     end
 
     def workflow_params

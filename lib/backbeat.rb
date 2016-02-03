@@ -31,6 +31,7 @@
 require "backbeat/api"
 require "backbeat/api/http_client"
 require "backbeat/memory_store"
+require "backbeat/runner"
 require "backbeat/workflow"
 require "backbeat/activity"
 require "backbeat/workflowable"
@@ -75,6 +76,10 @@ module Backbeat
           raise ConfigurationError.new("Unknown default api for context #{context}")
         end
       )
+    end
+
+    def run_chain
+      @run_chain ||= Runner.new(logger)
     end
 
     def local?

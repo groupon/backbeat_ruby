@@ -36,27 +36,31 @@ describe Backbeat::Runner do
   end
 
   let(:logger) { Backbeat::MockLogger.new }
-  let(:config) do
-    config = Backbeat::Config.new
-    config.logger = logger
-    config
-  end
+
   let(:workflow) { Object.new }
 
   it "runs the activity" do
     activity = MockActivity.new { :done }
-    runner = described_class.new(config)
+    runner = described_class.new(logger)
 
-    runner.call(activity, workflow)
+    runner.with_workflow(workflow) do
+      runner.running(activity) do
+        activity.run
+      end
+    end
 
     expect(activity.done?).to eq(true)
   end
 
   it "logs around running the activity" do
     activity = MockActivity.new { :done }
-    runner = described_class.new(config)
+    runner = described_class.new(logger)
 
-    runner.call(activity, workflow)
+    runner.with_workflow(workflow) do
+      runner.running(activity) do
+        activity.run
+      end
+    end
 
     expect(logger.msgs[:info].count).to eq(2)
     expect(logger.msgs[:info].first[:name]).to eq(:activity_started)
@@ -65,9 +69,13 @@ describe Backbeat::Runner do
 
   it "logs errors in the activity" do
     activity = MockActivity.new { raise "Error" }
-    runner = described_class.new(config)
+    runner = described_class.new(logger)
 
-    runner.call(activity, workflow)
+    runner.with_workflow(workflow) do
+      runner.running(activity) do
+        activity.run
+      end
+    end
 
     expect(logger.msgs[:info].count).to eq(1)
     expect(logger.msgs[:info].first[:name]).to eq(:activity_started)
@@ -85,7 +93,7 @@ describe Backbeat::Runner do
         @called
       end
 
-      def initialize(chain, config)
+      def initialize(chain, logger)
         @chain = chain
       end
 
@@ -99,9 +107,14 @@ describe Backbeat::Runner do
   it "can be extended with other runners" do
     Backbeat::Runner.chain.add(new_runner)
     activity = MockActivity.new { :done }
-    runner = described_class.new(config)
+    runner = described_class.new(logger)
 
-    runner.call(activity, workflow)
+    runner.with_workflow(workflow) do
+      runner.running(activity) do
+        activity.run
+      end
+    end
+
     Backbeat::Runner.chain.remove(new_runner)
 
     expect(new_runner.called?).to eq(true)

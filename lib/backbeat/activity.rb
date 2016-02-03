@@ -31,17 +31,21 @@
 module Backbeat
   class Activity
     def initialize(options = {})
-      @config  = options[:config] || Backbeat.config
+      @config  = options.delete(:config) || Backbeat.config
       @options = options
     end
 
     def run
-      processing
-      ret_value = object.send(method, *params)
-      complete(ret_value)
-    rescue => e
-      errored(e)
-      raise e
+      observer.running(self) do
+        begin
+          processing
+          ret_value = object.send(method, *params)
+          complete(ret_value)
+        rescue => e
+          errored(e)
+          raise e
+        end
+      end
     end
 
     def register_child(activity)
@@ -127,6 +131,10 @@ module Backbeat
 
     def store
       config.store
+    end
+
+    def observer
+      config.run_chain
     end
 
     def client_data

@@ -126,5 +126,5 @@ module Backbeat
       end
     end
   end
-  Backbeat::Runner.chain.add(ContextRunner)
+  Runner.chain.add(ContextRunner)
 end

@@ -1,27 +1,31 @@
 module Backbeat
   class Runner
     def self.chain
-      @chain ||= Chain.new(
-        RunActivity,
-        LogActivity
-      )
+      @chain ||= Chain.new(LogActivity)
     end
 
-    def initialize(config)
-      @config = config
-      @chain = Runner.chain
+    def initialize(logger)
+      @logger = logger
     end
 
-    def call(activity, workflow)
-      @chain.build do |chain, runner|
-        runner.new(chain, @config)
-      end.call(activity, workflow)
+    def with_workflow(workflow)
+      current = @workflow
+      @workflow = workflow
+      yield
+    ensure
+      @workflow = current
+    end
+
+    def running(activity)
+      Runner.chain.build(@logger) do
+        yield
+      end.call(activity, @workflow)
     end
 
     class LogActivity
-      def initialize(chain, config)
+      def initialize(chain, logger)
         @chain = chain
-        @logger = config.logger
+        @logger = logger
       end
 
       def call(activity, workflow)
@@ -42,20 +46,9 @@ module Backbeat
       end
     end
 
-    class RunActivity
-      def initialize(chain, _)
-        @chain = chain
-      end
-
-      def call(activity, workflow)
-        activity.run
-      end
-    end
-
     class Chain
       def initialize(*entries)
         @entries = entries
-        @base = Proc.new { |a, w| }
       end
 
       def add(klass)
@@ -66,9 +59,9 @@ module Backbeat
         @entries.delete(klass)
       end
 
-      def build
-        @entries.reduce(@base) do |chain, runner|
-          yield chain, runner
+      def build(logger, &block)
+        @entries.reduce(block) do |chain, runner|
+          runner.new(chain, logger)
         end
       end
     end
