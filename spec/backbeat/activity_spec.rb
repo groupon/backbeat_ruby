@@ -36,14 +36,6 @@ describe Backbeat::Activity do
 
   class MyWorkflow
 
-    attr_accessor :id
-
-    def self.find(id)
-      x = new
-      x.id = id
-      x
-    end
-
     def self.complete!
       @complete = true
     end
@@ -143,18 +135,6 @@ describe Backbeat::Activity do
 
       expect(activity_record[:statuses].last).to eq(:errored)
       expect(activity.error[:message]).to eq("Failed")
-    end
-
-    it "finds the workflowable object if an id is included" do
-      activity_data[:client_data][:id] = 5
-      activity_data[:client_data][:method] = :id
-      activity_data[:client_data][:params] = []
-
-      activity.run
-      activity_record = store.find_activity_by_id(activity.id)
-
-      expect(activity_record[:statuses].last).to eq(:complete)
-      expect(activity.result).to eq(5)
     end
   end
 

@@ -123,15 +123,6 @@ module Backbeat
     end
   end
 
-  module WorkflowableModel
-    include Workflowable
-    include Workflowable::InContext
-
-    def serializer
-      Serializer.new({ class: self.class, id: id })
-    end
-  end
-
   class ContextRunner
     def initialize(chain, _)
       @chain = chain

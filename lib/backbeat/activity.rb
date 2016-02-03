@@ -98,11 +98,7 @@ module Backbeat
 
     def object
       @object ||= (
-        if id = client_data[:id]
-          client_data[:class].find(id)
-        else
-          client_data[:class].new
-        end
+        client_data[:class].new
       )
     end
 
