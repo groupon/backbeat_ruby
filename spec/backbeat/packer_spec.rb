@@ -63,7 +63,7 @@ describe Backbeat::Packer do
     it "resolves the class name of the activity" do
       activity = Backbeat::Packer.unpack_activity(activity_data)
 
-      expect(activity.to_hash[:client_data][:class]).to eq(Array)
+      expect(activity.object).to eq(Array.new)
     end
   end
 

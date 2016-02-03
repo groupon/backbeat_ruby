@@ -49,22 +49,32 @@ module Backbeat
 
     def self.unpack_activity(data)
       client_data = symbolize_keys(data[:client_data])
-      klass = Inflector.constantize(client_data[:class_name] || client_data[:class])
-      new_client_data = client_data.merge({ class: klass })
-      activity_data = data.merge({ client_data: new_client_data })
-      Activity.new(activity_data)
+      class_name = client_data[:class_name] || client_data[:class]
+      klass = Inflector.constantize(class_name)
+      Activity.new({
+        id: data[:id],
+        name: data[:name],
+        mode: data[:mode],
+        class: klass,
+        method: client_data[:method],
+        params: client_data[:params],
+        client_data: {
+          class_name: class_name,
+          method: client_data[:method]
+        }
+      })
     end
 
     def self.success_response(result)
       rpc_response({ result: result })
     end
 
-    GENERIC_RPC_ERROR_CODE = -32000
+    RPC_GENERIC_ERROR_CODE = -32000
 
     def self.error_response(error)
       rpc_response({
         error: {
-          code: GENERIC_RPC_ERROR_CODE,
+          code: RPC_GENERIC_ERROR_CODE,
           message: error.message,
           data: (error.backtrace.take(5) if error.backtrace)
         }

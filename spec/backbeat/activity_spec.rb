@@ -77,15 +77,20 @@ describe Backbeat::Activity do
     config
   }
 
+  let(:now) { Time.now }
+
   let(:activity_data) {
     {
       id: 11,
       name: "MyActivity",
       mode: "blocking",
+      fires_at: now,
+      class: MyWorkflow,
+      method: "perform",
+      params: [1, 2, 3],
       client_data: {
-        class: MyWorkflow,
-        method: "perform",
-        params: [1, 2, 3]
+        class_name: "MyWorkflow",
+        method: "perform"
       }
     }
   }
@@ -101,8 +106,8 @@ describe Backbeat::Activity do
     end
 
     it "sets the workflow context on the worflowable object" do
-      activity_data[:client_data][:method] = :finish
-      activity_data[:client_data][:params] = []
+      activity_data[:method] = :finish
+      activity_data[:params] = []
 
       activity.run
 
@@ -127,7 +132,7 @@ describe Backbeat::Activity do
     end
 
     it "sends an error message to the workflow on error" do
-      activity_data[:client_data][:method] = :boom
+      activity_data[:method] = :boom
 
       expect { activity.run }.to raise_error(RuntimeError, "Failed")
 
@@ -143,10 +148,12 @@ describe Backbeat::Activity do
       Backbeat::Activity.new({
         name: "SubActivity",
         mode: "blocking",
+        class: MyWorkflow,
+        method: "perform",
+        params: [10, 10, 10],
         client_data: {
-          class: MyWorkflow,
-          method: "perform",
-          params: [10, 10, 10]
+          class_name: "MyWorkflow",
+          method: "perform"
         },
         config: config
       })
@@ -169,8 +176,20 @@ describe Backbeat::Activity do
   end
 
   context "#to_hash" do
-    it "returns the activity data" do
-      expect(activity.to_hash).to eq(activity_data)
+    it "returns the activity data required by the server" do
+      expect(activity.to_hash).to eq(
+        {
+          name: "MyActivity",
+          mode: "blocking",
+          fires_at: now,
+          parent_link_id: nil,
+          client_data: {
+            class_name: "MyWorkflow",
+            method: "perform",
+            params: [1, 2, 3]
+          }
+        }
+      )
     end
   end
 
@@ -186,7 +205,7 @@ describe Backbeat::Activity do
     end
 
     it "returns false if the activity errored" do
-      activity_data[:client_data][:method] = :boom
+      activity_data[:method] = :boom
 
       expect { activity.run }.to raise_error(RuntimeError, "Failed")
 

@@ -31,8 +31,8 @@
 module Backbeat
   class Activity
     def initialize(options = {})
-      @config  = options.delete(:config) || Backbeat.config
-      @activity_data = options
+      @config  = options[:config] || Backbeat.config
+      @options = options
     end
 
     def run
@@ -81,38 +81,44 @@ module Backbeat
     end
 
     def to_hash
-      activity_data
+      {
+        name: name,
+        mode: options[:mode],
+        fires_at: options[:fires_at],
+        parent_link_id: options[:parent_link_id],
+        client_data: client_data
+      }
     end
 
     def id
-      activity_data[:id]
+      options[:id]
     end
 
     def id=(new_id)
-      activity_data[:id] = new_id
+      options[:id] = new_id
     end
 
     def name
-      activity_data[:name]
+      options[:name]
     end
 
     def object
       @object ||= (
-        client_data[:class].new
+        options[:class].new
       )
     end
 
     def method
-      client_data[:method]
+      options[:method]
     end
 
     def params
-      client_data[:params]
+      options[:params]
     end
 
     private
 
-    attr_reader :config, :activity_data
+    attr_reader :config, :options
 
     def current_status
       status = store.find_activity_by_id(id)[:current_server_status]
@@ -124,7 +130,7 @@ module Backbeat
     end
 
     def client_data
-      activity_data[:client_data]
+      options[:client_data].merge({ params: params })
     end
   end
 end

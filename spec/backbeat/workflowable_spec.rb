@@ -81,16 +81,16 @@ describe Backbeat::Workflowable do
       Decider.in_context(workflow, :blocking, now).decision_one(:one, :two, :three)
 
       activity_id = store.find_activity_by_id(1)[:child_activities].first
-      activity = store.find_activity_by_id(activity_id)
+      activity_data = store.find_activity_by_id(activity_id)
 
-      expect(activity).to eq(
+      expect(activity_data).to eq(
         {
           id: 2,
           name: "Decider#decision_one",
           mode: :blocking,
           fires_at: now,
+          parent_link_id: nil,
           client_data: {
-            class: Decider,
             class_name: "Decider",
             method: :decision_one,
             params: [:one, :two, :three]

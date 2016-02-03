@@ -49,23 +49,19 @@ module Backbeat
 
     module InContext
       def in_context(workflow, mode = :blocking, fires_at = nil)
-        ContextProxy.new(serializer, workflow, { mode: mode, fires_at: fires_at })
+        ContextProxy.new(self, workflow, { mode: mode, fires_at: fires_at })
       end
 
       def start_context(subject)
         workflow = new_workflow(subject)
-        ContextProxy.new(serializer, workflow, { mode: :signal })
+        ContextProxy.new(self, workflow, { mode: :signal })
       end
 
       def link_context(link_workflow, subject)
         workflow = new_workflow(subject)
         link_id = link_workflow.current_activity.id
         options = { mode: :signal, parent_link_id: link_id }
-        ContextProxy.new(serializer, workflow, options)
-      end
-
-      def serializer
-        Serializer.new({ class: self })
+        ContextProxy.new(self, workflow, options)
       end
 
       private
@@ -80,34 +76,27 @@ module Backbeat
       end
     end
 
-    class Serializer
-      def initialize(object_data)
-        @object_data = object_data
-      end
-
-      def serialize(method, params, options)
-        {
-          name: "#{@object_data[:class].to_s}##{method}",
-          client_data: {
-            class_name: @object_data[:class].to_s,
-            method: method,
-            params: params
-          }.merge(@object_data)
-        }.merge(options)
-      end
-    end
-
     class ContextProxy
-      def initialize(serializer, workflow, options)
-        @serializer = serializer
+      def initialize(klass, workflow, options)
+        @klass = klass
         @workflow = workflow
         @options = options
       end
 
       def method_missing(method, *params)
-        activity_data = serializer.serialize(method, params, options)
+        activity_data = {
+          config: workflow.config,
+          name: "#{klass.to_s}##{method}",
+          class: klass,
+          method: method,
+          params: params,
+          client_data: {
+            class_name: klass.to_s,
+            method: method
+          }
+        }.merge(options)
 
-        activity = Activity.new(activity_data.merge({ config: workflow.config }))
+        activity = Activity.new(activity_data)
 
         if options[:mode] == :signal || !workflow.current_activity
           workflow.signal(activity)
@@ -118,7 +107,7 @@ module Backbeat
 
       private
 
-      attr_reader :serializer, :workflow, :options
+      attr_reader :klass, :workflow, :options
     end
   end
 

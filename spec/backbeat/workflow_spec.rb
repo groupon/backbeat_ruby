@@ -111,10 +111,12 @@ describe Backbeat::Workflow do
       id: 6,
       name: "MyActivity",
       mode: "blocking",
+      class: MyArray,
+      method: "size",
+      params: [],
       client_data: {
-        class: MyArray,
-        method: "size",
-        params: []
+        class_name: "MyArray",
+        method: "size"
       }
     }
   }
@@ -174,10 +176,12 @@ describe Backbeat::Workflow do
       Backbeat::Activity.new({
         name: "Hello",
         mode: "blocking",
+        class: MyArray,
+        method: "size",
+        params: [],
         client_data: {
-          class: MyArray,
-          method: "size",
-          params: []
+          class_name: "MyArray",
+          method: "size"
         },
         config: config
       })
@@ -222,10 +226,12 @@ describe Backbeat::Workflow do
       Backbeat::Activity.new({
         name: "MyNewActivity",
         mode: "blocking",
+        class: MyArray,
+        method: "size",
+        params: [],
         client_data: {
-          class: MyArray,
-          method: "size",
-          params: []
+          class_name: "MyArray",
+          method: "size"
         },
         config: config
       })
@@ -265,8 +271,8 @@ describe Backbeat::Workflow do
     it "runs the activity with a workflow having the new activity as the current activity" do
       config.context = :local
 
-      activity_data[:client_data][:method] = :step_one
-      activity_data[:client_data][:params] = []
+      activity_data[:method] = :step_one
+      activity_data[:params] = []
 
       workflow.run(activity)
 
