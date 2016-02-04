@@ -35,9 +35,12 @@ require "backbeat/runner"
 require "backbeat/workflow"
 require "backbeat/activity"
 require "backbeat/workflowable"
+require "backbeat/handler"
 require 'logger'
 
 module Backbeat
+  extend Handler
+
   class Config
     class ConfigurationError < StandardError; end
 
