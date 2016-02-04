@@ -11,7 +11,7 @@ $ rspec
 ## Running the examples
 
 ```bash
-$ ruby examples/local_workflow.rb
+$ ruby examples/workflow.rb
 ```
 
 ## Usage

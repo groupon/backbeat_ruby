@@ -68,7 +68,7 @@ end
 
 puts "\nStarting the workflow"
 
-workflow = AddSomething.start_context("The workflow subject goes here").add_3(1, 2, 3, 50)
+AddSomething.start_context("The workflow subject goes here").add_3(1, 2, 3, 50)
 
 puts "Remote workflow state:"
 PP.pp store.find_workflow_by_id(1)

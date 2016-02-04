@@ -72,6 +72,11 @@ module Backbeat
       store.update_activity_status(id, :completed, response)
     end
 
+    def status
+      status = store.find_activity_by_id(id)[:current_client_status]
+      status.to_sym if status
+    end
+
     def complete?
       current_status == :complete
     end
