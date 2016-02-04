@@ -20,4 +20,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'webmock', '~> 1.20'
   spec.add_development_dependency 'surrogate', '~> 0.8'
+  spec.add_development_dependency 'simplecov', '~> 0.10.0'
 end
