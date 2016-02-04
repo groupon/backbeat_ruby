@@ -100,6 +100,8 @@ module Backbeat
         { id: subject.id, class: subject.class }.to_json
       when subject.respond_to?(:to_hash)
         subject.to_hash.to_json
+      when subject.respond_to?(:to_h)
+        subject.to_h.to_json
       else
         subject.to_json
       end

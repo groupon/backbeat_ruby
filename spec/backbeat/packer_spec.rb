@@ -182,6 +182,11 @@ describe Backbeat::Packer do
       subject = Class.new { def to_hash; { a: 1 } end; }.new
       expect(Backbeat::Packer.subject_to_string(subject)).to eq({ a: 1 }.to_json)
     end
+
+    it "converts an object that responds to to_h" do
+      subject = Class.new { def to_h; { b: 2 } end; }.new
+      expect(Backbeat::Packer.subject_to_string(subject)).to eq({ b: 2 }.to_json)
+    end
   end
 
   context ".underscore_keys" do
