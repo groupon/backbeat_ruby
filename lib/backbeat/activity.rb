@@ -51,6 +51,7 @@ module Backbeat
     def register_child(activity)
       new_id = store.add_child_activity(id, activity.to_hash)
       activity.id = new_id
+      activity.run if config.local?
       activity
     end
 

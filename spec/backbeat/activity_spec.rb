@@ -173,6 +173,14 @@ describe Backbeat::Activity do
 
       expect(new_activity.id).to eq(12)
     end
+
+    it "runs the activity if the context is set to local" do
+      config.context = :local
+
+      activity.register_child(new_activity)
+
+      expect(new_activity.result).to eq(30)
+    end
   end
 
   context "#to_hash" do

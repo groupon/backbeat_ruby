@@ -72,8 +72,9 @@ module Backbeat
     end
 
     def register(activity)
-      current_activity.register_child(activity)
-      run(activity) if config.local?
+      observer.with_workflow(set_current(activity)) do
+        current_activity.register_child(activity)
+      end
       activity
     end
 
