@@ -72,7 +72,7 @@ class BusinessWorkflows
 
   def notify_all(department_ids)
     department_ids.each do |dept|
-      register("business.notify-dept", :non_blocking).with(dept)
+      register("business.notify-dept", mode: :non_blocking).with(dept)
     end
   end
   activity "business.notify-all", :notify_all

@@ -30,22 +30,24 @@ module Backbeat
       Thread.current[ACTIVITY] = previous
     end
 
-    def register(activity_name, mode = :blocking)
-      ActivityBuilder.new(activity_name, mode)
+    def register(activity_name, options = {})
+      ActivityBuilder.new(activity_name, options)
     end
 
     class ActivityBuilder
-      attr_reader :name, :mode
+      attr_reader :name, :options
 
-      def initialize(name, mode)
+      def initialize(name, options)
         @name = name
-        @mode = mode
+        @options = options
       end
 
       def call(*params)
         activity = Activity.new({
           name: name,
-          mode: mode,
+          mode: options[:mode],
+          fires_at: options[:fires_at],
+          client_id: options[:client_id],
           name: name,
           params: params,
           client_data: { name: name }
@@ -55,16 +57,17 @@ module Backbeat
       alias_method :with, :call
     end
 
-    def signal(activity_name, subject)
-      SignalBuilder.new(activity_name, subject)
+    def signal(activity_name, subject, options = {})
+      SignalBuilder.new(activity_name, subject, options)
     end
 
     class SignalBuilder
-      attr_reader :name, :subject
+      attr_reader :name, :subject, :options
 
-      def initialize(name, subject)
+      def initialize(name, subject, options)
         @name = name
         @subject = subject
+        @options = options
       end
 
       def call(*params)
@@ -77,6 +80,8 @@ module Backbeat
           name: name,
           mode: :blocking,
           name: name,
+          fires_at: options[:fires_at],
+          client_id: options[:client_id],
           params: params,
           client_data: { name: name }
         }.merge(Handler.find(name)))
