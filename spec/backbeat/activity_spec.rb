@@ -99,7 +99,7 @@ describe Backbeat::Activity do
   }
 
   context "#run" do
-    it "calls the method on the workflowable object with the arguments" do
+    it "calls the method on the object with the arguments" do
       expect_any_instance_of(MyWorkflow).to receive(:perform).with(1, 2, 3)
 
       activity.run
@@ -191,6 +191,7 @@ describe Backbeat::Activity do
           mode: "blocking",
           fires_at: now,
           parent_link_id: nil,
+          client_id: nil,
           client_data: {
             class_name: "MyWorkflow",
             method: "perform",

@@ -90,6 +90,7 @@ describe Backbeat::Workflowable do
           mode: :blocking,
           fires_at: now,
           parent_link_id: nil,
+          client_id: nil,
           client_data: {
             class_name: "Decider",
             method: :decision_one,

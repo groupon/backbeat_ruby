@@ -96,6 +96,7 @@ module Backbeat
         mode: options[:mode],
         fires_at: options[:fires_at],
         parent_link_id: options[:parent_link_id],
+        client_id: options[:client_id],
         client_data: client_data
       }
     end
