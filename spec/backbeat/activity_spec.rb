@@ -61,7 +61,7 @@ describe Backbeat::Activity do
     Backbeat::MemoryStore.new(
       activities: {
         10 => {},
-        11 => {}
+        11 => { workflow_id: 2 }
       },
       workflows: {
         1 => { activities: [:activity_1, :activity_2, :activity_3] },
@@ -219,6 +219,20 @@ describe Backbeat::Activity do
       activity.run
 
       expect(activity.complete?).to eq(false)
+    end
+  end
+
+  context "#workflow_id" do
+    it "returns the current workflow id" do
+      activity_data[:workflow_id] = 2
+
+      expect(activity.workflow_id).to eq(2)
+    end
+
+    it "reloads the workflow id if necessary" do
+      activity_data[:workflow_id] = nil
+
+      expect(activity.workflow_id).to eq(2)
     end
   end
 end

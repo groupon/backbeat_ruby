@@ -73,12 +73,12 @@ module Backbeat
     end
 
     def status
-      status = store.find_activity_by_id(id)[:current_client_status]
+      status = reload[:current_client_status]
       status.to_sym if status
     end
 
     def complete?
-      current_status == :complete
+      current_server_status == :complete
     end
 
     def errored(error)
@@ -103,6 +103,10 @@ module Backbeat
 
     def id
       options[:id]
+    end
+
+    def workflow_id
+      options[:workflow_id] || reload[:workflow_id]
     end
 
     def id=(new_id)
@@ -131,9 +135,13 @@ module Backbeat
 
     attr_reader :config, :options
 
-    def current_status
-      status = store.find_activity_by_id(id)[:current_server_status]
+    def current_server_status
+      status = reload[:current_server_status]
       status.to_sym if status
+    end
+
+    def reload
+      store.find_activity_by_id(id)
     end
 
     def store
