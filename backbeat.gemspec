@@ -15,7 +15,6 @@ Gem::Specification.new do |spec|
   spec.files         = Dir['lib/**/*.rb']
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency 'httparty', '~> 0.11'
   spec.add_runtime_dependency 'multi_json', '~> 1.11'
   spec.add_runtime_dependency 'activesupport', '> 3.2'
 

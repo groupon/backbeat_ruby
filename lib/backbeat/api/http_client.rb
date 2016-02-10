@@ -28,7 +28,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require "httparty"
+require "net/http"
 
 module Backbeat
   class API
@@ -41,31 +41,20 @@ module Backbeat
       end
 
       def get(path, options = {})
-        response = HTTParty.get(url(path), build_options(options))
-        response_to_hash(response)
+        make_request(Net::HTTP::Get, path, build_options(options))
       end
 
       def post(path, data, options = {})
-        response = HTTParty.post(url(path), build_options(options, data))
-        response_to_hash(response)
+        make_request(Net::HTTP::Post, path, build_options(options, data))
       end
 
       def put(path, data, options = {})
-        response = HTTParty.put(url(path), build_options(options, data))
-        response_to_hash(response)
+        make_request(Net::HTTP::Put, path, build_options(options, data))
       end
 
       private
 
       attr_reader :host, :port, :client_id, :auth_token
-
-      def response_to_hash(response)
-        {
-          status: response.code,
-          body: response.body,
-          headers: response.headers
-        }
-      end
 
       def build_options(raw_options, data = nil)
         options = {}
@@ -85,8 +74,31 @@ module Backbeat
         }
       end
 
-      def url(path)
-        "http://#{host}:#{port}#{path}"
+      def make_request(klass, path, options)
+        uri = build_uri(path, options[:query])
+        req = klass.new(uri)
+        options[:headers].each { |header, value| req[header] = value }
+        req.body = options[:body] if options[:body]
+        response = Net::HTTP.start(uri.host, uri.port) { |http| http.request(req) }
+        response_to_hash(response)
+      end
+
+      def build_uri(path, query)
+        uri = URI("http://#{host}:#{port}#{path}")
+        if query
+          uri.query = URI.encode_www_form(query)
+        end
+        uri
+      end
+
+      def response_to_hash(response)
+        headers = {}
+        response.each_header { |k, v| headers[k] = v }
+        {
+          status: response.code.to_i,
+          body: response.body,
+          headers: headers
+        }
       end
     end
   end
