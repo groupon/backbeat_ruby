@@ -65,6 +65,21 @@ describe Backbeat::Packer do
 
       expect(activity.object).to eq(Array.new)
     end
+
+    it "unpacks an activity with an activity name and no class name" do
+      Backbeat::Handler.add("activities.name1", Array, :size)
+      activity_data = {
+        id: 1,
+        client_data: {
+          name: "activities.name1",
+          params: []
+        }
+      }
+
+      activity = Backbeat::Packer.unpack_activity(activity_data)
+
+      expect(activity.object).to eq(Array.new)
+    end
   end
 
   context ".unpack_workflow" do

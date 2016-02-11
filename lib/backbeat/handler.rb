@@ -8,6 +8,13 @@ module Backbeat
       @__handlers__ ||= {}
     end
 
+    def self.add(activity_name, klass, method_name)
+      __handlers__[activity_name] = {
+        class: klass,
+        method: method_name
+      }
+    end
+
     def self.find(activity_name)
       __handlers__[activity_name]
     end
@@ -92,10 +99,7 @@ module Backbeat
       def activity(activity_name, method_name)
         klass = self
         if klass.method_defined?(method_name)
-          Handler.__handlers__[activity_name] = {
-            class: klass,
-            method: method_name
-          }
+          Handler.add(activity_name, klass, method_name)
         else
           raise ActivityRegistrationError, "Method #{method_name} does not exist"
         end

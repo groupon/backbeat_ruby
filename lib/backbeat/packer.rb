@@ -49,19 +49,24 @@ module Backbeat
 
     def self.unpack_activity(data)
       client_data = symbolize_keys(data[:client_data])
-      class_name = client_data[:class_name] || client_data[:class]
-      klass = Inflector.constantize(class_name)
+      if class_name = client_data[:class_name] || client_data[:class]
+        klass = Inflector.constantize(class_name)
+        method = client_data[:method]
+        detail = { class_name: class_name, method: client_data[:method] }
+      else
+        handler = Handler.find(client_data[:name])
+        klass = handler[:class]
+        method = handler[:method]
+        detail = { name: client_data[:name] }
+      end
       Activity.new({
         id: data[:id],
         name: data[:name],
         mode: data[:mode],
-        class: klass,
-        method: client_data[:method],
         params: client_data[:params],
-        client_data: {
-          class_name: class_name,
-          method: client_data[:method]
-        }
+        class: klass,
+        method: method,
+        client_data: detail
       })
     end
 
