@@ -28,7 +28,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require "multi_json"
+require 'json'
 require "backbeat/api/errors"
 require "backbeat/packer"
 
@@ -47,7 +47,7 @@ module Backbeat
       end
 
       def post(path, data, handlers = {})
-        response = http_client.post(path, MultiJson.dump(data), {
+        response = http_client.post(path, JSON.dump(data), {
           headers: {
             "Accept" => "application/json",
             "Content-Type" => "application/json"
@@ -57,7 +57,7 @@ module Backbeat
       end
 
       def put(path, data, handlers = {})
-        response = http_client.put(path, MultiJson.dump(data), {
+        response = http_client.put(path, JSON.dump(data), {
           headers: {
             "Accept" => "application/json",
             "Content-Type" => "application/json"
@@ -73,10 +73,10 @@ module Backbeat
       def parse_body(response)
         if response[:body]
           Packer.underscore_keys(
-            MultiJson.load(response[:body], symbolize_keys: true)
+            JSON.parse(response[:body], symbolize_names: true)
           )
         end
-      rescue MultiJson::ParseError
+      rescue JSON::ParserError
         response[:body]
       end
 
