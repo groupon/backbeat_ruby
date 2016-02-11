@@ -48,7 +48,6 @@ module Backbeat
           mode: options[:mode],
           fires_at: options[:fires_at],
           client_id: options[:client_id],
-          name: name,
           params: params,
           client_data: { name: name }
         }.merge(Handler.find(name)))
@@ -79,7 +78,6 @@ module Backbeat
         activity = Activity.new({
           name: name,
           mode: :blocking,
-          name: name,
           fires_at: options[:fires_at],
           client_id: options[:client_id],
           params: params,
