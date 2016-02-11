@@ -225,7 +225,7 @@ describe Backbeat::API do
           userId: "123"
         }]
 
-        expect(client).to receive(:get).with("/v2/workflows/3/events", {
+        expect(client).to receive(:get).with("/v2/workflows/3/nodes", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 200, body: JSON.dump(activity_data) })
 

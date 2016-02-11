@@ -64,7 +64,7 @@ module Backbeat
       end
 
       def find_all_activities(id)
-        http_client.get("/v2/workflows/#{id}/events")
+        http_client.get("/v2/workflows/#{id}/nodes")
       end
 
       def get_tree(id)
