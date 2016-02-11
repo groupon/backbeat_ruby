@@ -50,6 +50,7 @@ module Backbeat
       end
 
       def call(*params)
+        run_data = Handler.find(name) || {}
         activity = Activity.new({
           name: name,
           mode: options[:mode],
@@ -57,7 +58,7 @@ module Backbeat
           client_id: options[:client_id],
           params: params,
           client_data: { name: name }
-        }.merge(Handler.find(name)))
+        }.merge(run_data))
         Handler.current_activity.register_child(activity)
       end
       alias_method :with, :call
@@ -82,6 +83,7 @@ module Backbeat
           decider: name,
           name: name
         })
+        run_data = Handler.find(name) || {}
         activity = Activity.new({
           name: name,
           mode: :blocking,
@@ -89,7 +91,7 @@ module Backbeat
           client_id: options[:client_id],
           params: params,
           client_data: { name: name }
-        }.merge(Handler.find(name)))
+        }.merge(run_data))
         workflow.signal(activity)
       end
       alias_method :with, :call

@@ -80,12 +80,12 @@ describe Backbeat::Handler do
 
     it "handles the client_id option for the signal" do
       activity = Backbeat::Handler.signal(
-        "cooking-workflow.activity-1",
+        "cooking-workflow.other-activity",
         "new subject",
         { client_id: "123" }
       ).with(5)
 
-      activity_data = store.find_workflow_by_id(1)[:signals]["cooking-workflow.activity-1"]
+      activity_data = store.find_workflow_by_id(1)[:signals]["cooking-workflow.other-activity"]
 
       expect(activity_data[:client_id]).to eq("123")
     end
@@ -115,7 +115,7 @@ describe Backbeat::Handler do
 
     it "handles the client_id option" do
       activity = Backbeat::Handler.with_current_activity(parent_activity) do
-        Backbeat::Handler.register("cooking-workflow.activity-2", client_id: 'abc').with(1, 2)
+        Backbeat::Handler.register("cooking-workflow.activity-12", client_id: 'abc').with(1, 2)
       end
 
       activity_data = store.find_activity_by_id(activity.id)
