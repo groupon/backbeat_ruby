@@ -55,13 +55,21 @@ module Backbeat
           name: name,
           mode: options[:mode],
           fires_at: options[:fires_at],
-          client_id: options[:client_id],
+          client_id: client_id(options),
           params: params,
           client_data: { name: name }
         }.merge(run_data))
         Handler.current_activity.register_child(activity)
       end
       alias_method :with, :call
+
+      def client_id(options)
+        if id = options[:client_id]
+          id
+        elsif client_name = options[:client]
+          Backbeat.config.client(client_name)
+        end
+      end
     end
 
     def signal(activity_name, subject, options = {})
@@ -88,13 +96,21 @@ module Backbeat
           name: name,
           mode: :blocking,
           fires_at: options[:fires_at],
-          client_id: options[:client_id],
+          client_id: client_id(options),
           params: params,
           client_data: { name: name }
         }.merge(run_data))
         workflow.signal(activity)
       end
       alias_method :with, :call
+
+      def client_id(options)
+        if id = options[:client_id]
+          id
+        elsif client_name = options[:client]
+          Backbeat.config.client(client_name)
+        end
+      end
     end
 
     module Registration

@@ -89,6 +89,20 @@ describe Backbeat::Handler do
 
       expect(activity_data[:client_id]).to eq("123")
     end
+
+    it "handles the client option mapped to a client_id" do
+      Backbeat.config.client(:shipping, '123')
+
+      activity = Backbeat::Handler.signal(
+        "cooking-workflow.other-activity",
+        "new subject",
+        { client: :shipping }
+      ).with(5)
+
+      activity_data = store.find_workflow_by_id(1)[:signals]["cooking-workflow.other-activity"]
+
+      expect(activity_data[:client_id]).to eq("123")
+    end
   end
 
   context "activity" do
@@ -116,6 +130,18 @@ describe Backbeat::Handler do
     it "handles the client_id option" do
       activity = Backbeat::Handler.with_current_activity(parent_activity) do
         Backbeat::Handler.register("cooking-workflow.activity-12", client_id: 'abc').with(1, 2)
+      end
+
+      activity_data = store.find_activity_by_id(activity.id)
+
+      expect(activity_data[:client_id]).to eq('abc')
+    end
+
+    it "handles the client option" do
+      Backbeat.config.client(:shipping, 'abc')
+
+      activity = Backbeat::Handler.with_current_activity(parent_activity) do
+        Backbeat::Handler.register("cooking-workflow.activity-12", client: :shipping).with(1, 2)
       end
 
       activity_data = store.find_activity_by_id(activity.id)

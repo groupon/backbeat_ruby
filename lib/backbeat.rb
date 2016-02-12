@@ -85,6 +85,20 @@ module Backbeat
       @run_chain ||= Runner.new(logger)
     end
 
+    def clients
+      @cliens ||= {}
+    end
+
+    def client(name, id = nil)
+      if id
+        clients[name] = id
+      else
+        clients.fetch(name)
+      end
+    rescue KeyError
+      raise ConfigurationError, "Unknown client #{name}"
+    end
+
     def local?
       context == :local
     end

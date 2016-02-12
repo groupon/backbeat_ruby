@@ -120,6 +120,24 @@ describe Backbeat do
 
       expect { Backbeat.config.context }.to_not raise_error
     end
+
+    it "allows client ids to be configured" do
+      Backbeat.configure do |config|
+        config.client(:apples, '12345')
+        config.client(:oranges, '54321')
+      end
+
+      expect(Backbeat.config.client(:apples)).to eq('12345')
+      expect(Backbeat.config.client(:oranges)).to eq('54321')
+    end
+
+    it "raises an exception if a client is not configured" do
+      Backbeat.configure do |config|
+        config.client(:apples, '12345')
+      end
+
+      expect { Backbeat.config.client(:bananas) }.to raise_error(Backbeat::Config::ConfigurationError)
+    end
   end
 
   it "yields a local workflow to use" do
