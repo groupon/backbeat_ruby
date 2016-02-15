@@ -110,7 +110,7 @@ describe Backbeat::Handler do
       Cooking.new.signal("cooking-workflow.activity-1", "new subject").with(5)
     }
 
-    it "registers and activity in an existing workflow" do
+    it "registers an activity in an existing workflow" do
       activity = Backbeat::Handler.with_current_activity(parent_activity) do
         Backbeat::Handler.register("cooking-workflow.activity-2", mode: :non_blocking).with(1, 2)
       end

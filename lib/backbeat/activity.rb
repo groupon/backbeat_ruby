@@ -30,6 +30,8 @@
 
 module Backbeat
   class Activity
+    attr_reader :config
+
     def initialize(options = {})
       @config  = options.delete(:config) || Backbeat.config
       @options = options
@@ -133,7 +135,7 @@ module Backbeat
 
     private
 
-    attr_reader :config, :options
+    attr_reader :options
 
     def current_server_status
       status = reload[:current_server_status]

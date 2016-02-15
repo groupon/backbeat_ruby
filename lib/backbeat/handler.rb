@@ -42,16 +42,19 @@ module Backbeat
     end
 
     class ActivityBuilder
-      attr_reader :name, :options
+      attr_reader :name, :options, :parent
 
       def initialize(name, options)
         @name = name
         @options = options
+        @parent = Handler.current_activity
       end
 
       def call(*params)
         run_data = Handler.find(name) || {}
+
         activity = Activity.new({
+          config: parent.config,
           name: name,
           mode: options[:mode],
           fires_at: options[:fires_at],
@@ -59,7 +62,8 @@ module Backbeat
           params: params,
           client_data: { name: name }
         }.merge(run_data))
-        Handler.current_activity.register_child(activity)
+
+        parent.register_child(activity)
       end
       alias_method :with, :call
 
@@ -67,7 +71,7 @@ module Backbeat
         if id = options[:client_id]
           id
         elsif client_name = options[:client]
-          Backbeat.config.client(client_name)
+          parent.config.client(client_name)
         end
       end
     end
@@ -87,28 +91,33 @@ module Backbeat
 
       def call(*params)
         workflow = Workflow.new({
+          config: options[:config],
           subject: subject,
           decider: name,
           name: name
         })
+
         run_data = Handler.find(name) || {}
+
         activity = Activity.new({
+          config: workflow.config,
           name: name,
           mode: :blocking,
           fires_at: options[:fires_at],
-          client_id: client_id(options),
+          client_id: client_id(workflow, options),
           params: params,
           client_data: { name: name }
         }.merge(run_data))
+
         workflow.signal(activity)
       end
       alias_method :with, :call
 
-      def client_id(options)
+      def client_id(workflow, options)
         if id = options[:client_id]
           id
         elsif client_name = options[:client]
-          Backbeat.config.client(client_name)
+          workflow.config.client(client_name)
         end
       end
     end
