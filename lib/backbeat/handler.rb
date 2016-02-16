@@ -41,6 +41,12 @@ module Backbeat
       ActivityBuilder.new(activity_name, options)
     end
 
+    def signal(activity_name, subject, options = {})
+      SignalBuilder.new(activity_name, subject, options)
+    end
+
+    private
+
     class ActivityBuilder
       attr_reader :name, :options, :parent
 
@@ -74,10 +80,6 @@ module Backbeat
           parent.config.client(client_name)
         end
       end
-    end
-
-    def signal(activity_name, subject, options = {})
-      SignalBuilder.new(activity_name, subject, options)
     end
 
     class SignalBuilder
