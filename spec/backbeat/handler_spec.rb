@@ -17,7 +17,7 @@ describe Backbeat::Handler do
       register("cooking-workflow.last-activity").call
       (a + b) * 3
     end
-    activity "cooking-workflow.activity-2", :fry
+    activity "cooking-workflow.activity-2", :fry, backoff: 10
 
     def serve
       :done
@@ -39,7 +39,8 @@ describe Backbeat::Handler do
   it "registers activities" do
     expect(handlers["cooking-workflow.activity-1"]).to eq({
       class: Cooking,
-      method: :chop
+      method: :chop,
+      options: {}
     })
   end
 
@@ -103,6 +104,19 @@ describe Backbeat::Handler do
 
       expect(activity_data[:client_id]).to eq("123")
     end
+
+    it "adds the backoff option defined in the registration of the activity" do
+      today = Time.now
+
+      activity = Backbeat::Handler.signal(
+        "cooking-workflow.activity-2",
+        "new subject"
+      ).with(5)
+
+      activity_data = store.find_activity_by_id(activity.id)
+
+      expect(activity_data[:retry_interval]).to eq(10)
+    end
   end
 
   context "activity" do
@@ -159,6 +173,18 @@ describe Backbeat::Handler do
       activity_data = store.find_activity_by_id(activity.id)
 
       expect(activity_data[:fires_at]).to eq(today)
+    end
+
+    it "adds the backoff option defined in the registration of the activity" do
+      today = Time.now
+
+      activity = Backbeat::Handler.with_current_activity(parent_activity) do
+        Backbeat::Handler.register("cooking-workflow.activity-2", fires_at: today).with(1, 2)
+      end
+
+      activity_data = store.find_activity_by_id(activity.id)
+
+      expect(activity_data[:retry_interval]).to eq(10)
     end
   end
 end

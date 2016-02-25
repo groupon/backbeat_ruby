@@ -8,10 +8,11 @@ module Backbeat
       @__handlers__ ||= {}
     end
 
-    def self.add(activity_name, klass, method_name)
+    def self.add(activity_name, klass, method_name, options = {})
       __handlers__[activity_name] = {
         class: klass,
-        method: method_name
+        method: method_name,
+        options: options
       }
     end
 
@@ -57,17 +58,19 @@ module Backbeat
       end
 
       def call(*params)
-        run_data = Handler.find(name) || {}
+        registration_data = Handler.find(name) || {}
+        registered_options = registration_data[:options] || {}
 
         activity = Activity.new({
           config: parent.config,
           name: name,
           mode: options[:mode],
           fires_at: options[:fires_at] || options[:at],
+          retry_interval: registered_options[:backoff],
           client_id: client_id(options),
           params: params,
           client_data: { name: name }
-        }.merge(run_data))
+        }.merge(registration_data))
 
         parent.register_child(activity)
       end
@@ -99,17 +102,19 @@ module Backbeat
           name: name
         })
 
-        run_data = Handler.find(name) || {}
+        registration_data = Handler.find(name) || {}
+        registered_options = registration_data[:options] || {}
 
         activity = Activity.new({
           config: workflow.config,
           name: name,
           mode: :blocking,
           fires_at: options[:fires_at],
+          retry_interval: registered_options[:backoff],
           client_id: client_id(workflow, options),
           params: params,
           client_data: { name: name }
-        }.merge(run_data))
+        }.merge(registration_data))
 
         workflow.signal(activity)
       end
@@ -125,10 +130,10 @@ module Backbeat
     end
 
     module Registration
-      def activity(activity_name, method_name)
+      def activity(activity_name, method_name, options = {})
         klass = self
         if klass.method_defined?(method_name)
-          Handler.add(activity_name, klass, method_name)
+          Handler.add(activity_name, klass, method_name, options)
         else
           raise ActivityRegistrationError, "Method #{method_name} does not exist"
         end
