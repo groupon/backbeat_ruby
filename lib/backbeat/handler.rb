@@ -63,7 +63,7 @@ module Backbeat
           config: parent.config,
           name: name,
           mode: options[:mode],
-          fires_at: options[:fires_at],
+          fires_at: options[:fires_at] || options[:at],
           client_id: client_id(options),
           params: params,
           client_data: { name: name }

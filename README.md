@@ -25,56 +25,58 @@ Backbeat.configure do |config|
   config.host      = "your_backbeat_server_host"
   config.port      = "your_backbeat_server_port"
   config.client_id = "your_backbeat_user_id"
+  config.auth_token = "your_backbeat_auth_token"
   config.context   = :remote
   config.logger    = MyLogger.new("log/mylogs.log")
 end
 ```
 
-Create some workflowable classes:
+Define activity handlers:
 
 ```ruby
-class MyActivities
-  include Backbeat::Workflowable
+class PurchaseActivities
+  include Backbeat::Handler
 
-  def activity_one(order_id, customer_id)
-    DoSomething.call(order_id)
-    MyOtherActivities.in_context(workflow, :non_blocking).send_notification(customer_id)
-    MyOtherActivities.in_context(workflow, :blocking, Time.now + 1.day).complete_order(order_id)
-    MyOtherActivities.in_context(workflow, :fire_and_forget).mark_complete(order_id)
+  def activity_one(order_id)
+    customer_id = FindCustomerId.call(order_id)
+    MakePurchase.call(order_id)
+    Backbeat.register("purchase.send-notification", mode: :non_blocking).with(customer_id)
+    Backbeat.register("purchase.complete-order", at: Time.now + 1.day).with(order_id)
+    Backbeat.register("purchase.mark-completed", mode: :fire_and_forget, at: Time.now + 1.day).with(order_id)
   end
-end
+  activity "purchase.activity-1", :activity_one
 
-class MyDecider
-  include Backbeat::Workflowable
-
-  def the_first_activity(order_id)
-    order = Order.find(order_id)
-    customer = FindCustomer.call(order)
-    if customer.type == :one
-      MyActivities.in_context(workflow).activity_one(order_id, customer.id)
-    else
-      MyActivities.in_context(workflow).activity_two(order_id, customer.id)
-    end
+  def send_notification(order_id)
+    Notification.send(order_id)
   end
+  activity "purchase.send-notification", :send_notification
 end
 ```
 
 Signal the workflow. The signal is the first node in a workflow execution.
 Each signal will wait for previous signals for the provided
-subject (the argument to `start_context`) and decider (the class on which
-`start_context` is called) combination to finish before executing.
+subject (the second argument to `signal`) and decider (the name of the first
+activity that `signal` is called with) combination to finish before executing.
 
 ```ruby
 order = Order.last
-MyDecider.start_context(order).my_decision(order.id)
+Backbeat.signal("purchase.activity-1", order).with(order.id)
 ```
 
 Continue the workflow from your app's activity endpoint. This should match the endpoint
 specified when creating a user on the Backbeat server.
 
 ```ruby
-post 'perform_activity' do
+post 'activity' do
   Backbeat::Workflow.continue(params)
+end
+```
+
+Also define an endpoint to receive notifications of errored activities from Backbeat.
+
+```ruby
+post 'notification' do
+  Logger.info(params)
 end
 ```
 
@@ -88,16 +90,7 @@ Backbeat.configure do |config|
 end
 
 order = Order.last
-MyDecider.start_context(order).my_decision(order.id)
-```
-
-Or:
-
-```ruby
-Backbeat.local do |workflow|
-  order = Order.last
-  MyDecider.start_context(order).my_decision(order.id)
-end
+Backbeat.signal("purchase.activity-1", order).with(order.id)
 ```
 
 Make assertions prior to running activities using `Backbeat::Testing`
@@ -110,11 +103,11 @@ end
 Backbeat::Testing.enable!
 
 order = Order.last
-MyDecider.start_context(order).my_decision(order.id)
+Backbeat.signal("purchase.activity-1", order).with(order.id)
 
 activity = Backbeat::Testing.activities.first
 
-expect(activity.name).to eq("MyDecider#my_decision")
+expect(activity.name).to eq("purchase.activity-1")
 expect(activity.params).to eq([order.id])
 
 Backbeat::Testing.run # Runs all queued activities

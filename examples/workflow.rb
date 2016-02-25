@@ -1,102 +1,107 @@
 $: << File.expand_path("../../lib", __FILE__)
 
-require "backbeat"
+require 'backbeat'
 
-class SubtractSomething
-  include Backbeat::Workflowable
+ Backbeat.configure do |config|
+   config.context = :local
+   config.store = Backbeat::MemoryStore.new
+   config.logger = Logger.new(STDOUT)
+ end
 
-  def subtract_2(x, y, total)
-    new_total = total - x - y
-    SubtractSomething.in_context(workflow, :non_blocking).subtract_3(3, 1, 1, new_total)
-    SubtractSomething.in_context(workflow).subtract_3(1, 2, 1, new_total)
-    workflow.complete
-    :done
+Item = Struct.new(:id, :name) do
+  def self.find(id)
+    if id == 10
+      Item.new(10, "book")
+    end
   end
 
-  def subtract_3(x, y, z, total)
-    new_total = total - x - y - z
-    puts "Total: #{new_total}"
-  end
-end
-
-class AddSomething
-  include Backbeat::Workflowable
-
-  def add_2(x, y, total)
-    new_total = total + x + y
-    SubtractSomething.in_context(workflow, :blocking, Time.now + 500).subtract_2(1, 2, new_total)
+  def self.purchases
+    @purchases ||= []
   end
 
-  def add_3(x, y, z, total)
-    new_total = total + x + y + z
-    AddSomething.in_context(workflow, :fire_and_forget).add_2(5, 5, new_total)
-    new_total
+  def self.purchased(item_id)
+    purchases << item_id
   end
 end
 
-############################
-# Using an explicit local context
-############################
+Notification = Struct.new(:department) do
+  def self.sent
+    @sent ||= []
+  end
 
-require "pp"
-
-Backbeat.local do |workflow|
-  puts "Testing in a local context"
-  result = AddSomething.in_context(workflow).add_3(1, 2, 3, 50).result
-  puts "Result: #{result}"
-  puts "Activity History:"
-  PP.pp workflow.activity_history
+  def send
+    Notification.sent << department
+  end
 end
 
-############################
-# Using a remote context
-############################
+Package = Struct.new(:item) do
+  def self.built
+    @build ||= []
+  end
 
-# Use the memory api here just for testing
-require "backbeat/memory_store"
-store = Backbeat::MemoryStore.new
+  def self.shipped
+    @shipped ||= []
+  end
 
-require "logger"
+  def build
+    Package.built << item
+  end
 
-Backbeat.configure do |config|
-  config.context = :remote
-  config.store = store
-  config.logger = Logger.new(STDOUT)
+  def ship
+    Package.shipped << item
+  end
 end
 
-# Send a signal
+class BusinessWorkflows
+  include Backbeat::Handler
 
-puts "\nStarting the workflow"
+  def purchase(item_id)
+    item = Item.find(item_id)
+    if item
+      Item.purchased(item_id)
+      package = Package.new(item_id)
+      package.build
 
-AddSomething.start_context("The workflow subject goes here").add_3(1, 2, 3, 50)
+      register("business.ship-it").with(item_id)
+      register("business.notify-all").with(['accounting', 'sales', 'finance'])
+    else
+      raise "Item not found"
+    end
+  end
+  activity "business.purchase-item", :purchase
 
-puts "Remote workflow state:"
-PP.pp store.find_workflow_by_id(1)
+  def notify_all(department_ids)
+    department_ids.each do |dept|
+      register("business.notify-dept", mode: :non_blocking).with(dept)
+    end
+  end
+  activity "business.notify-all", :notify_all
 
-# Receive the activity data
+  def notify(department_id)
+    Notification.new(department_id).send
+  end
+  activity "business.notify-dept", :notify
 
-activity_data = store.find_workflow_by_id(1)[:signals]["AddSomething#add_3"]
-
-# Run the activity by continuing the workflow
-
-Backbeat::Workflow.continue(activity_data)
-
-############################
-# Using a local context
-############################
-
-Backbeat.configure do |config|
-  config.context = :local
+  def ship(item_id)
+    package = Package.new(item_id)
+    package.ship
+    "Shipped item #{item_id}"
+  end
+  activity "business.ship-it", :ship
 end
 
-# Sending a signal runs the complete workflow
+item = Item.new(10, "book")
 
-puts "\nRunning the workflow locally"
+activity = Backbeat.signal("business.purchase-item", item).with(item.id) # This workflow should complete
 
-Deal = Struct.new(:id)
-deal = Deal.new(5)
+puts "Workflow status: #{activity.status}"
+puts "Purchased items: #{Item.purchases}"
+puts "Notified departments: #{Notification.sent}"
+puts "Shipped items: #{Package.shipped}"
 
-activity = AddSomething.start_context(deal).add_3(1, 2, 3, 50)
+item = Item.new(11, "table")
 
-puts "Local workflow history:"
-PP.pp activity
+activity = Backbeat.signal("business.purchase-item", item).with(item.id) # This workflow should fail with "Item not found"
+
+puts "Workflow status: #{activity.status}"
+puts "Activity error: #{activity.error[:message]}"
