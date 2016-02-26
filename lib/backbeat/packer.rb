@@ -49,22 +49,37 @@ module Backbeat
 
     def self.unpack_activity(data)
       client_data = symbolize_keys(data[:client_data])
-      klass = Inflector.constantize(client_data[:class_name] || client_data[:class])
-      new_client_data = client_data.merge({ class: klass })
-      activity_data = data.merge({ client_data: new_client_data })
-      Activity.new(activity_data)
+      if class_name = client_data[:class_name] || client_data[:class]
+        klass = Inflector.constantize(class_name)
+        method = client_data[:method]
+        detail = { class_name: class_name, method: client_data[:method] }
+      else
+        handler = Handler.find(client_data[:name])
+        klass = handler[:class]
+        method = handler[:method]
+        detail = { name: client_data[:name] }
+      end
+      Activity.new({
+        id: data[:id],
+        name: data[:name],
+        mode: data[:mode],
+        params: client_data[:params],
+        class: klass,
+        method: method,
+        client_data: detail
+      })
     end
 
     def self.success_response(result)
       rpc_response({ result: result })
     end
 
-    GENERIC_RPC_ERROR_CODE = -32000
+    RPC_GENERIC_ERROR_CODE = -32000
 
     def self.error_response(error)
       rpc_response({
         error: {
-          code: GENERIC_RPC_ERROR_CODE,
+          code: RPC_GENERIC_ERROR_CODE,
           message: error.message,
           data: (error.backtrace.take(5) if error.backtrace)
         }
@@ -90,6 +105,8 @@ module Backbeat
         { id: subject.id, class: subject.class }.to_json
       when subject.respond_to?(:to_hash)
         subject.to_hash.to_json
+      when subject.respond_to?(:to_h)
+        subject.to_h.to_json
       else
         subject.to_json
       end

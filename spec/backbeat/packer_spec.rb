@@ -63,7 +63,22 @@ describe Backbeat::Packer do
     it "resolves the class name of the activity" do
       activity = Backbeat::Packer.unpack_activity(activity_data)
 
-      expect(activity.to_hash[:client_data][:class]).to eq(Array)
+      expect(activity.object).to eq(Array.new)
+    end
+
+    it "unpacks an activity with an activity name and no class name" do
+      Backbeat::Handler.add("activities.name1", Array, :size)
+      activity_data = {
+        id: 1,
+        client_data: {
+          name: "activities.name1",
+          params: []
+        }
+      }
+
+      activity = Backbeat::Packer.unpack_activity(activity_data)
+
+      expect(activity.object).to eq(Array.new)
     end
   end
 
@@ -181,6 +196,11 @@ describe Backbeat::Packer do
     it "converts an object that responds to to_hash" do
       subject = Class.new { def to_hash; { a: 1 } end; }.new
       expect(Backbeat::Packer.subject_to_string(subject)).to eq({ a: 1 }.to_json)
+    end
+
+    it "converts an object that responds to to_h" do
+      subject = Class.new { def to_h; { b: 2 } end; }.new
+      expect(Backbeat::Packer.subject_to_string(subject)).to eq({ b: 2 }.to_json)
     end
   end
 

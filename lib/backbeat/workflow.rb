@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 require "backbeat/packer"
-require "backbeat/activity/log_decorator"
+require "backbeat/runner"
 
 module Backbeat
   class Workflow
@@ -44,7 +44,7 @@ module Backbeat
     def initialize(options = {})
       @config = options.delete(:config) || Backbeat.config
       @current_activity = options[:current_activity]
-      @options = options
+      @workflow_data = options
     end
 
     def deactivate
@@ -68,64 +68,54 @@ module Backbeat
       new_id = store.signal_workflow(id, activity_data[:name], activity_data)
       activity.id = new_id
       run(activity) if config.local?
+      activity
     end
 
     def register(activity)
-      current_activity.register_child(activity)
-      run(activity) if config.local?
+      observer.with_workflow(set_current(activity)) do
+        current_activity.register_child(activity)
+      end
+      activity
     end
 
     def run(activity)
-      log(activity) do |activity|
-        activity.run(
-          Workflow.new({
-            name: name,
-            subject: subject,
-            decider: decider,
-            current_activity: activity,
-            config: config
-          })
-        )
+      observer.with_workflow(set_current(activity)) do
+        activity.run
       end
     end
 
     def run_current
-      log(current_activity) do |activity|
-        activity.run(self)
+      observer.with_workflow(self) do
+        current_activity.run
       end
     end
 
     def name
-      options[:name]
+      workflow_data[:name]
     end
 
     def subject
-      options[:subject] ||= {}
+      workflow_data[:subject] ||= {}
     end
 
     def decider
-      options[:decider]
+      workflow_data[:decider]
     end
 
     def id
-      options[:id] ||= find_id
+      workflow_data[:id] ||= find_id
     end
 
     private
 
-    attr_reader :options
-
-    def log(activity)
-      if logger = config.logger
-        runner = Activity::LogDecorator.new(activity, logger)
-      else
-        runner = activity
-      end
-      yield(runner)
-    end
+    attr_reader :workflow_data
 
     def store
       config.store
+    end
+
+    def observer
+      config.run_chain
     end
 
     def find_id
@@ -139,6 +129,16 @@ module Backbeat
 
     def create
       store.create_workflow(workflow_params)
+    end
+
+    def set_current(activity)
+      Workflow.new({
+        name: name,
+        subject: subject,
+        decider: decider,
+        current_activity: activity,
+        config: config
+      })
     end
 
     def workflow_params

@@ -82,7 +82,7 @@ module Backbeat
     end
 
     def find_all_workflow_activities(workflow_id)
-      workflows[workflow_id][:activities]
+      workflows[workflow_id][:activities] ||= []
     end
 
     def complete_workflow(workflow_id)

@@ -81,16 +81,18 @@ describe Backbeat::Workflowable do
       Decider.in_context(workflow, :blocking, now).decision_one(:one, :two, :three)
 
       activity_id = store.find_activity_by_id(1)[:child_activities].first
-      activity = store.find_activity_by_id(activity_id)
+      activity_data = store.find_activity_by_id(activity_id)
 
-      expect(activity).to eq(
+      expect(activity_data).to eq(
         {
           id: 2,
           name: "Decider#decision_one",
           mode: :blocking,
           fires_at: now,
+          retry_interval: nil,
+          parent_link_id: nil,
+          client_id: nil,
           client_data: {
-            class: Decider,
             class_name: "Decider",
             method: :decision_one,
             params: [:one, :two, :three]
@@ -169,68 +171,6 @@ describe Backbeat::Workflowable do
 
       expect(other_workflow[:subject]).to eq(subject.to_json)
       expect(signal[:parent_link_id]).to eq(activity.id)
-    end
-  end
-
-  context "WorkflowableModel" do
-
-    class WorkflowableModel
-      include Backbeat::WorkflowableModel
-
-      def self.records
-        @records ||= []
-      end
-
-      def self.find(id)
-        records.fetch(id) do
-          records[id] = new(id: id, name: "A findable object")
-          records[id]
-        end
-      end
-
-      attr_reader :id, :name
-
-      def initialize(attrs)
-        @id = attrs[:id]
-        @name = attrs[:name]
-      end
-
-      def update_attributes(attrs)
-        WorkflowableModel.records[id] = WorkflowableModel.new({ id: id }.merge(attrs))
-      end
-    end
-
-    let(:object) { WorkflowableModel.new(id: 10, name: "Lime") }
-
-    it "runs activities on an findable instance of a class" do
-      object.in_context(workflow).update_attributes({ name: "Lemon" })
-      activity_id = store.find_activity_by_id(1)[:child_activities].first
-      activity = store.find_activity_by_id(activity_id)
-
-      expect(activity).to eq(
-        {
-          id: 2,
-          name: "WorkflowableModel#update_attributes",
-          mode: :blocking,
-          fires_at: nil,
-          client_data: {
-            class_name: "WorkflowableModel",
-            class: WorkflowableModel,
-            id: 10,
-            method: :update_attributes,
-            params: [{ name: "Lemon" }]
-          }
-        }
-      )
-    end
-
-    it "can run in a local context" do
-      Backbeat.local do |workflow|
-        activity = object.in_context(workflow).update_attributes({ name: "Orange" })
-
-        expect(WorkflowableModel.find(10).name).to eq("Orange")
-        expect(activity.name).to eq("WorkflowableModel#update_attributes")
-      end
     end
   end
 end

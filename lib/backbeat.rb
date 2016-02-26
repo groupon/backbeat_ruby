@@ -31,11 +31,16 @@
 require "backbeat/api"
 require "backbeat/api/http_client"
 require "backbeat/memory_store"
+require "backbeat/runner"
 require "backbeat/workflow"
 require "backbeat/activity"
 require "backbeat/workflowable"
+require "backbeat/handler"
+require 'logger'
 
 module Backbeat
+  extend Handler
+
   class Config
     class ConfigurationError < StandardError; end
 
@@ -44,7 +49,16 @@ module Backbeat
     attr_accessor :port
     attr_accessor :client_id
     attr_accessor :auth_token
-    attr_accessor :logger
+
+    class NullLogger < Logger
+      def initialize; end
+      def add(*args, &block); end
+    end
+
+    attr_writer :logger
+    def logger
+      @logger ||= NullLogger.new
+    end
 
     attr_writer :context
     def context
@@ -65,6 +79,24 @@ module Backbeat
           raise ConfigurationError.new("Unknown default api for context #{context}")
         end
       )
+    end
+
+    def run_chain
+      @run_chain ||= Runner.new(logger)
+    end
+
+    def clients
+      @cliens ||= {}
+    end
+
+    def client(name, id = nil)
+      if id
+        clients[name] = id
+      else
+        clients.fetch(name)
+      end
+    rescue KeyError
+      raise ConfigurationError, "Unknown client #{name}"
     end
 
     def local?

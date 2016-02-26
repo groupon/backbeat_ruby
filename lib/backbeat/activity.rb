@@ -30,24 +30,30 @@
 
 module Backbeat
   class Activity
+    attr_reader :config
+
     def initialize(options = {})
       @config  = options.delete(:config) || Backbeat.config
       @options = options
     end
 
-    def run(workflow)
-      object.with_context(workflow) do
-        processing
-        ret_value = object.send(method, *params)
-        complete(ret_value)
+    def run
+      observer.running(self) do
+        begin
+          processing
+          ret_value = object.send(method, *params)
+          complete(ret_value)
+        rescue => e
+          errored(e)
+          raise e
+        end
       end
-    rescue => e
-      errored(e)
     end
 
     def register_child(activity)
       new_id = store.add_child_activity(id, activity.to_hash)
       activity.id = new_id
+      activity.run if config.local?
       activity
     end
 
@@ -68,8 +74,13 @@ module Backbeat
       store.update_activity_status(id, :completed, response)
     end
 
+    def status
+      status = reload[:current_client_status]
+      status.to_sym if status
+    end
+
     def complete?
-      current_status == :complete
+      current_server_status == :complete
     end
 
     def errored(error)
@@ -82,11 +93,23 @@ module Backbeat
     end
 
     def to_hash
-      options
+      {
+        name: name,
+        mode: options[:mode],
+        fires_at: options[:fires_at],
+        retry_interval: options[:retry_interval],
+        parent_link_id: options[:parent_link_id],
+        client_id: options[:client_id],
+        client_data: client_data
+      }
     end
 
     def id
       options[:id]
+    end
+
+    def workflow_id
+      options[:workflow_id] || reload[:workflow_id]
     end
 
     def id=(new_id)
@@ -97,39 +120,43 @@ module Backbeat
       options[:name]
     end
 
+    def object
+      @object ||= (
+        options[:class].new
+      )
+    end
+
     def method
-      client_data[:method]
+      options[:method]
     end
 
     def params
-      client_data[:params]
+      options[:params]
     end
 
     private
 
-    attr_reader :config, :options
+    attr_reader :options
 
-    def current_status
-      status = store.find_activity_by_id(id)[:current_server_status]
+    def current_server_status
+      status = reload[:current_server_status]
       status.to_sym if status
+    end
+
+    def reload
+      store.find_activity_by_id(id)
     end
 
     def store
       config.store
     end
 
-    def client_data
-      options[:client_data]
+    def observer
+      config.run_chain
     end
 
-    def object
-      @object ||= (
-        if id = client_data[:id]
-          client_data[:class].find(id)
-        else
-          client_data[:class].new
-        end
-      )
+    def client_data
+      options[:client_data].merge({ params: params })
     end
   end
 end
