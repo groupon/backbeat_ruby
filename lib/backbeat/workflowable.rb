@@ -31,6 +31,10 @@
 require "backbeat/runner"
 
 module Backbeat
+
+  # This module is deprecated in favor of named activites through
+  # the Handler module.
+
   module Workflowable
     def self.included(klass)
       klass.extend(InContext)
