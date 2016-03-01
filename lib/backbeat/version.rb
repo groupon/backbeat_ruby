@@ -29,5 +29,5 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 module Backbeat
-  VERSION = "1.0.0.rc3"
+  VERSION = "1.0.0.rc4"
 end
