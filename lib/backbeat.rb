@@ -44,6 +44,12 @@ module Backbeat
   class Config
     class ConfigurationError < StandardError; end
 
+    def self.local
+      config = new
+      config.context = :local
+      config
+    end
+
     attr_accessor :context
     attr_accessor :host
     attr_accessor :port
@@ -114,13 +120,7 @@ module Backbeat
     @config ||= Config.new
   end
 
-  def self.local_config
-    config = Config.new
-    config.context = :local
-    config
-  end
-
   def self.local
-    yield Workflow.new({ config: local_config })
+    yield Workflow.new({ config: Config.local })
   end
 end

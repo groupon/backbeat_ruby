@@ -186,5 +186,20 @@ describe Backbeat::Handler do
 
       expect(activity_data[:retry_interval]).to eq(10)
     end
+
+    it "signals a new workflow if there is not parent activity set in the current context" do
+      activity = Backbeat::Handler.register("cooking-workflow.activity-2", mode: :non_blocking).with(1, 2)
+
+      activity.run
+      activity_data = store.find_activity_by_id(activity.id)
+
+      expect(activity_data[:name]).to eq("cooking-workflow.activity-2")
+      expect(activity_data[:mode]).to eq(:blocking)
+      expect(activity_data[:client_data]).to eq({
+        name: "cooking-workflow.activity-2",
+        params: [1, 2]
+      })
+      expect(activity.result).to eq(9)
+    end
   end
 end

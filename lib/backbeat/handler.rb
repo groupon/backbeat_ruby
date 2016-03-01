@@ -69,7 +69,11 @@ module Backbeat
     end
 
     def register(activity_name, options = {})
-      ActivityBuilder.new(activity_name, options)
+      if Handler.current_activity
+        ActivityBuilder.new(activity_name, options)
+      else
+        signal(activity_name, {}, options)
+      end
     end
 
     def signal(activity_name, subject, options = {})
