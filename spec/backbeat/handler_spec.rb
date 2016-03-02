@@ -106,8 +106,6 @@ describe Backbeat::Handler do
     end
 
     it "adds the backoff option defined in the registration of the activity" do
-      today = Time.now
-
       activity = Backbeat::Handler.signal(
         "cooking-workflow.activity-2",
         "new subject"
@@ -116,6 +114,18 @@ describe Backbeat::Handler do
       activity_data = store.find_activity_by_id(activity.id)
 
       expect(activity_data[:retry_interval]).to eq(10)
+    end
+
+    it "raises an exception if the activity name is not found" do
+      expect {
+        Backbeat::Handler.signal("cooking-workflow.wrong-activity", "subject").with(10)
+      }.to raise_error(Backbeat::Handler::ActivityNotFoundError)
+    end
+
+    it "does not raise an exception for activities on other clients" do
+      expect {
+        Backbeat::Handler.signal("cooking-workflow.wrong-activity", "subject", { client_id: "123" }).with(10)
+      }.to_not raise_error
     end
   end
 
@@ -200,6 +210,18 @@ describe Backbeat::Handler do
         params: [1, 2]
       })
       expect(activity.result).to eq(9)
+    end
+
+    it "raises an exception if the activity name is not found" do
+      expect {
+        Backbeat::Handler.register("cooking-workflow.wrong-activity").with(10)
+      }.to raise_error(Backbeat::Handler::ActivityNotFoundError)
+    end
+
+    it "does not raise an exception for activities on other clients" do
+      expect {
+        Backbeat::Handler.register("cooking-workflow.wrong-activity", { client_id: "123" }).with(10)
+      }.to_not raise_error
     end
   end
 end

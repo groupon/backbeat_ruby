@@ -31,6 +31,7 @@
 module Backbeat
   module Handler
     ActivityRegistrationError = Class.new(StandardError)
+    ActivityNotFoundError = Class.new(StandardError)
 
     extend self
 
@@ -47,7 +48,7 @@ module Backbeat
     end
 
     def self.find(activity_name)
-      __handlers__[activity_name]
+      __handlers__[activity_name] || {}
     end
 
     def self.included(klass)
@@ -92,7 +93,13 @@ module Backbeat
       end
 
       def call(*params)
-        registration_data = Handler.find(name) || {}
+        client_id = lookup_client_id(options)
+        registration_data = Handler.find(name)
+
+        if client_id.nil? && registration_data.empty?
+          raise ActivityNotFoundError, "Activity #{name} not found"
+        end
+
         registered_options = registration_data[:options] || {}
 
         activity = Activity.new({
@@ -101,7 +108,7 @@ module Backbeat
           mode: options[:mode],
           fires_at: options[:fires_at] || options[:at],
           retry_interval: registered_options[:backoff],
-          client_id: client_id(options),
+          client_id: client_id,
           params: params,
           client_data: { name: name }
         }.merge(registration_data))
@@ -110,7 +117,7 @@ module Backbeat
       end
       alias_method :with, :call
 
-      def client_id(options)
+      def lookup_client_id(options)
         if id = options[:client_id]
           id
         elsif client_name = options[:client]
@@ -136,7 +143,13 @@ module Backbeat
           name: name
         })
 
-        registration_data = Handler.find(name) || {}
+        client_id = lookup_client_id(workflow, options)
+        registration_data = Handler.find(name)
+
+        if client_id.nil? && registration_data.empty?
+          raise ActivityNotFoundError, "Activity #{name} not found"
+        end
+
         registered_options = registration_data[:options] || {}
 
         activity = Activity.new({
@@ -145,7 +158,7 @@ module Backbeat
           mode: :blocking,
           fires_at: options[:fires_at],
           retry_interval: registered_options[:backoff],
-          client_id: client_id(workflow, options),
+          client_id: client_id,
           params: params,
           client_data: { name: name }
         }.merge(registration_data))
@@ -154,7 +167,7 @@ module Backbeat
       end
       alias_method :with, :call
 
-      def client_id(workflow, options)
+      def lookup_client_id(workflow, options)
         if id = options[:client_id]
           id
         elsif client_name = options[:client]

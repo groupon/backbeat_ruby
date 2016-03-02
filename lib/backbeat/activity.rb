@@ -121,9 +121,7 @@ module Backbeat
     end
 
     def object
-      @object ||= (
-        options[:class].new
-      )
+      @object ||= options[:class].new
     end
 
     def method
