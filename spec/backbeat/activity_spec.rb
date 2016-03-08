@@ -227,4 +227,29 @@ describe Backbeat::Activity do
       expect(activity.workflow_id).to eq(2)
     end
   end
+
+  context ".complete" do
+    before do
+      Backbeat.configure do |config|
+        config.context = :remote
+        config.store = store
+      end
+    end
+
+    it "completes the activity for the provided id" do
+      activity_data[:client_data][:async] = true
+
+      activity.run
+      activity_record = store.find_activity_by_id(activity.id)
+
+      expect(activity_record[:statuses].first).to eq(:processing)
+
+      Backbeat::Activity.complete(activity.id, { status: :done })
+
+      activity_record = store.find_activity_by_id(activity.id)
+
+      expect(activity_record[:statuses].last).to eq(:complete)
+      expect(activity_record[:response][:result]).to eq({ status: :done })
+    end
+  end
 end

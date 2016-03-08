@@ -30,6 +30,10 @@
 
 module Backbeat
   class Activity
+    def self.complete(activity_id, result = {})
+      new({ id: activity_id }).complete(result)
+    end
+
     attr_reader :config
 
     def initialize(options = {})
