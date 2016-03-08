@@ -30,6 +30,10 @@
 
 module Backbeat
   class Activity
+    def self.complete(activity_id, result = {})
+      new({ id: activity_id }).complete(result)
+    end
+
     attr_reader :config
 
     def initialize(options = {})
@@ -42,7 +46,7 @@ module Backbeat
         begin
           processing
           ret_value = object.send(method, *params)
-          complete(ret_value)
+          complete(ret_value) unless async?
         rescue => e
           errored(e)
           raise e
@@ -151,6 +155,10 @@ module Backbeat
 
     def observer
       config.run_chain
+    end
+
+    def async?
+      !!options[:client_data][:async]
     end
 
     def client_data

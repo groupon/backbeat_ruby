@@ -59,32 +59,35 @@ describe Backbeat::Workflow do
     end
 
     class MyArray
-      include Backbeat::Workflowable
+      include Backbeat::Handler
 
       def build(n)
         Array.new(n)
       end
+      activity "array.build", :build
 
       def size
         1
       end
+      activity "array.size", :size
 
       def step_two
-        MyArray.in_context(workflow).size
+        register("array.size").call
       end
+      activity "array.step_two", :step_two
 
       def step_one
-        MyArray.in_context(workflow).build(5)
-        MyArray.in_context(workflow).step_two
+        register("array.build").with(5)
+        register("array.step_two").call
       end
+      activity "array.step_one", :step_one
     end
 
     let(:activity_data) {
       {
         name: "Activity 1",
         client_data: {
-          class_name: "MyArray",
-          method: "build",
+          name: "array.build",
           params: [5]
         }
       }
@@ -115,8 +118,7 @@ describe Backbeat::Workflow do
       method: "size",
       params: [],
       client_data: {
-        class_name: "MyArray",
-        method: "size"
+        name: "array.size",
       }
     }
   }
@@ -180,8 +182,7 @@ describe Backbeat::Workflow do
         method: "size",
         params: [],
         client_data: {
-          class_name: "MyArray",
-          method: "size"
+          name: "array.size",
         },
         config: config
       })
@@ -230,8 +231,7 @@ describe Backbeat::Workflow do
         method: "size",
         params: [],
         client_data: {
-          class_name: "MyArray",
-          method: "size"
+          name: "array.size",
         },
         config: config
       })
