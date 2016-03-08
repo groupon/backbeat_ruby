@@ -57,7 +57,7 @@ module Backbeat
         handler = Handler.find(client_data[:name])
         klass = handler[:class]
         method = handler[:method]
-        detail = { name: client_data[:name] }
+        detail = { name: client_data[:name], async: client_data[:async] }
       end
       Activity.new({
         id: data[:id],

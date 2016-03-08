@@ -124,6 +124,16 @@ describe Backbeat::Activity do
       expect(activity_record[:statuses].last).to eq(:errored)
       expect(activity.error[:message]).to eq("Failed")
     end
+
+    it "does not send an complete message if the async option is true" do
+      activity_data[:client_data][:async] = true
+
+      activity.run
+
+      activity_record = store.find_activity_by_id(activity.id)
+
+      expect(activity_record[:statuses].last).to eq(:processing)
+    end
   end
 
   context "#register_child" do

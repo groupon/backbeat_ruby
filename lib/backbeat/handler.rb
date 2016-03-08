@@ -109,9 +109,14 @@ module Backbeat
           fires_at: options[:fires_at] || options[:at],
           retry_interval: registered_options[:backoff],
           client_id: client_id,
+          class: registration_data[:class],
+          method: registration_data[:method],
           params: params,
-          client_data: { name: name }
-        }.merge(registration_data))
+          client_data: {
+            name: name,
+            async: registered_options[:async]
+          }
+        })
 
         parent.register_child(activity)
       end
@@ -159,9 +164,14 @@ module Backbeat
           fires_at: options[:fires_at],
           retry_interval: registered_options[:backoff],
           client_id: client_id,
+          class: registration_data[:class],
+          method: registration_data[:method],
           params: params,
-          client_data: { name: name }
-        }.merge(registration_data))
+          client_data: {
+            name: name,
+            async: registered_options[:async]
+          }
+        })
 
         workflow.signal(activity)
       end
