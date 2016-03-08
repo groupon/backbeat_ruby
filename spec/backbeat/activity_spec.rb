@@ -35,25 +35,12 @@ require "backbeat/activity"
 describe Backbeat::Activity do
 
   class MyWorkflow
-
-    def self.complete!
-      @complete = true
-    end
-
-    def self.complete?
-      @complete
-    end
-
     def boom(*args)
       raise "Failed"
     end
 
     def perform(a, b, c)
       a + b + c
-    end
-
-    def finish
-      MyWorkflow.complete!
     end
   end
 
@@ -89,8 +76,7 @@ describe Backbeat::Activity do
       method: "perform",
       params: [1, 2, 3],
       client_data: {
-        class_name: "MyWorkflow",
-        method: "perform"
+        name: "workflow.perform",
       }
     }
   }
@@ -105,13 +91,10 @@ describe Backbeat::Activity do
       activity.run
     end
 
-    it "sets the workflow context on the worflowable object" do
-      activity_data[:method] = :finish
-      activity_data[:params] = []
+    it "notifies the run chain observer before running the activity" do
+      expect(config.run_chain).to receive(:running).with(activity)
 
       activity.run
-
-      expect(MyWorkflow.complete?).to eq(true)
     end
 
     it "sends a processing message to the activity" do
@@ -152,8 +135,7 @@ describe Backbeat::Activity do
         method: "perform",
         params: [10, 10, 10],
         client_data: {
-          class_name: "MyWorkflow",
-          method: "perform"
+          name: "workflow.perform",
         },
         config: config
       })
@@ -194,8 +176,7 @@ describe Backbeat::Activity do
           parent_link_id: nil,
           client_id: nil,
           client_data: {
-            class_name: "MyWorkflow",
-            method: "perform",
+            name: "workflow.perform",
             params: [1, 2, 3]
           }
         }
