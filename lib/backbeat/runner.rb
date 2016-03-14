@@ -64,15 +64,15 @@ module Backbeat
         logger.info(event(activity, :activity_complete))
         ret_val
       rescue => e
-        logger.error(event(activity, :activity_errored))
+        logger.error(event(activity, :activity_errored, { message: e.message, backtrace: e.backtrace }))
       end
 
       private
 
       attr_reader :logger
 
-      def event(activity, name)
-        { name: name, activity: activity.name, params: activity.params }
+      def event(activity, name, options = {})
+        { name: name, activity: activity.name, params: activity.params }.merge(options)
       end
     end
 

@@ -81,6 +81,7 @@ describe Backbeat::Runner do
     expect(logger.msgs[:info].first[:name]).to eq(:activity_started)
     expect(logger.msgs[:error].count).to eq(1)
     expect(logger.msgs[:error].last[:name]).to eq(:activity_errored)
+    expect(logger.msgs[:error].last[:message]).to eq("Error")
   end
 
   let(:new_runner) {
