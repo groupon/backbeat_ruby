@@ -28,7 +28,7 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'json'
+require 'active_support/json'
 require "backbeat/api/errors"
 require "backbeat/packer"
 
@@ -47,7 +47,7 @@ module Backbeat
       end
 
       def post(path, data, handlers = {})
-        response = http_client.post(path, JSON.dump(data), {
+        response = http_client.post(path, ActiveSupport::JSON.encode(data), {
           headers: {
             "Accept" => "application/json",
             "Content-Type" => "application/json"
@@ -57,7 +57,7 @@ module Backbeat
       end
 
       def put(path, data, handlers = {})
-        response = http_client.put(path, JSON.dump(data), {
+        response = http_client.put(path, ActiveSupport::JSON.encode(data), {
           headers: {
             "Accept" => "application/json",
             "Content-Type" => "application/json"
