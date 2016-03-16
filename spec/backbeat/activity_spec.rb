@@ -228,6 +228,18 @@ describe Backbeat::Activity do
     end
   end
 
+  context "#workflow" do
+    it "returns a workflow object with the activity's workflow id" do
+      activity_data[:workflow_id] = 2
+
+      workflow = activity.workflow
+      workflow.complete
+
+      expect(workflow.id).to eq(2)
+      expect(store.find_workflow_by_id(2)[:complete]).to eq(true)
+    end
+  end
+
   context ".complete" do
     before do
       Backbeat.configure do |config|

@@ -116,6 +116,10 @@ module Backbeat
       options[:workflow_id] || reload[:workflow_id]
     end
 
+    def workflow
+      Workflow.new({ id: workflow_id, config: config })
+    end
+
     def id=(new_id)
       options[:id] = new_id
     end
