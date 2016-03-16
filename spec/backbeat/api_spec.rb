@@ -376,5 +376,18 @@ describe Backbeat::API do
         expect(api.add_child_activity(12, activity_data)).to eq(13)
       end
     end
+
+    context "#search_activities" do
+      it "searches activities by the provided params" do
+        expect(client).to receive(:get).with("/v2/events/search", {
+          headers: {
+            "Accept" => "application/json"
+          },
+          query: { current_status: :errored }
+        }).and_return({ status: 200, body: [{ id: 10 }].to_json })
+
+        expect(api.search_activities({ current_status: :errored })).to eq([{ id: 10 }])
+      end
+    end
   end
 end

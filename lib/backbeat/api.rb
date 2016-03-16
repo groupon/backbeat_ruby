@@ -101,6 +101,10 @@ module Backbeat
       activities_api.get_activity_response(id, data)
     end
 
+    def search_activities(search_params)
+      activities_api.search(search_params)
+    end
+
     private
 
     def workflows_api

@@ -183,6 +183,8 @@ describe Backbeat::Activity do
           mode: "blocking",
           fires_at: now,
           retry_interval: nil,
+          retry: nil,
+          metadata: nil,
           parent_link_id: nil,
           client_id: nil,
           client_data: {

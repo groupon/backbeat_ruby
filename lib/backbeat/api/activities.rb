@@ -61,6 +61,10 @@ module Backbeat
         http_client.get("/v2/events/#{id}/response")
       end
 
+      def search(params)
+        http_client.get("/v2/events/search", { query: params })
+      end
+
       private
 
       attr_reader :http_client
