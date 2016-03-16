@@ -132,6 +132,18 @@ describe Backbeat::Handler do
       expect(activity_data[:client_data][:async]).to eq(true)
     end
 
+    it "uses a provided workflow name" do
+      activity = Backbeat::Handler.signal(
+        "cooking-workflow.async-activity",
+        "new subject",
+        { name: "Test Workflow" }
+      ).with(5)
+
+      workflow_data = store.find_workflow_by_id(1)
+
+      expect(workflow_data[:name]).to eq("Test Workflow")
+    end
+
     it "raises an exception if the activity name is not found" do
       expect {
         Backbeat::Handler.signal("cooking-workflow.wrong-activity", "subject").with(10)

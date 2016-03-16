@@ -145,7 +145,7 @@ module Backbeat
           config: options[:config],
           subject: subject,
           decider: name,
-          name: name
+          name: options[:name] || name
         })
 
         client_id = lookup_client_id(workflow, options)
