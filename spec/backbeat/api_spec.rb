@@ -46,7 +46,7 @@ describe Backbeat::API do
           decider: "Decider"
         }
 
-        expect(client).to receive(:post).with("/v2/workflows", JSON.dump(workflow_data), {
+        expect(client).to receive(:post).with("/workflows", JSON.dump(workflow_data), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -61,7 +61,7 @@ describe Backbeat::API do
       it "returns a validation error if the workflow is invalid" do
         workflow_data = { name: "My Workflow", decider: "Decider" }
 
-        expect(client).to receive(:post).with("/v2/workflows", JSON.dump(workflow_data), {
+        expect(client).to receive(:post).with("/workflows", JSON.dump(workflow_data), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -72,7 +72,7 @@ describe Backbeat::API do
       end
 
       it "raises an authentication error if the request is not authenticated" do
-        expect(client).to receive(:post).with("/v2/workflows", JSON.dump({}), {
+        expect(client).to receive(:post).with("/workflows", JSON.dump({}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -95,7 +95,7 @@ describe Backbeat::API do
           userId: "123"
         }
 
-        expect(client).to receive(:get).with("/v2/workflows/5", {
+        expect(client).to receive(:get).with("/workflows/5", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 200, body: JSON.dump(workflow_data) })
 
@@ -105,7 +105,7 @@ describe Backbeat::API do
       end
 
       it "raises a not found error if the workflow is not found" do
-        expect(client).to receive(:get).with("/v2/workflows/5", {
+        expect(client).to receive(:get).with("/workflows/5", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 404, body: JSON.dump({ error: "Record not found" })})
 
@@ -130,7 +130,7 @@ describe Backbeat::API do
       }
 
       it "finds a workflow by subject" do
-        expect(client).to receive(:get).with("/v2/workflows", {
+        expect(client).to receive(:get).with("/workflows", {
           headers: { "Accept" => "application/json"},
           query: workflow_query
         }).and_return({ status: 200, body: JSON.dump(workflow_data) })
@@ -141,7 +141,7 @@ describe Backbeat::API do
       end
 
       it "returns false if the workflow is not found" do
-        expect(client).to receive(:get).with("/v2/workflows", {
+        expect(client).to receive(:get).with("/workflows", {
           headers: { "Accept" => "application/json"},
           query: workflow_query
         }).and_return({ status: 404 })
@@ -154,7 +154,7 @@ describe Backbeat::API do
       let(:signal_data) {{ client_data: { arguments: [1, 2, 3] }}}
 
       it "signals the workflow with the id, name, and client data" do
-        expect(client).to receive(:post).with("/v2/workflows/10/signal", JSON.dump(signal_data), {
+        expect(client).to receive(:post).with("/workflows/10/signal", JSON.dump(signal_data), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -167,7 +167,7 @@ describe Backbeat::API do
       end
 
       it "raises a validation error if the signal data is not valid" do
-        expect(client).to receive(:post).with("/v2/workflows/10/signal", JSON.dump(signal_data), {
+        expect(client).to receive(:post).with("/workflows/10/signal", JSON.dump(signal_data), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -180,7 +180,7 @@ describe Backbeat::API do
 
     context "#complete_workflow" do
       it "makes a request to mark the workflow complete" do
-        expect(client).to receive(:put).with("/v2/workflows/20/complete", JSON.dump({}), {
+        expect(client).to receive(:put).with("/workflows/20/complete", JSON.dump({}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -203,7 +203,7 @@ describe Backbeat::API do
           userId: "123"
         }]
 
-        expect(client).to receive(:get).with("/v2/workflows/5/children", {
+        expect(client).to receive(:get).with("/workflows/5/children", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 200, body: JSON.dump(child_data) })
 
@@ -225,7 +225,7 @@ describe Backbeat::API do
           userId: "123"
         }]
 
-        expect(client).to receive(:get).with("/v2/workflows/3/nodes", {
+        expect(client).to receive(:get).with("/workflows/3/nodes", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 200, body: JSON.dump(activity_data) })
 
@@ -239,7 +239,7 @@ describe Backbeat::API do
       it "gets the hash representation of the workflow tree" do
         tree_data = { id: 5, children: [] }
 
-        expect(client).to receive(:get).with("/v2/workflows/3/tree", {
+        expect(client).to receive(:get).with("/workflows/3/tree", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 200, body: JSON.dump(tree_data) })
 
@@ -253,7 +253,7 @@ describe Backbeat::API do
       it "gets the printable representation of the workflow tree" do
         tree_data = { print: "ID NAME \n\n ID Name etc" }
 
-        expect(client).to receive(:get).with("/v2/workflows/3/tree/print", {
+        expect(client).to receive(:get).with("/workflows/3/tree/print", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 200, body: JSON.dump(tree_data) })
 
@@ -280,7 +280,7 @@ describe Backbeat::API do
 
     context "#find_activity_by_id" do
       it "finds an activity by id" do
-        expect(client).to receive(:get).with("/v2/events/25", {
+        expect(client).to receive(:get).with("/activities/25", {
           headers: { "Accept" => "application/json"}
         }).and_return({ status: 200, body: JSON.dump(activity_data) })
 
@@ -292,7 +292,7 @@ describe Backbeat::API do
 
     context "#update_activity_status" do
       it "sends a request to update the activity status" do
-        expect(client).to receive(:put).with("/v2/events/25/status/errored", JSON.dump({ response: nil }), {
+        expect(client).to receive(:put).with("/activities/25/status/errored", JSON.dump({ response: nil }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -303,7 +303,7 @@ describe Backbeat::API do
       end
 
       it "sends a result" do
-        expect(client).to receive(:put).with("/v2/events/10/status/completed", JSON.dump({ response: { result: 5, error: nil }}), {
+        expect(client).to receive(:put).with("/activities/10/status/completed", JSON.dump({ response: { result: 5, error: nil }}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -314,7 +314,7 @@ describe Backbeat::API do
       end
 
       it "raises a status change error" do
-        expect(client).to receive(:put).with("/v2/events/10/status/processing", JSON.dump({ response: nil }), {
+        expect(client).to receive(:put).with("/activities/10/status/processing", JSON.dump({ response: nil }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -327,7 +327,7 @@ describe Backbeat::API do
 
     context "#restart_activity" do
       it "sends a request to restart the activity" do
-        expect(client).to receive(:put).with("/v2/events/25/restart", JSON.dump({}), {
+        expect(client).to receive(:put).with("/activities/25/restart", JSON.dump({}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -340,7 +340,7 @@ describe Backbeat::API do
 
     context "#reset_activity" do
       it "sends a request to reset the node" do
-        expect(client).to receive(:put).with("/v2/events/30/reset", JSON.dump({}), {
+        expect(client).to receive(:put).with("/activities/30/reset", JSON.dump({}), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -353,7 +353,7 @@ describe Backbeat::API do
 
     context "#add_child_activities" do
       it "creates new child activities on the activity" do
-        expect(client).to receive(:post).with("/v2/events/12/decisions", JSON.dump({ decisions: [activity_data] }), {
+        expect(client).to receive(:post).with("/activities/12/decisions", JSON.dump({ decisions: [activity_data] }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -366,7 +366,7 @@ describe Backbeat::API do
 
     context "#add_child_activity" do
       it "creates a new child activity on the activity" do
-        expect(client).to receive(:post).with("/v2/events/12/decisions", JSON.dump({ decisions: [activity_data] }), {
+        expect(client).to receive(:post).with("/activities/12/decisions", JSON.dump({ decisions: [activity_data] }), {
           headers: {
             "Content-Type" => "application/json",
             "Accept" => "application/json"
@@ -379,7 +379,7 @@ describe Backbeat::API do
 
     context "#search_activities" do
       it "searches activities by the provided params" do
-        expect(client).to receive(:get).with("/v2/events/search", {
+        expect(client).to receive(:get).with("/activities/search", {
           headers: {
             "Accept" => "application/json"
           },

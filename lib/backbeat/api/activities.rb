@@ -38,31 +38,31 @@ module Backbeat
       end
 
       def find_activity_by_id(id)
-        http_client.get("/v2/events/#{id}")
+        http_client.get("/activities/#{id}")
       end
 
       def update_activity_status(id, status, response = nil)
-        http_client.put("/v2/events/#{id}/status/#{status}", { response: response })
+        http_client.put("/activities/#{id}/status/#{status}", { response: response })
       end
 
       def restart_activity(id)
-        http_client.put("/v2/events/#{id}/restart", {})
+        http_client.put("/activities/#{id}/restart", {})
       end
 
       def reset_activity(id)
-        http_client.put("/v2/events/#{id}/reset", {})
+        http_client.put("/activities/#{id}/reset", {})
       end
 
       def add_child_activities(id, data)
-        http_client.post("/v2/events/#{id}/decisions", { decisions: data })
+        http_client.post("/activities/#{id}/decisions", { decisions: data })
       end
 
       def get_activity_response(id)
-        http_client.get("/v2/events/#{id}/response")
+        http_client.get("/activities/#{id}/response")
       end
 
       def search(params)
-        http_client.get("/v2/events/search", { query: params })
+        http_client.get("/activities/search", { query: params })
       end
 
       private
