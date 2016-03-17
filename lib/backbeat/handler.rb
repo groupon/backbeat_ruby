@@ -108,10 +108,12 @@ module Backbeat
           mode: options[:mode],
           fires_at: options[:fires_at] || options[:at],
           retry_interval: registered_options[:backoff],
+          metadata: options[:metadata],
           client_id: client_id,
           class: registration_data[:class],
           method: registration_data[:method],
           params: params,
+          retries: registered_options[:retries],
           client_data: {
             name: name,
             async: registered_options[:async]
@@ -163,6 +165,8 @@ module Backbeat
           mode: :blocking,
           fires_at: options[:fires_at],
           retry_interval: registered_options[:backoff],
+          retries: registered_options[:retries],
+          metadata: options[:metadata],
           client_id: client_id,
           class: registration_data[:class],
           method: registration_data[:method],

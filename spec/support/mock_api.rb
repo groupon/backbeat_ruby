@@ -82,6 +82,9 @@ module Backbeat
     define(:add_child_activities) do |id, data|
     end
 
+    define(:search_activities) do |params|
+    end
+
     define(:get_activity_response) do |id|
     end
   end

@@ -127,6 +127,9 @@ module Backbeat
     def add_child_activities(id, data)
     end
 
+    def search_activities(params)
+    end
+
     private
 
     attr_reader :seeds
