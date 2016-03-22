@@ -49,8 +49,8 @@ module Backbeat
       workflows_api.find_workflow_by_subject(data)
     end
 
-    def signal_workflow(id, name, data)
-      workflows_api.signal_workflow(id, name, data)[:id]
+    def signal_workflow(id, data)
+      workflows_api.signal_workflow(id, data)[:id]
     end
 
     def complete_workflow(id)

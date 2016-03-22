@@ -51,7 +51,7 @@ module Backbeat
         })
       end
 
-      def signal_workflow(id, name, data)
+      def signal_workflow(id, data)
         http_client.post("/workflows/#{id}/signal", data)
       end
 

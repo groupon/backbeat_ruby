@@ -46,7 +46,7 @@ module Backbeat
     define(:find_workflow_by_subject) do |data|
     end
 
-    define(:signal_workflow) do |id, name, data|
+    define(:signal_workflow) do |id, data|
     end
 
     define(:complete_workflow) do |id|

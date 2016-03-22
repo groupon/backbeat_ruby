@@ -151,7 +151,7 @@ describe Backbeat::API do
     end
 
     context "#signal_workflow" do
-      let(:signal_data) {{ client_data: { arguments: [1, 2, 3] }}}
+      let(:signal_data) {{ name: :my_signal, client_data: { arguments: [1, 2, 3] }}}
 
       it "signals the workflow with the id, name, and client data" do
         expect(client).to receive(:post).with("/workflows/10/signal", JSON.dump(signal_data), {
@@ -161,7 +161,7 @@ describe Backbeat::API do
           }
         }).and_return({ status: 201, body: { id: 11 }.to_json })
 
-        response = api.signal_workflow(10, :my_signal, signal_data)
+        response = api.signal_workflow(10, signal_data)
 
         expect(response).to eq(11)
       end
@@ -174,7 +174,7 @@ describe Backbeat::API do
           }
         }).and_return({ status: 422, body: JSON.dump({ error: "Invalid" })})
 
-        expect { api.signal_workflow(10, :my_signal, signal_data) }.to raise_error Backbeat::API::ValidationError, { error: "Invalid" }.to_s
+        expect { api.signal_workflow(10, signal_data) }.to raise_error Backbeat::API::ValidationError, { error: "Invalid" }.to_s
       end
     end
 
