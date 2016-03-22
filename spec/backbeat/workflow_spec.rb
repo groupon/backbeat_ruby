@@ -31,7 +31,6 @@
 require "spec_helper"
 require "backbeat"
 require "backbeat/workflow"
-require "backbeat/workflowable"
 require "backbeat/activity"
 require "backbeat/memory_store"
 

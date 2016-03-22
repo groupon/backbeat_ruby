@@ -41,15 +41,15 @@ describe Backbeat::Packer do
       config.context = :remote
       config.store = memory_store
     end
+
+    Backbeat::Handler.add("activities.name1", Array, :size)
   end
 
   context ".unpack_activity" do
     let(:activity_data) {{
       id: 1,
       client_data: {
-        name: "activity name",
-        class_name: "Array",
-        method: "method",
+        name: "activities.name1",
         params: []
       }
     }}
@@ -65,21 +65,6 @@ describe Backbeat::Packer do
 
       expect(activity.object).to eq(Array.new)
     end
-
-    it "unpacks an activity with an activity name and no class name" do
-      Backbeat::Handler.add("activities.name1", Array, :size)
-      activity_data = {
-        id: 1,
-        client_data: {
-          name: "activities.name1",
-          params: []
-        }
-      }
-
-      activity = Backbeat::Packer.unpack_activity(activity_data)
-
-      expect(activity.object).to eq(Array.new)
-    end
   end
 
   context ".unpack_workflow" do
@@ -90,9 +75,7 @@ describe Backbeat::Packer do
       subject: "Subject",
       decider: "Decider",
       client_data: {
-        name: "activity name",
-        class_name: "Array",
-        method: "method",
+        name: "activities.name1",
         params: []
       }
     }}
@@ -120,7 +103,7 @@ describe Backbeat::Packer do
     it "does not change the casing of client data and metadata" do
       camelized_data = activity_data.merge({
         "clientData" => {
-          "class_name" => "Array",
+          "name" => "activities.name1",
           "params" => [{ "numberOne" => 1 }],
           "metadata" => { "numberTwo" => 2 }
         }
