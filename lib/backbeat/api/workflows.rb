@@ -38,41 +38,41 @@ module Backbeat
       end
 
       def create_workflow(data)
-        http_client.post("/v2/workflows", data)
+        http_client.post("/workflows", data)
       end
 
       def find_workflow_by_id(id)
-        http_client.get("/v2/workflows/#{id}")
+        http_client.get("/workflows/#{id}")
       end
 
       def find_workflow_by_subject(data)
-        http_client.get("/v2/workflows", { query: data }, {
+        http_client.get("/workflows", { query: data }, {
           404 => lambda { |response| false }
         })
       end
 
       def signal_workflow(id, name, data)
-        http_client.post("/v2/workflows/#{id}/signal", data)
+        http_client.post("/workflows/#{id}/signal", data)
       end
 
       def complete_workflow(id)
-        http_client.put("/v2/workflows/#{id}/complete", {})
+        http_client.put("/workflows/#{id}/complete", {})
       end
 
       def find_all_children(id)
-        http_client.get("/v2/workflows/#{id}/children")
+        http_client.get("/workflows/#{id}/children")
       end
 
       def find_all_activities(id)
-        http_client.get("/v2/workflows/#{id}/nodes")
+        http_client.get("/workflows/#{id}/nodes")
       end
 
       def get_tree(id)
-        http_client.get("/v2/workflows/#{id}/tree")
+        http_client.get("/workflows/#{id}/tree")
       end
 
       def get_printable_tree(id)
-        http_client.get("/v2/workflows/#{id}/tree/print")
+        http_client.get("/workflows/#{id}/tree/print")
       end
 
       private
