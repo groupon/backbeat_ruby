@@ -106,6 +106,10 @@ module Backbeat
       store.update_activity_status(id, :errored, response)
     end
 
+    def resolve
+      store.update_activity_status(id, :resolved)
+    end
+
     def processing
       store.update_activity_status(id, :processing)
     end
@@ -126,8 +130,6 @@ module Backbeat
       {
         name: name,
         mode: options[:mode],
-        current_server_status: options[:current_server_status],
-        current_client_status: options[:current_client_status],
         fires_at: options[:fires_at],
         retry_interval: options[:retry_interval],
         retry: options[:retries],

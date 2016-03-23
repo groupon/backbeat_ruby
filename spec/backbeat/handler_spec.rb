@@ -18,9 +18,9 @@ describe Backbeat::Handler do
     activity "cooking-workflow.activity-1", :chop, { rescue_with: :cleanup }
 
     def cleanup(activity)
+      activity.resolve
+      Backbeat.register("cooking-workflow.last-activity").call
       Cooking.rescued = true
-      activity.shutdown
-      Backbeat.register_sibling("cooking-workflow.serve").call
     end
 
     def fry(a, b)
@@ -251,32 +251,6 @@ describe Backbeat::Handler do
       expect {
         Backbeat::Handler.register("cooking-workflow.wrong-activity", { client_id: "123" }).with(10)
       }.to_not raise_error
-    end
-  end
-
-  context "#register_sibling" do
-    let(:parent_activity) {
-      Cooking.new.signal("cooking-workflow.activity-1", "new subject").with(5)
-    }
-
-    it "registers an activity in an existing workflow" do
-      activity_1 = Backbeat::Handler.with_current_activity(parent_activity) do
-        Backbeat::Handler.register("cooking-workflow.activity-2").with(1, 2)
-      end
-
-      activity_2 = Backbeat::Handler.with_current_activity(activity_1) do
-        Backbeat::Handler.register_sibling("cooking-workflow.last-activity").call
-      end
-
-      activity_data = store.find_activity_by_id(activity_2.id)
-
-      expect(activity_data[:name]).to eq("cooking-workflow.last-activity")
-      expect(activity_data[:client_data]).to eq({
-        name: "cooking-workflow.last-activity",
-        params: []
-      })
-      expect(activity_data[:current_server_status]).to eq(:ready)
-      expect(activity_data[:current_client_status]).to eq(:ready)
     end
   end
 

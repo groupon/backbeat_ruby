@@ -189,8 +189,6 @@ describe Backbeat::Activity do
       expect(activity.to_hash).to eq(
         {
           name: "workflow.perform",
-          current_server_status: nil,
-          current_client_status: nil,
           mode: "blocking",
           fires_at: now,
           retry_interval: nil,
@@ -250,6 +248,16 @@ describe Backbeat::Activity do
 
       expect(workflow.id).to eq(2)
       expect(store.find_workflow_by_id(2)[:complete]).to eq(true)
+    end
+  end
+
+  context "#resolve" do
+    it "sends the resolved activity status update" do
+      activity.resolve
+
+      activity_record = store.find_activity_by_id(activity.id)
+
+      expect(activity_record[:statuses].last).to eq(:resolved)
     end
   end
 

@@ -79,11 +79,6 @@ module Backbeat
       end
     end
 
-    def register_sibling(activity_name, options = {})
-      ready_statuses = { current_server_status: :ready, current_client_status: :ready }
-      ActivityBuilder.new(activity_name, ready_statuses.merge(options), Handler.current_activity.parent)
-    end
-
     def signal(activity_name, subject, options = {})
       SignalBuilder.new(activity_name, subject, options)
     end
@@ -111,8 +106,6 @@ module Backbeat
 
         activity = Activity.new({
           parent_id: parent.id,
-          current_server_status: options[:current_server_status],
-          current_client_status: options[:current_client_status],
           config: parent.config,
           mode: options[:mode],
           fires_at: options[:fires_at] || options[:at],
