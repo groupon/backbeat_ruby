@@ -99,7 +99,8 @@ module Backbeat
       child_activity[:id]
     end
 
-    def signal_workflow(id, name, data)
+    def signal_workflow(id, data)
+      name = data[:name]
       child_activity = data.merge(new_activity)
       activities[child_activity[:id]] = child_activity
       workflows[id][:signals] ||= {}

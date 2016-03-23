@@ -35,16 +35,18 @@ require "backbeat/testing"
 describe Backbeat::Testing do
 
   class ImportWorkflow
-    include Backbeat::Workflowable
+    include Backbeat::Handler
 
     def import(thing)
-      :import
-      ImportWorkflow.in_context(workflow).finish("Imported")
+      register("import.finish").with("Imported")
+      :imported
     end
+    activity "import.start", :import
 
     def finish(message)
       message
     end
+    activity "import.finish", :finish
   end
 
   before do
@@ -61,29 +63,29 @@ describe Backbeat::Testing do
   end
 
   it "adds activities to the testing queue rather than running" do
-    ImportWorkflow.start_context({ id: 5 }).import("File")
+    Backbeat.register("import.start", { id: 5 }).with("File")
 
     expect(Backbeat::Testing.activities.count).to eq(1)
-    expect(Backbeat::Testing.activities.first.name).to eq("ImportWorkflow#import")
+    expect(Backbeat::Testing.activities.first.name).to eq("import.start")
   end
 
   it "runs all queued activities" do
-    ImportWorkflow.start_context({ id: 5 }).import("File")
+    Backbeat.register("import.start", { id: 5 }).with("File")
 
     Backbeat::Testing.run
 
     signal = Backbeat::Testing.activities.first
     activity = Backbeat::Testing.activities.last
 
-    expect(signal.name).to eq("ImportWorkflow#import")
+    expect(signal.name).to eq("import.start")
     expect(signal.complete?).to eq(true)
-    expect(activity.name).to eq("ImportWorkflow#finish")
+    expect(activity.name).to eq("import.finish")
     expect(activity.complete?).to eq(true)
     expect(activity.result).to eq("Imported")
   end
 
   it "does not run already ran activities" do
-    ImportWorkflow.start_context({ id: 5 }).import("File")
+    Backbeat.register("import.start", { id: 5 }).with("File")
 
     expect_any_instance_of(ImportWorkflow).to receive(:import).once
 
@@ -94,10 +96,10 @@ describe Backbeat::Testing do
   it "sets the testing mode for the provided block" do
     activity_1 = nil
     Backbeat::Testing.disable! do
-      activity_1 = ImportWorkflow.start_context({ id: 5 }).import("File")
+      activity_1 = Backbeat.register("import.start", { id: 5 }).with("File")
     end
 
-    activity_2 = ImportWorkflow.start_context({ id: 6 }).finish("Done")
+    activity_2 = Backbeat.register("import.finish", { id: 5 }).with("File")
 
     expect(activity_1.complete?).to eq(true)
     expect(activity_2.complete?).to eq(false)
@@ -108,7 +110,7 @@ describe Backbeat::Testing do
 
     activity = Backbeat::Testing.activities.first
 
-    expect(activity.name).to eq("ImportWorkflow#finish")
+    expect(activity.name).to eq("import.finish")
     expect(activity.params).to eq(["Imported"])
 
     Backbeat::Testing.run

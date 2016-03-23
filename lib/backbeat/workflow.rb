@@ -65,7 +65,7 @@ module Backbeat
 
     def signal(activity)
       activity_data = activity.to_hash
-      new_id = store.signal_workflow(id, activity_data[:name], activity_data)
+      new_id = store.signal_workflow(id, activity_data)
       activity.id = new_id
       run(activity) if config.local?
       activity

@@ -34,7 +34,6 @@ require "backbeat/memory_store"
 require "backbeat/runner"
 require "backbeat/workflow"
 require "backbeat/activity"
-require "backbeat/workflowable"
 require "backbeat/handler"
 require 'logger'
 
