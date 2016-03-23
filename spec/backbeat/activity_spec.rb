@@ -69,15 +69,12 @@ describe Backbeat::Activity do
   let(:activity_data) {
     {
       id: 11,
-      name: "MyActivity",
+      name: "workflow.perform",
       mode: "blocking",
       fires_at: now,
       class: MyWorkflow,
       method: "perform",
-      params: [1, 2, 3],
-      client_data: {
-        name: "workflow.perform",
-      }
+      params: [1, 2, 3]
     }
   }
   let(:activity) {
@@ -126,7 +123,7 @@ describe Backbeat::Activity do
     end
 
     it "does not send an complete message if the async option is true" do
-      activity_data[:client_data][:async] = true
+      activity_data[:async] = true
 
       activity.run
 
@@ -139,14 +136,11 @@ describe Backbeat::Activity do
   context "#register_child" do
     let(:new_activity) {
       Backbeat::Activity.new({
-        name: "SubActivity",
+        name: "workflow.perform",
         mode: "blocking",
         class: MyWorkflow,
         method: "perform",
         params: [10, 10, 10],
-        client_data: {
-          name: "workflow.perform",
-        },
         config: config
       })
     }
@@ -179,7 +173,7 @@ describe Backbeat::Activity do
     it "returns the activity data required by the server" do
       expect(activity.to_hash).to eq(
         {
-          name: "MyActivity",
+          name: "workflow.perform",
           mode: "blocking",
           fires_at: now,
           retry_interval: nil,
@@ -251,12 +245,12 @@ describe Backbeat::Activity do
     end
 
     it "completes the activity for the provided id" do
-      activity_data[:client_data][:async] = true
+      activity_data[:async] = true
 
       activity.run
       activity_record = store.find_activity_by_id(activity.id)
 
-      expect(activity_record[:statuses].first).to eq(:processing)
+      expect(activity_record[:statuses].last).to eq(:processing)
 
       Backbeat::Activity.complete(activity.id, { status: :done })
 

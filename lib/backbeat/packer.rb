@@ -52,15 +52,16 @@ module Backbeat
       handler = Handler.find(client_data[:name])
       klass = handler[:class]
       method = handler[:method]
-      detail = { name: client_data[:name], async: client_data[:async] }
+      handler_options = handler[:options]
       Activity.new({
         id: data[:id],
-        name: data[:name],
+        name: client_data[:name],
         mode: data[:mode],
         params: client_data[:params],
         class: klass,
         method: method,
-        client_data: detail
+        async: handler_options[:async],
+        rescue_with: handler_options[:rescue_with]
       })
     end
 

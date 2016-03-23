@@ -7,17 +7,28 @@ describe Backbeat::Handler do
   class Cooking
     include Backbeat::Handler
 
+    class << self
+      attr_accessor :rescued
+    end
+
     def chop(amount)
       register("cooking-workflow.activity-2").with(10)
       amount * 2
     end
-    activity "cooking-workflow.activity-1", :chop
+    activity "cooking-workflow.activity-1", :chop, { rescue_with: :cleanup }
+
+    def cleanup(activity)
+      # 1. local state cleanup
+      # 2. activity state cleanup
+      # 3. register next step
+      Cooking.rescued = true
+    end
 
     def fry(a, b)
       register("cooking-workflow.last-activity").call
       (a + b) * 3
     end
-    activity "cooking-workflow.activity-2", :fry, backoff: 10
+    activity "cooking-workflow.activity-2", :fry, { backoff: 10 }
 
     def serve
       :done
@@ -26,7 +37,7 @@ describe Backbeat::Handler do
 
     def order_wine(n)
     end
-    activity "cooking-workflow.async-activity", :order_wine, async: true
+    activity "cooking-workflow.async-activity", :order_wine, { async: true }
   end
 
   let(:handlers) { Backbeat::Handler.__handlers__ }
@@ -44,8 +55,11 @@ describe Backbeat::Handler do
     expect(handlers["cooking-workflow.activity-1"]).to eq({
       class: Cooking,
       method: :chop,
-      options: {}
+      options: {
+        rescue_with: :cleanup
+      }
     })
+    expect(handlers["cooking-workflow.async-activity"][:options]).to eq({ async: true })
   end
 
   it "raises an exception if the method does not exist" do
@@ -65,8 +79,7 @@ describe Backbeat::Handler do
       expect(activity_data[:mode]).to eq(:blocking)
       expect(activity_data[:client_data]).to eq({
         name: "cooking-workflow.activity-1",
-        params: [5],
-        async: nil
+        params: [5]
       })
       expect(activity.result).to eq(10)
     end
@@ -121,17 +134,6 @@ describe Backbeat::Handler do
       expect(activity_data[:retry_interval]).to eq(10)
     end
 
-    it "adds the async option to the client data" do
-      activity = Backbeat::Handler.signal(
-        "cooking-workflow.async-activity",
-        "new subject"
-      ).with(5)
-
-      activity_data = store.find_activity_by_id(activity.id)
-
-      expect(activity_data[:client_data][:async]).to eq(true)
-    end
-
     it "uses a provided workflow name" do
       activity = Backbeat::Handler.signal(
         "cooking-workflow.async-activity",
@@ -174,8 +176,7 @@ describe Backbeat::Handler do
       expect(activity_data[:mode]).to eq(:non_blocking)
       expect(activity_data[:client_data]).to eq({
         name: "cooking-workflow.activity-2",
-        params: [1, 2],
-        async: nil
+        params: [1, 2]
       })
       expect(activity.result).to eq(9)
     end
@@ -226,16 +227,6 @@ describe Backbeat::Handler do
       expect(activity_data[:retry_interval]).to eq(10)
     end
 
-    it "adds the async option to the client data" do
-      activity = Backbeat::Handler.with_current_activity(parent_activity) do
-        Backbeat::Handler.register("cooking-workflow.async-activity").with(1)
-      end
-
-      activity_data = store.find_activity_by_id(activity.id)
-
-      expect(activity_data[:client_data][:async]).to eq(true)
-    end
-
     it "signals a new workflow if there is not parent activity set in the current context" do
       activity = Backbeat::Handler.register("cooking-workflow.activity-2", mode: :non_blocking).with(1, 2)
 
@@ -246,8 +237,7 @@ describe Backbeat::Handler do
       expect(activity_data[:mode]).to eq(:blocking)
       expect(activity_data[:client_data]).to eq({
         name: "cooking-workflow.activity-2",
-        params: [1, 2],
-        async: nil
+        params: [1, 2]
       })
       expect(activity.result).to eq(9)
     end
@@ -262,6 +252,19 @@ describe Backbeat::Handler do
       expect {
         Backbeat::Handler.register("cooking-workflow.wrong-activity", { client_id: "123" }).with(10)
       }.to_not raise_error
+    end
+  end
+
+  context "rescue_with" do
+    it "calls the rescue handler" do
+      activity = Backbeat::Handler.register("cooking-workflow.activity-1", mode: :non_blocking).with(1, 2)
+
+      activity.run
+      activity_data = store.find_activity_by_id(activity.id)
+
+      Backbeat::Activity.rescue(activity_data)
+
+      expect(Cooking.rescued).to eq(true)
     end
   end
 end
