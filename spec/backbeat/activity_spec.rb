@@ -236,6 +236,16 @@ describe Backbeat::Activity do
     end
   end
 
+  context "#shutdown" do
+    it "deactivates the workflow through the shutdown action" do
+      activity.shutdown
+
+      activity_record = store.find_activity_by_id(activity.id)
+
+      expect(activity_record[:shutdown]).to eq(true)
+    end
+  end
+
   context ".complete" do
     before do
       Backbeat.configure do |config|

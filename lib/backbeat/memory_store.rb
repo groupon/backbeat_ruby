@@ -125,6 +125,11 @@ module Backbeat
       activities[activity_id][:reset] = true
     end
 
+    def shutdown_activity(activity_id)
+      activities[activity_id] ||= {}
+      activities[activity_id][:shutdown] = true
+    end
+
     def add_child_activities(id, data)
     end
 

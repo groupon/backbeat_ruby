@@ -53,6 +53,10 @@ module Backbeat
         http_client.put("/activities/#{id}/reset", {})
       end
 
+      def shutdown_activity(id)
+        http_client.put("/activities/#{id}/shutdown", {})
+      end
+
       def add_child_activities(id, data)
         http_client.post("/activities/#{id}/decisions", { decisions: data })
       end

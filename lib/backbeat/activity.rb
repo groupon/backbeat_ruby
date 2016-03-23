@@ -110,6 +110,10 @@ module Backbeat
       store.update_activity_status(id, :processing)
     end
 
+    def shutdown
+      store.shutdown_activity(id)
+    end
+
     def to_hash
       {
         name: name,

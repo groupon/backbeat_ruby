@@ -89,6 +89,10 @@ module Backbeat
       activities_api.reset_activity(id)
     end
 
+    def shutdown_activity(id)
+      activities_api.shutdown_activity(id)
+    end
+
     def add_child_activity(id, data)
       add_child_activities(id, [data]).first
     end

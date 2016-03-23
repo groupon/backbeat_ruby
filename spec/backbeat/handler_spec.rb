@@ -18,9 +18,6 @@ describe Backbeat::Handler do
     activity "cooking-workflow.activity-1", :chop, { rescue_with: :cleanup }
 
     def cleanup(activity)
-      # 1. local state cleanup
-      # 2. activity state cleanup
-      # 3. register next step
       Cooking.rescued = true
     end
 

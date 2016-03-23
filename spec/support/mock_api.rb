@@ -76,6 +76,9 @@ module Backbeat
     define(:reset_activity) do |id|
     end
 
+    define(:shutdown_activity) do |id|
+    end
+
     define(:add_child_activity) do |id, data|
     end
 
