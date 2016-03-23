@@ -114,10 +114,20 @@ module Backbeat
       store.shutdown_activity(id)
     end
 
+    def parent
+      parent_data = store.find_activity_by_id(options[:parent_id])
+      Packer.unpack_activity(parent_data)
+    rescue API::NotFoundError => e
+      raise ParentNotFound, e.message
+    end
+    ParentNotFound = Class.new(StandardError)
+
     def to_hash
       {
         name: name,
         mode: options[:mode],
+        current_server_status: options[:current_server_status],
+        current_client_status: options[:current_client_status],
         fires_at: options[:fires_at],
         retry_interval: options[:retry_interval],
         retry: options[:retries],

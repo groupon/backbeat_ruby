@@ -73,10 +73,15 @@ module Backbeat
 
     def register(activity_name, options = {})
       if current_activity
-        ActivityBuilder.new(activity_name, options)
+        ActivityBuilder.new(activity_name, options, Handler.current_activity)
       else
         signal(activity_name, {}, options)
       end
+    end
+
+    def register_sibling(activity_name, options = {})
+      ready_statuses = { current_server_status: :ready, current_client_status: :ready }
+      ActivityBuilder.new(activity_name, ready_statuses.merge(options), Handler.current_activity.parent)
     end
 
     def signal(activity_name, subject, options = {})
@@ -88,10 +93,10 @@ module Backbeat
     class ActivityBuilder
       attr_reader :name, :options, :parent
 
-      def initialize(name, options)
+      def initialize(name, options, parent)
         @name = name
         @options = options
-        @parent = Handler.current_activity
+        @parent = parent
       end
 
       def call(*params)
@@ -105,6 +110,9 @@ module Backbeat
         registered_options = registration_data[:options] || {}
 
         activity = Activity.new({
+          parent_id: parent.id,
+          current_server_status: options[:current_server_status],
+          current_client_status: options[:current_client_status],
           config: parent.config,
           mode: options[:mode],
           fires_at: options[:fires_at] || options[:at],

@@ -58,7 +58,7 @@ module Backbeat
     end
 
     def find_activity_by_id(id)
-      activities[id]
+      activities.fetch(id) { raise API::NotFoundError }
     end
 
     def update_activity_status(activity_id, status, response = {})

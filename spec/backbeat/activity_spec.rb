@@ -47,8 +47,8 @@ describe Backbeat::Activity do
   let(:store) {
     Backbeat::MemoryStore.new(
       activities: {
-        10 => {},
-        11 => { workflow_id: 2 }
+        10 => { id: 10, workflow_id: 2, client_data: {} },
+        11 => { id: 11, workflow_id: 2, client_data: {} }
       },
       workflows: {
         1 => { activities: [:activity_1, :activity_2, :activity_3] },
@@ -69,6 +69,7 @@ describe Backbeat::Activity do
   let(:activity_data) {
     {
       id: 11,
+      parent_id: 10,
       name: "workflow.perform",
       mode: "blocking",
       fires_at: now,
@@ -169,11 +170,27 @@ describe Backbeat::Activity do
     end
   end
 
+  context "#parent" do
+    it "returns the parent activity object" do
+      parent = activity.parent
+
+      expect(parent.id).to eq(10)
+    end
+
+    it "raises an exception if there is no parent" do
+      activity_data[:parent_id] = nil
+
+      expect { activity.parent }.to raise_error(Backbeat::Activity::ParentNotFound)
+    end
+  end
+
   context "#to_hash" do
     it "returns the activity data required by the server" do
       expect(activity.to_hash).to eq(
         {
           name: "workflow.perform",
+          current_server_status: nil,
+          current_client_status: nil,
           mode: "blocking",
           fires_at: now,
           retry_interval: nil,
