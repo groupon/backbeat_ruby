@@ -351,19 +351,6 @@ describe Backbeat::API do
       end
     end
 
-    context "#shutdown_activity" do
-      it "sends a request to shutdown the node" do
-        expect(client).to receive(:put).with("/activities/30/shutdown", JSON.dump({}), {
-          headers: {
-            "Content-Type" => "application/json",
-            "Accept" => "application/json"
-          }
-        }).and_return({ status: 200 })
-
-        api.shutdown_activity(30)
-      end
-    end
-
     context "#add_child_activities" do
       it "creates new child activities on the activity" do
         expect(client).to receive(:post).with("/activities/12/decisions", JSON.dump({ decisions: [activity_data] }), {

@@ -115,7 +115,7 @@ module Backbeat
     end
 
     def shutdown
-      store.shutdown_activity(id)
+      store.update_activity_status(id, :shutdown)
     end
 
     def parent

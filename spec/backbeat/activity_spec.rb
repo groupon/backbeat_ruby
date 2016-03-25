@@ -262,12 +262,12 @@ describe Backbeat::Activity do
   end
 
   context "#shutdown" do
-    it "deactivates the workflow through the shutdown action" do
+    it "sends the shutdown status update" do
       activity.shutdown
 
       activity_record = store.find_activity_by_id(activity.id)
 
-      expect(activity_record[:shutdown]).to eq(true)
+      expect(activity_record[:statuses].last).to eq(:shutdown)
     end
   end
 
