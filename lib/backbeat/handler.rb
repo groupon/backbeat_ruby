@@ -106,6 +106,7 @@ module Backbeat
 
         activity = Activity.new({
           parent_id: parent.id,
+          workflow_id: parent.workflow_id,
           config: parent.config,
           mode: options[:mode],
           fires_at: options[:fires_at] || options[:at],
@@ -161,6 +162,7 @@ module Backbeat
 
         activity = Activity.new({
           config: workflow.config,
+          workflow_id: workflow.id,
           mode: :blocking,
           fires_at: options[:fires_at],
           retry_interval: registered_options[:backoff],
