@@ -32,9 +32,10 @@ require 'grape'
 require 'backbeat'
 
 Backbeat.configure do |config|
-  config.host      = "http://192.168.59.103"
+  config.host      = "192.168.59.103"
   config.port      = 9292
   config.client_id = "9ab09c2f-68d5-4e0e-8844-3637eea44254"
+  config.auth_token = "H0hcSqi7VPAovzM62ZXueg"
   config.context   = :remote
 end
 
@@ -43,29 +44,31 @@ module BackbeatSample
 
   class BackbeatModel
     class AddSomething
-      include Backbeat::Workflowable
+      include Backbeat::Handler
 
       def add_2(x, y, total)
         new_total = total + x + y
         Logger.info "Output #{new_total}"
         sleep 10
       end
+      activity "workflow.add-2", :add_2
 
       def add_3(x, y, z, total)
         new_total = total + x + y + z
         Logger.info "Output #{new_total}"
         Logger.info "Registering more acitvities"
         sleep 10
-        AddSomething.in_context(workflow, :blocking).add_2(5, 5, new_total)
-        AddSomething.in_context(workflow, :fire_and_forget).add_2(1, 2, new_total)
+        Backbeat.register("workflow.add-2", { mode: :blocking }).with(5, 5, new_total)
+        Backbeat.register("workflow.add-2", { mode: :fire_and_foreget }).with(1, 2, new_total)
       end
+      activity "workflow.add-3", :add_3
     end
 
     def self.signal_workflow
       # The following starts a 'signal' to a new or existing workflow
       # for the provided subject and decider.
       subject = { id: 1, name: "AdditionJob" }
-      BackbeatModel::AddSomething.start_context(subject).add_3(1, 2, 3, 50)
+      Backbeat.signal("workflow.add-3", subject).with(1, 2, 3, 50)
     end
   end
 
