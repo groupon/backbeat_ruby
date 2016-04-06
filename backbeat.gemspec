@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.version       = Backbeat::VERSION
   spec.authors       = ["FED"]
   spec.email         = ["fed@groupon.com"]
-  spec.homepage      = "https://github.groupondevcom/finance-engineering/backbeat_ruby_client"
+  spec.homepage      = "https://github/groupon/backbeat_ruby"
   spec.description   = "Ruby client for the Backbeat workflow service"
   spec.summary       = "Ruby client for the Backbeat workflow service."
   spec.license       = "MIT"
