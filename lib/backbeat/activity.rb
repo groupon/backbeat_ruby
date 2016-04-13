@@ -34,6 +34,12 @@ module Backbeat
       new({ id: activity_id }).complete(result)
     end
 
+    def self.rescue(activity_data)
+      workflow = Packer.unpack_workflow(activity_data)
+      activity = workflow.current_activity
+      activity.rescue
+    end
+
     attr_reader :config
 
     def initialize(options = {})
@@ -50,6 +56,14 @@ module Backbeat
         rescue => e
           errored(e)
           raise e
+        end
+      end
+    end
+
+    def rescue
+      if rescue?
+        observer.running(self) do
+          object.send(rescue_with, self)
         end
       end
     end
@@ -92,9 +106,25 @@ module Backbeat
       store.update_activity_status(id, :errored, response)
     end
 
+    def resolve
+      store.update_activity_status(id, :resolved)
+    end
+
     def processing
       store.update_activity_status(id, :processing)
     end
+
+    def shutdown
+      store.update_activity_status(id, :shutdown)
+    end
+
+    def parent
+      parent_data = store.find_activity_by_id(options[:parent_id])
+      Packer.unpack_activity(parent_data)
+    rescue API::NotFoundError => e
+      raise ParentNotFound, e.message
+    end
+    ParentNotFound = Class.new(StandardError)
 
     def to_hash
       {
@@ -106,7 +136,10 @@ module Backbeat
         metadata: options[:metadata],
         parent_link_id: options[:parent_link_id],
         client_id: options[:client_id],
-        client_data: client_data
+        client_data: {
+          name: options[:name],
+          params: options[:params]
+        }
       }
     end
 
@@ -142,6 +175,14 @@ module Backbeat
       options[:params]
     end
 
+    def rescue_with
+      options[:rescue_with]
+    end
+
+    def rescue?
+      !!options[:rescue_with]
+    end
+
     private
 
     attr_reader :options
@@ -164,11 +205,7 @@ module Backbeat
     end
 
     def async?
-      !!options[:client_data][:async]
-    end
-
-    def client_data
-      options[:client_data].merge({ params: params })
+      !!options[:async]
     end
   end
 end

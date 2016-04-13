@@ -28,6 +28,8 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+require "backbeat/runner"
+
 module Backbeat
   module Handler
     ActivityRegistrationError = Class.new(StandardError)
@@ -71,7 +73,7 @@ module Backbeat
 
     def register(activity_name, options = {})
       if current_activity
-        ActivityBuilder.new(activity_name, options)
+        ActivityBuilder.new(activity_name, options, Handler.current_activity)
       else
         signal(activity_name, {}, options)
       end
@@ -86,10 +88,10 @@ module Backbeat
     class ActivityBuilder
       attr_reader :name, :options, :parent
 
-      def initialize(name, options)
+      def initialize(name, options, parent)
         @name = name
         @options = options
-        @parent = Handler.current_activity
+        @parent = parent
       end
 
       def call(*params)
@@ -103,21 +105,20 @@ module Backbeat
         registered_options = registration_data[:options] || {}
 
         activity = Activity.new({
+          parent_id: parent.id,
+          workflow_id: parent.workflow_id,
           config: parent.config,
-          name: name,
           mode: options[:mode],
           fires_at: options[:fires_at] || options[:at],
           retry_interval: registered_options[:backoff],
           metadata: options[:metadata],
           client_id: client_id,
+          name: name,
           class: registration_data[:class],
           method: registration_data[:method],
           params: params,
           retries: registered_options[:retries],
-          client_data: {
-            name: name,
-            async: registered_options[:async]
-          }
+          async: registered_options[:async]
         })
 
         parent.register_child(activity)
@@ -161,20 +162,18 @@ module Backbeat
 
         activity = Activity.new({
           config: workflow.config,
-          name: name,
+          workflow_id: workflow.id,
           mode: :blocking,
           fires_at: options[:fires_at],
           retry_interval: registered_options[:backoff],
           retries: registered_options[:retries],
           metadata: options[:metadata],
           client_id: client_id,
+          name: name,
           class: registration_data[:class],
           method: registration_data[:method],
           params: params,
-          client_data: {
-            name: name,
-            async: registered_options[:async]
-          }
+          async: registered_options[:async]
         })
 
         workflow.signal(activity)
@@ -191,9 +190,12 @@ module Backbeat
     end
 
     module Registration
+      OPTIONS = [:backoff, :retries, :rescue_with, :async]
+
       def activity(activity_name, method_name, options = {})
         klass = self
         if klass.method_defined?(method_name)
+          registered_options = options.select { |k, _| OPTIONS.include?(k) }
           Handler.add(activity_name, klass, method_name, options)
         else
           raise ActivityRegistrationError, "Method #{method_name} does not exist"

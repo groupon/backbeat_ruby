@@ -50,6 +50,29 @@ class PurchaseActivities
     Notification.send(order_id)
   end
   activity "purchase.send-notification", :send_notification
+
+  def complete_order(order_id)
+    CompleteOrder.call(order_id)
+  end
+  activity "purchase.complete-order", :complete_order, rescue_with: :manual_complete
+
+  def manual_complete(activity)
+    Backbeat.register("purchase.wait-for-help").with(activity.params.first, activity.id)
+    activity.resolve
+  end
+
+  def wait_for_help(order_id, activity_id)
+    owner = Order.find(order_id).owner
+    ManualIntervention.call(order_id, owner, activity_id)
+  end
+  activity "purchase.wait", :wait_for_help, async: true
+  # Async activities aren't completed until calling back with the id via:
+  # Backbeat::Activity.complete(activity_id)
+
+  def mark_completed(order_id)
+    Order.find(order_id).completed
+  end
+  activity "purchase.mark-completed", :mark_completed
 end
 ```
 
@@ -72,11 +95,14 @@ post 'activity' do
 end
 ```
 
-Also define an endpoint to receive notifications of errored activities from Backbeat.
+Also define an endpoint to receive notifications of errored activities from
+Backbeat and run any defined rescue handlers. Rescue handlers run when an
+activity has exhausted its retries.
 
 ```ruby
 post 'notification' do
   Logger.info(params)
+  Backbeat::Activity.rescue(params)
 end
 ```
 
