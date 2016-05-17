@@ -46,6 +46,7 @@ module Backbeat
     def self.local
       config = new
       config.context = :local
+      config.logger = Backbeat.config.logger
       config
     end
 

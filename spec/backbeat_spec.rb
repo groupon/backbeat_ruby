@@ -101,6 +101,16 @@ describe Backbeat do
       expect(Backbeat.config.store).to be_a(Backbeat::MemoryStore)
     end
 
+    it "defaults logger to configured logger when using local context" do
+      logger = Logger.new("/dev/null")
+      Backbeat.configure do |config|
+        config.logger = logger
+      end
+      local_context = Backbeat::Config.local
+
+      expect(local_context.logger).to be(logger)
+    end
+
     it "raises an error if the context is unknown" do
       Backbeat.configure do |config|
         config.context = :foo
